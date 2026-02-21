@@ -1,0 +1,29 @@
+/* Design tokens for EasyCall — elderly-friendly defaults */
+:root {
+  /* Font sizes — larger for readability */
+  --font-size-sm: 1rem; /* 16px — minimum readable */
+  --font-size-base: 1.25rem; /* 20px — body text */
+  --font-size-lg: 1.5rem; /* 24px — subheadings */
+  --font-size-xl: 2rem; /* 32px — headings */
+  --font-size-2xl: 2.5rem; /* 40px — page titles */
+
+  /* Touch targets — minimum 56px per WCAG / elderly UX */
+  --touch-target-min: 3.5rem; /* 56px */
+  --touch-target-comfortable: 4rem; /* 64px */
+  --touch-target-large: 5rem; /* 80px — primary call buttons */
+
+  /* Spacing */
+  --spacing-xs: 0.5rem; /* 8px */
+  --spacing-sm: 0.75rem; /* 12px */
+  --spacing-md: 1rem; /* 16px */
+  --spacing-lg: 1.5rem; /* 24px */
+  --spacing-xl: 2rem; /* 32px */
+  --spacing-2xl: 3rem; /* 48px */
+
+  /* Colors (semantic aliases) */
+  --color-call-active: #166534; /* green-800 */
+  --color-call-end: #991b1b; /* red-800 */
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #4a4a6a;
+  --color-bg-primary: #f0fdf4; /* green-50 */
+}

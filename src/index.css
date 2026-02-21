@@ -1,0 +1,48 @@
+@import 'tailwindcss';
+@plugin "daisyui";
+
+/* Custom "elderly" theme — WCAG AAA high-contrast colors */
+@plugin "daisyui/theme" {
+  name: 'elderly';
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* High-contrast green primary on light background */
+  --color-base-100: oklch(0.98 0.01 145);
+  --color-base-200: oklch(0.95 0.02 145);
+  --color-base-300: oklch(0.9 0.03 145);
+  --color-base-content: oklch(0.15 0.02 145);
+
+  --color-primary: oklch(0.4 0.15 155);
+  --color-primary-content: oklch(0.98 0.01 145);
+
+  --color-secondary: oklch(0.45 0.1 250);
+  --color-secondary-content: oklch(0.98 0.01 250);
+
+  --color-accent: oklch(0.5 0.12 80);
+  --color-accent-content: oklch(0.98 0.01 80);
+
+  --color-neutral: oklch(0.3 0.02 250);
+  --color-neutral-content: oklch(0.98 0.01 250);
+
+  --color-info: oklch(0.5 0.12 250);
+  --color-info-content: oklch(0.98 0.01 250);
+
+  --color-success: oklch(0.45 0.15 155);
+  --color-success-content: oklch(0.98 0.01 155);
+
+  --color-warning: oklch(0.55 0.15 80);
+  --color-warning-content: oklch(0.15 0.02 80);
+
+  --color-error: oklch(0.45 0.18 25);
+  --color-error-content: oklch(0.98 0.01 25);
+
+  --rounded-box: 1rem;
+  --rounded-btn: 0.75rem;
+  --rounded-badge: 1.5rem;
+  --animation-btn: 0;
+  --animation-input: 0;
+  --btn-focus-scale: 1;
+  --tab-radius: 0.75rem;
+}
