@@ -8,7 +8,7 @@ EasyCall is a PWA for elderly video calling using Jitsi. See docs/PRD_EasyCall.m
 
 - TDD: Always write tests FIRST, then implement.
 - TypeScript strict mode is enabled.
-- All components must pass jest-axe accessibility checks.
+- All components must pass vitest-axe accessibility checks.
 - Follow the task list in docs/PRD_EasyCall.md — check off tasks as completed.
 
 ## Code Style

@@ -10,7 +10,8 @@ Elderly-friendly video calling PWA built with Jitsi.
 - **State:** Zustand v5
 - **Routing:** React Router v7
 - **PWA:** vite-plugin-pwa + Workbox
-- **Testing:** Vitest + Testing Library
+- **Testing:** Vitest + Testing Library + vitest-axe + MSW v2
+- **E2E:** Playwright (Chromium + WebKit)
 - **Linting:** ESLint (flat config) + Prettier
 
 ## Getting Started
@@ -35,6 +36,8 @@ pnpm preview    # Preview production build
 | `pnpm lint`         | Run ESLint                    |
 | `pnpm lint:fix`     | Run ESLint with auto-fix      |
 | `pnpm format`       | Format code with Prettier     |
+| `pnpm test:coverage` | Run tests with coverage report |
+| `pnpm test:e2e`     | Run Playwright E2E tests      |
 | `pnpm format:check` | Check formatting              |
 
 ## Project Structure

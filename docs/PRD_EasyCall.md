@@ -1545,7 +1545,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Create a smoke test that renders the App component and verifies it mounts without errors. Create a PWA manifest validation test that checks required fields (name, icons, start_url, display: standalone, orientation: portrait).",
     "estimated_hours": 3,
     "dependencies": [],
-    "done": false
+    "done": true
   },
   {
     "id": "1.0.2",
@@ -1565,7 +1565,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write meta-tests: a test that verifies jest-axe catches a known violation, a test that verifies MSW intercepts requests, a test that verifies the Jitsi mock emits events correctly.",
     "estimated_hours": 4,
     "dependencies": ["1.0.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.0.3",
