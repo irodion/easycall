@@ -1,2 +1,6 @@
 export { renderWithProviders } from './render';
-export { createMockUser, createMockContact } from './factories';
+export {
+  createMockUser,
+  createMockContact,
+  resetFactoryCounters,
+} from './factories';

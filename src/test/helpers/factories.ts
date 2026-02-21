@@ -3,6 +3,11 @@ import type { EasyCallUser, Contact, FirestoreTimestamp } from '@/types/user';
 let userIdCounter = 0;
 let contactIdCounter = 0;
 
+export function resetFactoryCounters(): void {
+  userIdCounter = 0;
+  contactIdCounter = 0;
+}
+
 function mockTimestamp(date = new Date()): FirestoreTimestamp {
   return {
     seconds: Math.floor(date.getTime() / 1000),

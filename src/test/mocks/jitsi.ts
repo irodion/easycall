@@ -37,6 +37,7 @@ export class MockJitsiMeetExternalAPI {
 
   dispose(): void {
     this.listeners.clear();
+    this.commands.length = 0;
   }
 
   isAudioMuted(): Promise<boolean> {

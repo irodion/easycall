@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import { MemoryRouter, type MemoryRouterProps } from 'react-router';
 
@@ -10,7 +10,7 @@ export function renderWithProviders(
   ui: ReactElement,
   { routerProps, ...renderOptions }: RenderWithProvidersOptions = {},
 ) {
-  function Wrapper({ children }: { children: React.ReactNode }) {
+  function Wrapper({ children }: { children: ReactNode }) {
     return <MemoryRouter {...routerProps}>{children}</MemoryRouter>;
   }
 

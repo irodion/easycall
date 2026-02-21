@@ -9,7 +9,7 @@ export interface EasyCallUser {
   uid: string;
   displayName: string;
   role: 'elderly' | 'caregiver';
-  email: string;
+  email: string | null;
   settings: UserSettings;
   pushTokens: string[];
   onboardingComplete: boolean;
@@ -27,7 +27,7 @@ export interface UserSettings {
 export interface Contact {
   id: string;
   name: string;
-  photoURL: string;
+  photoURL: string | null;
   jitsiRoomId: string;
   contactUserId: string;
   displayOrder: number;
