@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Accessibility testing with vitest-axe (toHaveNoViolations matcher)
+- API mocking with MSW v2 (Firestore request handlers)
+- Playwright E2E testing (Chromium + WebKit) with smoke tests
+- MockJitsiMeetExternalAPI for unit testing Jitsi integration
+- Test helpers: renderWithProviders, createMockUser, createMockContact
+- TypeScript types for User, Contact, and JitsiMeetExternalAPI
+- Coverage thresholds (80% lines/functions/statements, 75% branches)
+
 ## [0.1.0] - 2026-02-21
 
 ### Added

@@ -270,7 +270,7 @@ npx prettier
 | Component tests | Vitest + React Testing Library                    | UI rendering, user interactions       |
 | E2E tests       | Playwright                                        | Full user flows, cross-browser        |
 | WebRTC testing  | Playwright + `--use-fake-device-for-media-stream` | Simulated camera/mic for CI           |
-| Accessibility   | jest-axe + Lighthouse CI                          | WCAG AAA compliance checks            |
+| Accessibility   | vitest-axe + Lighthouse CI                          | WCAG AAA compliance checks            |
 | API mocking     | MSW (Mock Service Worker)                         | Firebase + Jitsi API mocking in tests |
 
 ### DevOps
@@ -1220,11 +1220,11 @@ export class MockJitsiMeetExternalAPI {
 
 ```typescript
 // src/test/setup.ts
-import { toHaveNoViolations } from 'jest-axe';
+import { toHaveNoViolations } from 'vitest-axe';
 expect.extend(toHaveNoViolations);
 
 // Usage in component tests:
-import { axe } from 'jest-axe';
+import { axe } from 'vitest-axe';
 import { render } from '@testing-library/react';
 
 test('HomeScreen passes accessibility audit', async () => {
@@ -1376,7 +1376,7 @@ EasyCall is a PWA for elderly video calling using Jitsi. See PRD_EasyCall.md for
 
 - TDD: Always write tests FIRST, then implement.
 - TypeScript strict mode is enabled.
-- All components must pass jest-axe accessibility checks.
+- All components must pass vitest-axe accessibility checks.
 - Follow the task list in PRD_EasyCall.md — check off tasks as completed.
 
 ## Code Style
@@ -1545,27 +1545,27 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Create a smoke test that renders the App component and verifies it mounts without errors. Create a PWA manifest validation test that checks required fields (name, icons, start_url, display: standalone, orientation: portrait).",
     "estimated_hours": 3,
     "dependencies": [],
-    "done": false
+    "done": true
   },
   {
     "id": "1.0.2",
     "phase": 1,
     "feature": "setup",
     "title": "Testing Infrastructure",
-    "description": "Configure Vitest with jsdom environment, React Testing Library, jest-axe for accessibility testing, and MSW for API mocking. Create mock files for JitsiMeetExternalAPI and Firebase services. Set up Playwright with Chrome (Pixel 7 device profile) and fake media stream flags. Create test utility helpers (renderWithProviders, createMockUser, createMockContact).",
+    "description": "Configure Vitest with jsdom environment, React Testing Library, vitest-axe for accessibility testing, and MSW for API mocking. Create mock files for JitsiMeetExternalAPI and Firebase services. Set up Playwright with Chrome (Pixel 7 device profile) and fake media stream flags. Create test utility helpers (renderWithProviders, createMockUser, createMockContact).",
     "acceptance_criteria": [
       "Running 'pnpm test' executes Vitest and finds test files",
       "A sample component test renders and queries the DOM via RTL",
-      "jest-axe integration works: a test with a contrast violation fails",
+      "vitest-axe integration works: a test with a contrast violation fails",
       "MSW intercepts a mock Firebase request in a test",
       "JitsiMeetExternalAPI mock can be instantiated and emit events",
       "Playwright launches Chrome with fake media stream and can navigate to localhost",
       "Code coverage report is generated with thresholds: 80% lines, 75% branches"
     ],
-    "test_first": "Write meta-tests: a test that verifies jest-axe catches a known violation, a test that verifies MSW intercepts requests, a test that verifies the Jitsi mock emits events correctly.",
+    "test_first": "Write meta-tests: a test that verifies vitest-axe catches a known violation, a test that verifies MSW intercepts requests, a test that verifies the Jitsi mock emits events correctly.",
     "estimated_hours": 4,
     "dependencies": ["1.0.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.0.3",
@@ -1598,9 +1598,9 @@ The following JSON represents the complete task backlog. Each task has:
       "EasyCallButton has minimum 56×56px touch target at all screen sizes",
       "EasyCallButton renders with ≥20px bold text",
       "EasyCallText respects the fontSize setting (normal/large/xlarge)",
-      "All base components pass jest-axe accessibility audit"
+      "All base components pass vitest-axe accessibility audit"
     ],
-    "test_first": "Write tests for each base component: verify minimum dimensions via computed styles, verify text sizes, verify ARIA attributes, verify jest-axe passes.",
+    "test_first": "Write tests for each base component: verify minimum dimensions via computed styles, verify text sizes, verify ARIA attributes, verify vitest-axe passes.",
     "estimated_hours": 4,
     "dependencies": ["1.0.1", "1.0.2"],
     "done": false
@@ -1639,9 +1639,9 @@ The following JSON represents the complete task backlog. Each task has:
       "AC-1.6: Empty state shows 'No contacts yet' message and pairing code",
       "AC-1.7: Settings gear icon is ≥48×48px and navigates to /settings",
       "AC-1.8: All touch targets ≥56×56px",
-      "AC-1.9: All text passes WCAG AAA contrast check (jest-axe)"
+      "AC-1.9: All text passes WCAG AAA contrast check (vitest-axe)"
     ],
-    "test_first": "Write component tests: renders N contact cards for N contacts, each card has correct name text, tapping a card calls navigate('/call/contactId'), empty state renders when contacts=[], settings icon renders with correct size, jest-axe passes on the full component.",
+    "test_first": "Write component tests: renders N contact cards for N contacts, each card has correct name text, tapping a card calls navigate('/call/contactId'), empty state renders when contacts=[], settings icon renders with correct size, vitest-axe passes on the full component.",
     "estimated_hours": 5,
     "dependencies": ["1.0.4", "1.1.1"],
     "done": false
@@ -1676,7 +1676,7 @@ The following JSON represents the complete task backlog. Each task has:
       "AC-3.3: Helper overlay shown with ≥20px text before browser prompt",
       "AC-3.4: Denied state shows recovery instructions with ≥18px text",
       "AC-3.5: 'Try Again' button calls retry() and returns to checking state",
-      "Component passes jest-axe accessibility audit"
+      "Component passes vitest-axe accessibility audit"
     ],
     "test_first": "Write component tests for each state: checking shows spinner, granted calls onReady callback, denied shows recovery text and Try Again button, Try Again click calls retry.",
     "estimated_hours": 4,
@@ -1734,7 +1734,7 @@ The following JSON represents the complete task backlog. Each task has:
       "AC-2.5: Mic toggle shows 'Microphone ON' (green) or 'Microphone OFF' (red) based on state",
       "AC-2.6: End call calls api.dispose() and navigates to home",
       "AC-2.7: When participantLeft fires and room is empty, 'Call Ended' shown for 3s then navigate home",
-      "All controls pass jest-axe audit"
+      "All controls pass vitest-axe audit"
     ],
     "test_first": "Write component tests using the Jitsi mock: verify API constructor options, verify toggleAudio command on mic button click, verify toggleVideo on camera click, verify hangup on end call click, verify navigation on readyToClose event, verify 'Call Ended' message on participantLeft with empty room.",
     "estimated_hours": 8,
@@ -1772,7 +1772,7 @@ The following JSON represents the complete task backlog. Each task has:
       "Pairing code section displays the current code in ≥48px font",
       "'Add Contact' navigates to the add contact flow",
       "Back button returns to Home Screen",
-      "All elements pass jest-axe accessibility audit"
+      "All elements pass vitest-axe accessibility audit"
     ],
     "test_first": "Write component tests: renders all 4 options, font size change updates store, pairing code displays, navigation works on button clicks.",
     "estimated_hours": 4,
@@ -2102,7 +2102,7 @@ The following JSON represents the complete task backlog. Each task has:
     "phase": 3,
     "feature": "accessibility",
     "title": "Full Accessibility Audit & Fixes",
-    "description": "Run a comprehensive accessibility audit across all screens: automated (Lighthouse, axe-core via jest-axe), semi-automated (WAVE browser extension), and manual (keyboard navigation, screen reader with TalkBack on Android). Fix all identified issues. Ensure all screens meet WCAG AAA for contrast and WCAG AA for all other criteria. Document the audit results.",
+    "description": "Run a comprehensive accessibility audit across all screens: automated (Lighthouse, axe-core via vitest-axe), semi-automated (WAVE browser extension), and manual (keyboard navigation, screen reader with TalkBack on Android). Fix all identified issues. Ensure all screens meet WCAG AAA for contrast and WCAG AA for all other criteria. Document the audit results.",
     "acceptance_criteria": [
       "Lighthouse Accessibility score ≥95 on all routes",
       "axe-core reports zero violations on all components",
@@ -2112,7 +2112,7 @@ The following JSON represents the complete task backlog. Each task has:
       "Skip-to-content link is available on pages with repetitive navigation",
       "Audit report document created in /docs"
     ],
-    "test_first": "Run existing jest-axe tests as baseline. Add Lighthouse CI to GitHub Actions with score threshold of 95. Manual testing is documented as a checklist.",
+    "test_first": "Run existing vitest-axe tests as baseline. Add Lighthouse CI to GitHub Actions with score threshold of 95. Manual testing is documented as a checklist.",
     "estimated_hours": 8,
     "dependencies": ["All Phase 1 and 2 tasks"],
     "done": false
