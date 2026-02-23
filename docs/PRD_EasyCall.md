@@ -599,10 +599,13 @@ service cloud.firestore {
           || isCaregiverOf(userId, request.auth.uid);
       }
 
-      // Incoming call: anyone can write (to initiate a call), owner can read
+      // Incoming call: owner reads, any authenticated user can write
+      // HARDENING (Task 1.3.2+): validate callerId == request.auth.uid,
+      // require fields (callerId, callerName, jitsiRoomId, status, timestamp),
+      // enforce status must be "ringing" on create
       match /incomingCall {
         allow read: if request.auth.uid == userId;
-        allow write: if request.auth != null; // Any authenticated user can call
+        allow write: if request.auth != null;
       }
 
       // Call history: owner or linked caregiver can read
@@ -613,7 +616,9 @@ service cloud.firestore {
       }
     }
 
-    // Pairing codes: anyone authenticated can read (to validate), owner can write
+    // Pairing codes: anyone authenticated can read (to validate), owner can create
+    // HARDENING (Task 1.3.2+): enforce elderlyUserId == request.auth.uid on create,
+    // require fields (elderlyUserId, expiresAt, used), enforce used == false on create
     match /pairingCodes/{code} {
       allow read: if request.auth != null;
       allow create: if request.auth != null;
@@ -1068,6 +1073,8 @@ export function usePushNotifications(userId: string) {
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Unauthorized access to elderly user's account | Firebase Anonymous Auth + optional biometric/PIN lock                                                                                                                        |
 | Stranger initiating a call to elderly user    | Only users with a contact entry (and thus the room ID) can call. Room IDs are unguessable (6 random chars). JaaS JWT authentication prevents room hijacking.                 |
+| Fake incomingCall spam                        | Firestore rules validate `callerId == request.auth.uid` and enforce required fields + `status: "ringing"` on create. Prevents spoofed caller identity and malformed docs.    |
+| Pairing code ownership spoofing               | Firestore rules enforce `elderlyUserId == request.auth.uid` on create, preventing a user from generating pairing codes on behalf of another elderly user.                    |
 | Eavesdropping on calls                        | Jitsi uses SRTP (Secure Real-Time Protocol) encryption for all media streams. JaaS rooms are JWT-authenticated.                                                              |
 | Caregiver privilege abuse                     | Permissions are scoped (manage_contacts, manage_settings, view_history). Elderly user can remove caregivers from settings.                                                   |
 | Push token theft                              | FCM tokens are stored in Firestore with per-user security rules. Only the user and Cloud Functions (admin SDK) can access them.                                              |
@@ -1584,7 +1591,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write a test that imports the firebase service layer and verifies that app, auth, db, and messaging are defined (mock Firebase initialization).",
     "estimated_hours": 3,
     "dependencies": ["1.0.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.0.4",

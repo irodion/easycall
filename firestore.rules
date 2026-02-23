@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if the requesting user is a caregiver of the given elderly user
+    function isCaregiverOf(elderlyUserId, caregiverUid) {
+      return exists(/databases/$(database)/documents/users/$(elderlyUserId)/caregivers/$(caregiverUid));
+    }
+
+    match /users/{userId} {
+      // Users can read/write their own profile
+      allow read, write: if request.auth.uid == userId;
+
+      // Contacts: owner or linked caregiver
+      match /contacts/{contactId} {
+        allow read, write: if request.auth.uid == userId
+          || isCaregiverOf(userId, request.auth.uid);
+      }
+
+      // Caregivers subcollection: owner manages, caregiver reads own entry
+      match /caregivers/{caregiverUserId} {
+        allow read: if request.auth.uid == userId
+          || request.auth.uid == caregiverUserId;
+        allow write: if request.auth.uid == userId;
+      }
+
+      // Incoming call: owner reads, any authenticated user can write (to initiate a call)
+      match /incomingCall {
+        allow read: if request.auth.uid == userId;
+        allow write: if request.auth != null;
+      }
+
+      // Call history: owner or linked caregiver can read, owner can write
+      match /callHistory/{callId} {
+        allow read: if request.auth.uid == userId
+          || isCaregiverOf(userId, request.auth.uid);
+        allow write: if request.auth.uid == userId;
+      }
+    }
+
+    // Pairing codes: anyone authenticated can read (to validate) and create
+    match /pairingCodes/{code} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+    }
+  }
+}
