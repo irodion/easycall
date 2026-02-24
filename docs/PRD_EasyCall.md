@@ -599,13 +599,16 @@ service cloud.firestore {
           || isCaregiverOf(userId, request.auth.uid);
       }
 
-      // Incoming call: owner reads, any authenticated user can write
-      // HARDENING (Task 1.3.2+): validate callerId == request.auth.uid,
-      // require fields (callerId, callerName, jitsiRoomId, status, timestamp),
-      // enforce status must be "ringing" on create
+      // Incoming call signaling (single doc per elderly user, overwritten per call)
       match /incomingCall {
         allow read: if request.auth.uid == userId;
-        allow write: if request.auth != null;
+        allow create: if request.auth != null
+          && request.resource.data.callerId == request.auth.uid
+          && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
+          && request.resource.data.status == 'ringing';
+        allow update: if request.auth.uid == userId
+          || request.auth.uid == resource.data.callerId;
+        allow delete: if request.auth.uid == userId;
       }
 
       // Call history: owner or linked caregiver can read
@@ -617,11 +620,12 @@ service cloud.firestore {
     }
 
     // Pairing codes: anyone authenticated can read (to validate), owner can create
-    // HARDENING (Task 1.3.2+): enforce elderlyUserId == request.auth.uid on create,
-    // require fields (elderlyUserId, expiresAt, used), enforce used == false on create
     match /pairingCodes/{code} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.elderlyUserId == request.auth.uid
+        && request.resource.data.keys().hasAll(['elderlyUserId', 'expiresAt', 'used'])
+        && request.resource.data.used == false;
     }
   }
 }
