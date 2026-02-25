@@ -394,7 +394,7 @@ interfaceConfigOverwrite: {
 
 **Signaling flow:**
 
-1. Caller writes to `users/{elderlyUserId}/incomingCall` in Firestore: `{ callerId, callerName, callerPhoto, jitsiRoomId, status: "ringing", timestamp }`.
+1. Caller writes to `users/{elderlyUserId}/incomingCall/current` in Firestore: `{ callerId, callerName, callerPhoto, jitsiRoomId, status: "ringing", timestamp }`.
 2. If the elderly PWA is open: the `onSnapshot` listener fires → full-screen ringing UI appears.
 3. If the elderly PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → elderly user taps notification → PWA opens → reads `incomingCall` doc → shows ringing UI.
 4. Elderly user taps "Answer" → navigates to call screen, auto-joins the room.
@@ -568,7 +568,7 @@ Root
 │   │   ├── startedAt: timestamp
 │   │   └── endedAt: timestamp
 │   │
-│   └── Document: incomingCall (single doc, overwritten per call)
+│   └── Sub-collection: incomingCall/current (single doc, overwritten per call)
 │       ├── callerId: string
 │       ├── callerName: string
 │       ├── callerPhotoURL: string | null
@@ -599,15 +599,19 @@ service cloud.firestore {
           || isCaregiverOf(userId, request.auth.uid);
       }
 
-      // Incoming call signaling (single doc per elderly user, overwritten per call)
-      match /incomingCall {
+      // Incoming call signaling (single doc "current", overwritten per call)
+      match /incomingCall/current {
         allow read: if request.auth.uid == userId;
         allow create: if request.auth != null
           && request.resource.data.callerId == request.auth.uid
           && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.status == 'ringing';
         allow update: if request.auth.uid == userId
-          || request.auth.uid == resource.data.callerId;
+          || (request.auth.uid == resource.data.callerId
+              && request.resource.data.callerId == resource.data.callerId
+              && request.resource.data.callerName == resource.data.callerName
+              && request.resource.data.jitsiRoomId == resource.data.jitsiRoomId
+              && request.resource.data.timestamp == resource.data.timestamp);
         allow delete: if request.auth.uid == userId;
       }
 
@@ -619,13 +623,15 @@ service cloud.firestore {
       }
     }
 
-    // Pairing codes: anyone authenticated can read (to validate), owner can create
+    // Pairing codes: owner can read own codes, owner can create
     match /pairingCodes/{code} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null
+        && resource.data.elderlyUserId == request.auth.uid;
       allow create: if request.auth != null
         && request.resource.data.elderlyUserId == request.auth.uid
         && request.resource.data.keys().hasAll(['elderlyUserId', 'expiresAt', 'used'])
-        && request.resource.data.used == false;
+        && request.resource.data.used == false
+        && request.resource.data.expiresAt > request.time;
     }
   }
 }
@@ -837,7 +843,7 @@ import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 
 export const onIncomingCall = onDocumentWritten(
-  'users/{elderlyUserId}/incomingCall',
+  'users/{elderlyUserId}/incomingCall/current',
   async (event) => {
     const after = event.data?.after.data();
     if (!after || after.status !== 'ringing') return;
@@ -1424,7 +1430,7 @@ types/ # TypeScript type definitions
 
 ## Key Libraries
 
-- Firebase v10 (modular SDK)
+- Firebase v12 (modular SDK)
 - JitsiMeetExternalAPI (loaded via script tag, not npm)
 - vite-plugin-pwa + Workbox
 - Zustand v5
