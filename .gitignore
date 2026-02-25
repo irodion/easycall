@@ -8,11 +8,14 @@ dist-ssr
 # Environment files
 .env
 .env.*
+!.env.example
 *.local
 
 # Firebase
 .firebase
+.firebaserc
 firebase-debug.log
+functions/lib/
 
 # Test coverage
 coverage

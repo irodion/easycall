@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if the requesting user is a caregiver of the given elderly user
+    function isCaregiverOf(elderlyUserId, caregiverUid) {
+      return exists(/databases/$(database)/documents/users/$(elderlyUserId)/caregivers/$(caregiverUid));
+    }
+
+    match /users/{userId} {
+      // Users can read/write their own profile
+      allow read, write: if request.auth.uid == userId;
+
+      // Contacts: owner or linked caregiver
+      match /contacts/{contactId} {
+        allow read, write: if request.auth.uid == userId
+          || isCaregiverOf(userId, request.auth.uid);
+      }
+
+      // Caregivers subcollection: owner manages, caregiver reads own entry
+      match /caregivers/{caregiverUserId} {
+        allow read: if request.auth.uid == userId
+          || request.auth.uid == caregiverUserId;
+        allow write: if request.auth.uid == userId;
+      }
+
+      // Incoming call signaling (single doc "current", overwritten per call)
+      match /incomingCall/current {
+        allow read: if request.auth.uid == userId;
+        allow create: if request.auth != null
+          && request.resource.data.callerId == request.auth.uid
+          && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
+          && request.resource.data.status == 'ringing';
+        allow update: if request.auth.uid == userId
+          || (request.auth.uid == resource.data.callerId
+              && request.resource.data.callerId == resource.data.callerId
+              && request.resource.data.callerName == resource.data.callerName
+              && request.resource.data.jitsiRoomId == resource.data.jitsiRoomId
+              && request.resource.data.timestamp == resource.data.timestamp);
+        allow delete: if request.auth.uid == userId;
+      }
+
+      // Call history: owner or linked caregiver can read, owner can write
+      match /callHistory/{callId} {
+        allow read: if request.auth.uid == userId
+          || isCaregiverOf(userId, request.auth.uid);
+        allow write: if request.auth.uid == userId;
+      }
+    }
+
+    // Pairing codes: owner can read own codes, owner can create
+    match /pairingCodes/{code} {
+      allow read: if request.auth != null
+        && resource.data.elderlyUserId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.elderlyUserId == request.auth.uid
+        && request.resource.data.keys().hasAll(['elderlyUserId', 'expiresAt', 'used'])
+        && request.resource.data.used == false
+        && request.resource.data.expiresAt > request.time;
+    }
+  }
+}

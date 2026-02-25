@@ -394,7 +394,7 @@ interfaceConfigOverwrite: {
 
 **Signaling flow:**
 
-1. Caller writes to `users/{elderlyUserId}/incomingCall` in Firestore: `{ callerId, callerName, callerPhoto, jitsiRoomId, status: "ringing", timestamp }`.
+1. Caller writes to `users/{elderlyUserId}/incomingCall/current` in Firestore: `{ callerId, callerName, callerPhoto, jitsiRoomId, status: "ringing", timestamp }`.
 2. If the elderly PWA is open: the `onSnapshot` listener fires → full-screen ringing UI appears.
 3. If the elderly PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → elderly user taps notification → PWA opens → reads `incomingCall` doc → shows ringing UI.
 4. Elderly user taps "Answer" → navigates to call screen, auto-joins the room.
@@ -568,7 +568,7 @@ Root
 │   │   ├── startedAt: timestamp
 │   │   └── endedAt: timestamp
 │   │
-│   └── Document: incomingCall (single doc, overwritten per call)
+│   └── Sub-collection: incomingCall/current (single doc, overwritten per call)
 │       ├── callerId: string
 │       ├── callerName: string
 │       ├── callerPhotoURL: string | null
@@ -599,10 +599,20 @@ service cloud.firestore {
           || isCaregiverOf(userId, request.auth.uid);
       }
 
-      // Incoming call: anyone can write (to initiate a call), owner can read
-      match /incomingCall {
+      // Incoming call signaling (single doc "current", overwritten per call)
+      match /incomingCall/current {
         allow read: if request.auth.uid == userId;
-        allow write: if request.auth != null; // Any authenticated user can call
+        allow create: if request.auth != null
+          && request.resource.data.callerId == request.auth.uid
+          && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
+          && request.resource.data.status == 'ringing';
+        allow update: if request.auth.uid == userId
+          || (request.auth.uid == resource.data.callerId
+              && request.resource.data.callerId == resource.data.callerId
+              && request.resource.data.callerName == resource.data.callerName
+              && request.resource.data.jitsiRoomId == resource.data.jitsiRoomId
+              && request.resource.data.timestamp == resource.data.timestamp);
+        allow delete: if request.auth.uid == userId;
       }
 
       // Call history: owner or linked caregiver can read
@@ -613,10 +623,15 @@ service cloud.firestore {
       }
     }
 
-    // Pairing codes: anyone authenticated can read (to validate), owner can write
+    // Pairing codes: owner can read own codes, owner can create
     match /pairingCodes/{code} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && resource.data.elderlyUserId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.elderlyUserId == request.auth.uid
+        && request.resource.data.keys().hasAll(['elderlyUserId', 'expiresAt', 'used'])
+        && request.resource.data.used == false
+        && request.resource.data.expiresAt > request.time;
     }
   }
 }
@@ -828,7 +843,7 @@ import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 
 export const onIncomingCall = onDocumentWritten(
-  'users/{elderlyUserId}/incomingCall',
+  'users/{elderlyUserId}/incomingCall/current',
   async (event) => {
     const after = event.data?.after.data();
     if (!after || after.status !== 'ringing') return;
@@ -1068,6 +1083,8 @@ export function usePushNotifications(userId: string) {
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Unauthorized access to elderly user's account | Firebase Anonymous Auth + optional biometric/PIN lock                                                                                                                        |
 | Stranger initiating a call to elderly user    | Only users with a contact entry (and thus the room ID) can call. Room IDs are unguessable (6 random chars). JaaS JWT authentication prevents room hijacking.                 |
+| Fake incomingCall spam                        | Firestore rules validate `callerId == request.auth.uid` and enforce required fields + `status: "ringing"` on create. Prevents spoofed caller identity and malformed docs.    |
+| Pairing code ownership spoofing               | Firestore rules enforce `elderlyUserId == request.auth.uid` on create, preventing a user from generating pairing codes on behalf of another elderly user.                    |
 | Eavesdropping on calls                        | Jitsi uses SRTP (Secure Real-Time Protocol) encryption for all media streams. JaaS rooms are JWT-authenticated.                                                              |
 | Caregiver privilege abuse                     | Permissions are scoped (manage_contacts, manage_settings, view_history). Elderly user can remove caregivers from settings.                                                   |
 | Push token theft                              | FCM tokens are stored in Firestore with per-user security rules. Only the user and Cloud Functions (admin SDK) can access them.                                              |
@@ -1413,7 +1430,7 @@ types/ # TypeScript type definitions
 
 ## Key Libraries
 
-- Firebase v10 (modular SDK)
+- Firebase v12 (modular SDK)
 - JitsiMeetExternalAPI (loaded via script tag, not npm)
 - vite-plugin-pwa + Workbox
 - Zustand v5
@@ -1584,7 +1601,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write a test that imports the firebase service layer and verifies that app, auth, db, and messaging are defined (mock Firebase initialization).",
     "estimated_hours": 3,
     "dependencies": ["1.0.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.0.4",
