@@ -184,7 +184,12 @@ export const onIncomingCall = onDocumentWritten(
 
     if (pushTokens.length === 0) return;
 
-    await getMessaging().sendEachForMulticast({
+    const STALE_TOKEN_ERRORS = new Set([
+      'messaging/registration-token-not-registered',
+      'messaging/invalid-registration-token',
+    ]);
+
+    const response = await getMessaging().sendEachForMulticast({
       tokens: pushTokens,
       data: {
         type: 'incoming_call',
@@ -202,5 +207,27 @@ export const onIncomingCall = onDocumentWritten(
         fcmOptions: { link: `/call/${after['jitsiRoomId']}` },
       },
     });
+
+    // Remove stale tokens so future sends don't hit dead registrations.
+    const staleTokens = response.responses
+      .map((r, i) => ({ r, token: pushTokens[i]! }))
+      .filter(({ r }) => !r.success && STALE_TOKEN_ERRORS.has(r.error?.code ?? ''))
+      .map(({ token }) => token);
+
+    if (staleTokens.length > 0) {
+      console.log(
+        `Removing ${staleTokens.length} stale FCM token(s) for user ${event.params['elderlyUserId']}`,
+      );
+      await db
+        .doc(`users/${event.params['elderlyUserId']}`)
+        .update({ pushTokens: FieldValue.arrayRemove(...staleTokens) });
+    }
+
+    const failCount = response.responses.filter((r) => !r.success).length;
+    if (failCount > 0) {
+      console.error(
+        `FCM: ${failCount} of ${pushTokens.length} sends failed for user ${event.params['elderlyUserId']}`,
+      );
+    }
   },
 );
