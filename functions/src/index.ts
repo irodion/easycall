@@ -139,9 +139,11 @@ export const generateJitsiJwt = onCall(async (request) => {
     throw new HttpsError('permission-denied', 'Not a participant in this room.');
   }
 
-  const privateKey = process.env['JAAS_PRIVATE_KEY'];
   const appId = process.env['JAAS_APP_ID'];
   const keyId = process.env['JAAS_KEY_ID'];
+  // Normalize escaped "\n" sequences that Cloud Functions env vars commonly
+  // contain when set via the CLI or Secret Manager, as they break PEM parsing.
+  const privateKey = process.env['JAAS_PRIVATE_KEY']?.replace(/\\n/g, '\n');
 
   if (!privateKey || !appId || !keyId) {
     throw new HttpsError('internal', 'JaaS configuration is missing.');
@@ -191,7 +193,19 @@ export const onIncomingCall = onDocumentWritten(
 
     const db = getFirestore();
     const elderlyDoc = await db.doc(`users/${event.params['elderlyUserId']}`).get();
-    const pushTokens: string[] = elderlyDoc.data()?.['pushTokens'] ?? [];
+    const rawTokens: unknown = elderlyDoc.data()?.['pushTokens'] ?? [];
+
+    if (
+      !Array.isArray(rawTokens) ||
+      !rawTokens.every((t) => typeof t === 'string')
+    ) {
+      console.warn(
+        `pushTokens for user ${event.params['elderlyUserId']} is not a string array; skipping FCM send.`,
+      );
+      return;
+    }
+
+    const pushTokens: string[] = rawTokens;
 
     if (pushTokens.length === 0) return;
 
