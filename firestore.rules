@@ -33,9 +33,8 @@ service cloud.firestore {
           && request.resource.data.keys().hasOnly(['callerId', 'callerName', 'callerPhotoURL', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.status == 'ringing';
-        allow update: if request.auth.uid == userId
-          || (request.auth.uid == resource.data.callerId
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
+        allow update: if (request.auth.uid == userId || request.auth.uid == resource.data.callerId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
         allow delete: if request.auth.uid == userId;
       }
 
@@ -52,10 +51,12 @@ service cloud.firestore {
       allow read: if request.auth != null
         && resource.data.elderlyUserId == request.auth.uid;
       allow create: if request.auth != null
+        && code.matches('^[0-9]{6}$')
         && request.resource.data.elderlyUserId == request.auth.uid
         && request.resource.data.keys().hasAll(['elderlyUserId', 'expiresAt', 'used'])
         && request.resource.data.used == false
-        && request.resource.data.expiresAt > request.time;
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt.toMillis() <= request.time.toMillis() + 600000;
     }
   }
 }

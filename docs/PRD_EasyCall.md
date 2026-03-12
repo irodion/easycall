@@ -394,7 +394,7 @@ interfaceConfigOverwrite: {
 
 **Signaling flow:**
 
-1. Caller writes to `users/{elderlyUserId}/incomingCall/current` in Firestore: `{ callerId, callerName, callerPhoto, jitsiRoomId, status: "ringing", timestamp }`.
+1. Caller writes to `users/{elderlyUserId}/incomingCall/current` in Firestore: `{ callerId, callerName, callerPhotoURL, jitsiRoomId, status: "ringing", timestamp }`.
 2. If the elderly PWA is open: the `onSnapshot` listener fires → full-screen ringing UI appears.
 3. If the elderly PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → elderly user taps notification → PWA opens → reads `incomingCall/current` doc → shows ringing UI.
 4. Elderly user taps "Answer" → navigates to call screen, auto-joins the room.
@@ -608,9 +608,8 @@ service cloud.firestore {
           && request.resource.data.keys().hasOnly(['callerId', 'callerName', 'callerPhotoURL', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.status == 'ringing';
-        allow update: if request.auth.uid == userId
-          || (request.auth.uid == resource.data.callerId
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
+        allow update: if (request.auth.uid == userId || request.auth.uid == resource.data.callerId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
         allow delete: if request.auth.uid == userId;
       }
 
@@ -627,10 +626,12 @@ service cloud.firestore {
       allow read: if request.auth != null
         && resource.data.elderlyUserId == request.auth.uid;
       allow create: if request.auth != null
+        && code.matches('^[0-9]{6}$')
         && request.resource.data.elderlyUserId == request.auth.uid
         && request.resource.data.keys().hasAll(['elderlyUserId', 'expiresAt', 'used'])
         && request.resource.data.used == false
-        && request.resource.data.expiresAt > request.time;
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt.toMillis() <= request.time.toMillis() + 600000;
     }
   }
 }
@@ -1593,7 +1594,7 @@ The following JSON represents the complete task backlog. Each task has:
       "Firebase project exists and is accessible via firebase CLI",
       "Anonymous auth is enabled in the Firebase console",
       "Firestore security rules file exists and deploys without errors",
-      "Firebase service layer exports initialized instances: app, auth, db, messaging",
+      "Firebase service layer exports initialized instances: app, auth, db; and getFirebaseMessaging() async function (lazy, returns null in unsupported browsers)",
       "Environment variables are loaded correctly in both dev and build",
       ".env.local is in .gitignore"
     ],
