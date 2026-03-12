@@ -26,17 +26,16 @@ service cloud.firestore {
 
       // Incoming call signaling (single doc "current", overwritten per call)
       match /incomingCall/current {
-        allow read: if request.auth.uid == userId;
+        allow read: if request.auth.uid == userId
+          || request.auth.uid == resource.data.callerId;
         allow create: if request.auth != null
           && request.resource.data.callerId == request.auth.uid
+          && request.resource.data.keys().hasOnly(['callerId', 'callerName', 'callerPhotoURL', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.status == 'ringing';
         allow update: if request.auth.uid == userId
           || (request.auth.uid == resource.data.callerId
-              && request.resource.data.callerId == resource.data.callerId
-              && request.resource.data.callerName == resource.data.callerName
-              && request.resource.data.jitsiRoomId == resource.data.jitsiRoomId
-              && request.resource.data.timestamp == resource.data.timestamp);
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
         allow delete: if request.auth.uid == userId;
       }
 

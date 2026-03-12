@@ -220,7 +220,7 @@ npx prettier
 
 **AD-4: Pre-generated deterministic room IDs.** Each elderly-contact pair has a pre-computed unique Jitsi room ID stored in Firestore (e.g., `easycall-rose-alex-a7f3x`). No room creation API is needed. Both parties join the same pre-known room. This eliminates an entire class of "wrong room" errors.
 
-**AD-5: Firestore real-time listeners for call signaling.** When Alex calls grandma, a document is written to `users/{grandmaId}/incomingCall`. Grandma's app has an `onSnapshot` listener that fires in <1 second, triggering the ringtone and full-screen answer UI. This is simpler, cheaper, and more reliable than building a custom WebSocket server.
+**AD-5: Firestore real-time listeners for call signaling.** When Alex calls grandma, a document is written to `users/{grandmaId}/incomingCall/current`. Grandma's app has an `onSnapshot` listener that fires in <1 second, triggering the ringtone and full-screen answer UI. This is simpler, cheaper, and more reliable than building a custom WebSocket server.
 
 **AD-6: Cloudflare Pages for hosting.** Unlimited bandwidth (critical for unpredictable video-app usage patterns), global CDN, free HTTPS, GitHub auto-deploy. Superior to Vercel/Netlify for this use case due to zero bandwidth caps on the free tier.
 
@@ -396,7 +396,7 @@ interfaceConfigOverwrite: {
 
 1. Caller writes to `users/{elderlyUserId}/incomingCall/current` in Firestore: `{ callerId, callerName, callerPhoto, jitsiRoomId, status: "ringing", timestamp }`.
 2. If the elderly PWA is open: the `onSnapshot` listener fires → full-screen ringing UI appears.
-3. If the elderly PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → elderly user taps notification → PWA opens → reads `incomingCall` doc → shows ringing UI.
+3. If the elderly PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → elderly user taps notification → PWA opens → reads `incomingCall/current` doc → shows ringing UI.
 4. Elderly user taps "Answer" → navigates to call screen, auto-joins the room.
 5. If elderly user doesn't answer within 60 seconds → caller writes `status: "missed"` → ringing stops → call logged as missed.
 
@@ -601,17 +601,16 @@ service cloud.firestore {
 
       // Incoming call signaling (single doc "current", overwritten per call)
       match /incomingCall/current {
-        allow read: if request.auth.uid == userId;
+        allow read: if request.auth.uid == userId
+          || request.auth.uid == resource.data.callerId;
         allow create: if request.auth != null
           && request.resource.data.callerId == request.auth.uid
+          && request.resource.data.keys().hasOnly(['callerId', 'callerName', 'callerPhotoURL', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
           && request.resource.data.status == 'ringing';
         allow update: if request.auth.uid == userId
           || (request.auth.uid == resource.data.callerId
-              && request.resource.data.callerId == resource.data.callerId
-              && request.resource.data.callerName == resource.data.callerName
-              && request.resource.data.jitsiRoomId == resource.data.jitsiRoomId
-              && request.resource.data.timestamp == resource.data.timestamp);
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
         allow delete: if request.auth.uid == userId;
       }
 
