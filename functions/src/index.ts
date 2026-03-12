@@ -209,6 +209,7 @@ export const onIncomingCall = onDocumentWritten(
 
     if (pushTokens.length === 0) return;
 
+<<<<<<< HEAD
     const STALE_TOKEN_ERRORS = new Set([
       'messaging/registration-token-not-registered',
       'messaging/invalid-registration-token',
@@ -216,6 +217,18 @@ export const onIncomingCall = onDocumentWritten(
 
     const FCM_BATCH_LIMIT = 500;
     const payload = {
+||||||| parent of c821897 (fix(functions): add contacts collectionGroup index and prune stale FCM tokens)
+    await getMessaging().sendEachForMulticast({
+      tokens: pushTokens,
+=======
+    const STALE_TOKEN_ERRORS = new Set([
+      'messaging/registration-token-not-registered',
+      'messaging/invalid-registration-token',
+    ]);
+
+    const response = await getMessaging().sendEachForMulticast({
+      tokens: pushTokens,
+>>>>>>> c821897 (fix(functions): add contacts collectionGroup index and prune stale FCM tokens)
       data: {
         type: 'incoming_call',
         callerName: String(after['callerName'] ?? ''),
@@ -231,6 +244,7 @@ export const onIncomingCall = onDocumentWritten(
         headers: { Urgency: 'high' },
         fcmOptions: { link: `/call/${after['jitsiRoomId']}` },
       },
+<<<<<<< HEAD
     };
 
     const staleTokens: string[] = [];
@@ -265,5 +279,32 @@ export const onIncomingCall = onDocumentWritten(
         `FCM: ${totalFails} of ${pushTokens.length} sends failed for user ${event.params['elderlyUserId']}`,
       );
     }
+||||||| parent of c821897 (fix(functions): add contacts collectionGroup index and prune stale FCM tokens)
+    });
+=======
+    });
+
+    // Remove stale tokens so future sends don't hit dead registrations.
+    const staleTokens = response.responses
+      .map((r, i) => ({ r, token: pushTokens[i]! }))
+      .filter(({ r }) => !r.success && STALE_TOKEN_ERRORS.has(r.error?.code ?? ''))
+      .map(({ token }) => token);
+
+    if (staleTokens.length > 0) {
+      console.log(
+        `Removing ${staleTokens.length} stale FCM token(s) for user ${event.params['elderlyUserId']}`,
+      );
+      await db
+        .doc(`users/${event.params['elderlyUserId']}`)
+        .update({ pushTokens: FieldValue.arrayRemove(...staleTokens) });
+    }
+
+    const failCount = response.responses.filter((r) => !r.success).length;
+    if (failCount > 0) {
+      console.error(
+        `FCM: ${failCount} of ${pushTokens.length} sends failed for user ${event.params['elderlyUserId']}`,
+      );
+    }
+>>>>>>> c821897 (fix(functions): add contacts collectionGroup index and prune stale FCM tokens)
   },
 );
