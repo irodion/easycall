@@ -1,12 +1,12 @@
 {
-  "indexes": [
+  "indexes": [],
+  "fieldOverrides": [
     {
       "collectionGroup": "contacts",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        { "fieldPath": "jitsiRoomId", "order": "ASCENDING" }
+      "fieldPath": "jitsiRoomId",
+      "indexes": [
+        { "queryScope": "COLLECTION_GROUP", "order": "ASCENDING" }
       ]
     }
-  ],
-  "fieldOverrides": []
+  ]
 }
