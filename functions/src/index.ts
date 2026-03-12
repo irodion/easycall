@@ -20,7 +20,8 @@ export const validatePairingCode = onCall(async (request) => {
     throw new HttpsError('unauthenticated', 'Authentication required.');
   }
 
-  const { code } = request.data as { code: unknown };
+  const data = typeof request.data === 'object' && request.data !== null ? request.data : {};
+  const { code } = data as { code?: unknown };
 
   if (typeof code !== 'string' || !/^\d{6}$/.test(code)) {
     throw new HttpsError('invalid-argument', 'code must be a 6-digit numeric string.');
@@ -83,9 +84,11 @@ export const generateJitsiJwt = onCall(async (request) => {
     throw new HttpsError('unauthenticated', 'Authentication required.');
   }
 
-  const { roomName, displayName } = request.data as {
-    roomName: unknown;
-    displayName: unknown;
+  const requestData =
+    typeof request.data === 'object' && request.data !== null ? request.data : {};
+  const { roomName, displayName } = requestData as {
+    roomName?: unknown;
+    displayName?: unknown;
   };
 
   if (typeof roomName !== 'string' || !roomName) {
@@ -99,14 +102,18 @@ export const generateJitsiJwt = onCall(async (request) => {
   const db = getFirestore();
 
   // Find the contact record that owns this room ID (across all users).
+  // No limit() — we require exactly one match. Multiple matches would mean
+  // a room ID collision, which must not silently authorize via the wrong record.
   const contactsSnap = await db
     .collectionGroup('contacts')
     .where('jitsiRoomId', '==', roomName)
-    .limit(1)
     .get();
 
   if (contactsSnap.empty) {
     throw new HttpsError('not-found', 'Room not found.');
+  }
+  if (contactsSnap.size !== 1) {
+    throw new HttpsError('internal', 'Ambiguous room ID — multiple contacts share this room.');
   }
 
   const contactDoc = contactsSnap.docs[0]!;
@@ -176,7 +183,11 @@ export const onIncomingCall = onDocumentWritten(
   'users/{elderlyUserId}/incomingCall/current',
   async (event) => {
     const after = event.data?.after.data();
+    const before = event.data?.before.data();
+    // Only notify on a transition into 'ringing', not on subsequent updates
+    // that leave status unchanged (e.g. a no-op write on an already-ringing doc).
     if (!after || after['status'] !== 'ringing') return;
+    if (before && before['status'] === 'ringing') return;
 
     const db = getFirestore();
     const elderlyDoc = await db.doc(`users/${event.params['elderlyUserId']}`).get();
@@ -189,8 +200,8 @@ export const onIncomingCall = onDocumentWritten(
       'messaging/invalid-registration-token',
     ]);
 
-    const response = await getMessaging().sendEachForMulticast({
-      tokens: pushTokens,
+    const FCM_BATCH_LIMIT = 500;
+    const payload = {
       data: {
         type: 'incoming_call',
         callerName: String(after['callerName'] ?? ''),
@@ -199,21 +210,33 @@ export const onIncomingCall = onDocumentWritten(
         elderlyUserId: event.params['elderlyUserId'],
       },
       android: {
-        priority: 'high',
+        priority: 'high' as const,
         ttl: 60_000, // matches the 60-second call timeout
       },
       webpush: {
         headers: { Urgency: 'high' },
         fcmOptions: { link: `/call/${after['jitsiRoomId']}` },
       },
-    });
+    };
+
+    const staleTokens: string[] = [];
+    let totalFails = 0;
+
+    for (let i = 0; i < pushTokens.length; i += FCM_BATCH_LIMIT) {
+      const chunk = pushTokens.slice(i, i + FCM_BATCH_LIMIT);
+      const response = await getMessaging().sendEachForMulticast({ tokens: chunk, ...payload });
+
+      response.responses.forEach((r, j) => {
+        if (!r.success) {
+          totalFails++;
+          if (STALE_TOKEN_ERRORS.has(r.error?.code ?? '')) {
+            staleTokens.push(chunk[j]!);
+          }
+        }
+      });
+    }
 
     // Remove stale tokens so future sends don't hit dead registrations.
-    const staleTokens = response.responses
-      .map((r, i) => ({ r, token: pushTokens[i]! }))
-      .filter(({ r }) => !r.success && STALE_TOKEN_ERRORS.has(r.error?.code ?? ''))
-      .map(({ token }) => token);
-
     if (staleTokens.length > 0) {
       console.log(
         `Removing ${staleTokens.length} stale FCM token(s) for user ${event.params['elderlyUserId']}`,
@@ -223,10 +246,9 @@ export const onIncomingCall = onDocumentWritten(
         .update({ pushTokens: FieldValue.arrayRemove(...staleTokens) });
     }
 
-    const failCount = response.responses.filter((r) => !r.success).length;
-    if (failCount > 0) {
+    if (totalFails > 0) {
       console.error(
-        `FCM: ${failCount} of ${pushTokens.length} sends failed for user ${event.params['elderlyUserId']}`,
+        `FCM: ${totalFails} of ${pushTokens.length} sends failed for user ${event.params['elderlyUserId']}`,
       );
     }
   },
