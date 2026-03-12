@@ -17,17 +17,20 @@ service cloud.firestore {
           || isCaregiverOf(userId, request.auth.uid);
       }
 
-      // Caregivers subcollection: owner manages, caregiver reads own entry
+      // Caregivers subcollection: read-only from client.
+      // Write is performed exclusively by the validatePairingCode Cloud Function
+      // (admin SDK bypasses these rules). Allowing client writes here would let
+      // any authenticated user self-grant caregiver access to any elderly account.
       match /caregivers/{caregiverUserId} {
         allow read: if request.auth.uid == userId
           || request.auth.uid == caregiverUserId;
-        allow write: if request.auth.uid == userId;
+        allow write: if false;
       }
 
       // Incoming call signaling (single doc "current", overwritten per call)
       match /incomingCall/current {
         allow read: if request.auth.uid == userId
-          || request.auth.uid == resource.data.callerId;
+          || (resource != null && request.auth.uid == resource.data.callerId);
         allow create: if request.auth != null
           && request.resource.data.callerId == request.auth.uid
           && request.resource.data.keys().hasOnly(['callerId', 'callerName', 'callerPhotoURL', 'jitsiRoomId', 'status', 'timestamp'])
