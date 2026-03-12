@@ -220,7 +220,7 @@ npx prettier
 
 **AD-4: Pre-generated deterministic room IDs.** Each elderly-contact pair has a pre-computed unique Jitsi room ID stored in Firestore (e.g., `easycall-rose-alex-a7f3x`). No room creation API is needed. Both parties join the same pre-known room. This eliminates an entire class of "wrong room" errors.
 
-**AD-5: Firestore real-time listeners for call signaling.** When Alex calls grandma, a document is written to `users/{grandmaId}/incomingCall`. Grandma's app has an `onSnapshot` listener that fires in <1 second, triggering the ringtone and full-screen answer UI. This is simpler, cheaper, and more reliable than building a custom WebSocket server.
+**AD-5: Firestore real-time listeners for call signaling.** When Alex calls grandma, a document is written to `users/{grandmaId}/incomingCall/current`. Grandma's app has an `onSnapshot` listener that fires in <1 second, triggering the ringtone and full-screen answer UI. This is simpler, cheaper, and more reliable than building a custom WebSocket server.
 
 **AD-6: Cloudflare Pages for hosting.** Unlimited bandwidth (critical for unpredictable video-app usage patterns), global CDN, free HTTPS, GitHub auto-deploy. Superior to Vercel/Netlify for this use case due to zero bandwidth caps on the free tier.
 
@@ -394,9 +394,9 @@ interfaceConfigOverwrite: {
 
 **Signaling flow:**
 
-1. Caller writes to `users/{elderlyUserId}/incomingCall` in Firestore: `{ callerId, callerName, callerPhoto, jitsiRoomId, status: "ringing", timestamp }`.
+1. Caller writes to `users/{elderlyUserId}/incomingCall/current` in Firestore: `{ callerId, callerName, callerPhotoURL, jitsiRoomId, status: "ringing", timestamp }`.
 2. If the elderly PWA is open: the `onSnapshot` listener fires → full-screen ringing UI appears.
-3. If the elderly PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → elderly user taps notification → PWA opens → reads `incomingCall` doc → shows ringing UI.
+3. If the elderly PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → elderly user taps notification → PWA opens → reads `incomingCall/current` doc → shows ringing UI.
 4. Elderly user taps "Answer" → navigates to call screen, auto-joins the room.
 5. If elderly user doesn't answer within 60 seconds → caller writes `status: "missed"` → ringing stops → call logged as missed.
 
@@ -568,7 +568,7 @@ Root
 │   │   ├── startedAt: timestamp
 │   │   └── endedAt: timestamp
 │   │
-│   └── Document: incomingCall (single doc, overwritten per call)
+│   └── Sub-collection: incomingCall/current (single doc, overwritten per call)
 │       ├── callerId: string
 │       ├── callerName: string
 │       ├── callerPhotoURL: string | null
@@ -599,10 +599,18 @@ service cloud.firestore {
           || isCaregiverOf(userId, request.auth.uid);
       }
 
-      // Incoming call: anyone can write (to initiate a call), owner can read
-      match /incomingCall {
-        allow read: if request.auth.uid == userId;
-        allow write: if request.auth != null; // Any authenticated user can call
+      // Incoming call signaling (single doc "current", overwritten per call)
+      match /incomingCall/current {
+        allow read: if request.auth.uid == userId
+          || request.auth.uid == resource.data.callerId;
+        allow create: if request.auth != null
+          && request.resource.data.callerId == request.auth.uid
+          && request.resource.data.keys().hasOnly(['callerId', 'callerName', 'callerPhotoURL', 'jitsiRoomId', 'status', 'timestamp'])
+          && request.resource.data.keys().hasAll(['callerId', 'callerName', 'jitsiRoomId', 'status', 'timestamp'])
+          && request.resource.data.status == 'ringing';
+        allow update: if (request.auth.uid == userId || request.auth.uid == resource.data.callerId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+        allow delete: if request.auth.uid == userId;
       }
 
       // Call history: owner or linked caregiver can read
@@ -613,10 +621,17 @@ service cloud.firestore {
       }
     }
 
-    // Pairing codes: anyone authenticated can read (to validate), owner can write
+    // Pairing codes: owner can read own codes, owner can create
     match /pairingCodes/{code} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && resource.data.elderlyUserId == request.auth.uid;
+      allow create: if request.auth != null
+        && code.matches('^[0-9]{6}$')
+        && request.resource.data.elderlyUserId == request.auth.uid
+        && request.resource.data.keys().hasAll(['elderlyUserId', 'expiresAt', 'used'])
+        && request.resource.data.used == false
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt.toMillis() <= request.time.toMillis() + 600000;
     }
   }
 }
@@ -828,7 +843,7 @@ import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 
 export const onIncomingCall = onDocumentWritten(
-  'users/{elderlyUserId}/incomingCall',
+  'users/{elderlyUserId}/incomingCall/current',
   async (event) => {
     const after = event.data?.after.data();
     if (!after || after.status !== 'ringing') return;
@@ -1068,6 +1083,8 @@ export function usePushNotifications(userId: string) {
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Unauthorized access to elderly user's account | Firebase Anonymous Auth + optional biometric/PIN lock                                                                                                                        |
 | Stranger initiating a call to elderly user    | Only users with a contact entry (and thus the room ID) can call. Room IDs are unguessable (6 random chars). JaaS JWT authentication prevents room hijacking.                 |
+| Fake incomingCall spam                        | Firestore rules validate `callerId == request.auth.uid` and enforce required fields + `status: "ringing"` on create. Prevents spoofed caller identity and malformed docs.    |
+| Pairing code ownership spoofing               | Firestore rules enforce `elderlyUserId == request.auth.uid` on create, preventing a user from generating pairing codes on behalf of another elderly user.                    |
 | Eavesdropping on calls                        | Jitsi uses SRTP (Secure Real-Time Protocol) encryption for all media streams. JaaS rooms are JWT-authenticated.                                                              |
 | Caregiver privilege abuse                     | Permissions are scoped (manage_contacts, manage_settings, view_history). Elderly user can remove caregivers from settings.                                                   |
 | Push token theft                              | FCM tokens are stored in Firestore with per-user security rules. Only the user and Cloud Functions (admin SDK) can access them.                                              |
@@ -1413,7 +1430,7 @@ types/ # TypeScript type definitions
 
 ## Key Libraries
 
-- Firebase v10 (modular SDK)
+- Firebase v12 (modular SDK)
 - JitsiMeetExternalAPI (loaded via script tag, not npm)
 - vite-plugin-pwa + Workbox
 - Zustand v5
@@ -1577,14 +1594,14 @@ The following JSON represents the complete task backlog. Each task has:
       "Firebase project exists and is accessible via firebase CLI",
       "Anonymous auth is enabled in the Firebase console",
       "Firestore security rules file exists and deploys without errors",
-      "Firebase service layer exports initialized instances: app, auth, db, messaging",
+      "Firebase service layer exports initialized instances: app, auth, db; and getFirebaseMessaging() async function (lazy, returns null in unsupported browsers)",
       "Environment variables are loaded correctly in both dev and build",
       ".env.local is in .gitignore"
     ],
     "test_first": "Write a test that imports the firebase service layer and verifies that app, auth, db, and messaging are defined (mock Firebase initialization).",
     "estimated_hours": 3,
     "dependencies": ["1.0.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.0.4",

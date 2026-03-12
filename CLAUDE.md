@@ -47,7 +47,7 @@ src/
 
 ## Key Libraries
 
-- Firebase v10 (modular SDK)
+- Firebase v12 (modular SDK)
 - JitsiMeetExternalAPI (loaded via script tag, not npm)
 - vite-plugin-pwa + Workbox
 - Zustand v5
