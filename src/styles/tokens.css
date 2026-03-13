@@ -18,7 +18,7 @@
   --space-lg: 32px;
   --space-xl: 48px;
 
-  /* Colors (WCAG AAA compliant) */
+  /* Colors (WCAG AAA compliant for large text / UI components only) */
   --color-call-green: #1b7a1b;
   --color-call-red: #c41e1e;
   --color-bg: #ffffff;

@@ -15,7 +15,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "prepare": "test -d .git && cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit || true"
+    "prepare": "if git rev-parse --git-dir > /dev/null 2>&1; then cp scripts/hooks/pre-commit $(git rev-parse --git-dir)/hooks/pre-commit && chmod +x $(git rev-parse --git-dir)/hooks/pre-commit; fi"
   },
   "dependencies": {
     "firebase": "^12.9.0",
