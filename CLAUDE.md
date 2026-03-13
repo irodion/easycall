@@ -44,6 +44,7 @@ src/
 - Use MSW for API mocking.
 - Mock JitsiMeetExternalAPI using the mock in src/test/mocks/jitsi.ts.
 - Run `pnpm test` before committing.
+- For E2E tests with Firebase Emulators, see docs/references/e2e-emulator-testing.md.
 
 ## Key Libraries
 

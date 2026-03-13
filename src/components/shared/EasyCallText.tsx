@@ -9,6 +9,7 @@ interface EasyCallTextProps {
   variant?: 'body' | 'heading' | 'button' | 'display';
   children: ReactNode;
   className?: string;
+  id?: string;
 }
 
 const variantClass: Record<NonNullable<EasyCallTextProps['variant']>, string> = {
@@ -24,6 +25,7 @@ export function EasyCallText({
   variant = 'body',
   children,
   className,
+  id,
 }: EasyCallTextProps) {
   const classes = [
     variantClass[variant],
@@ -33,5 +35,5 @@ export function EasyCallText({
     .filter(Boolean)
     .join(' ');
 
-  return <Tag className={classes}>{children}</Tag>;
+  return <Tag className={classes} id={id}>{children}</Tag>;
 }

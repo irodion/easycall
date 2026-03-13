@@ -2,6 +2,7 @@
   "name": "easycall",
   "private": true,
   "version": "0.1.0",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,9 +16,12 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:emulators": "USE_EMULATORS=true playwright test --project=chromium",
     "prepare": "if git rev-parse --git-dir > /dev/null 2>&1; then cp scripts/hooks/pre-commit $(git rev-parse --git-dir)/hooks/pre-commit && chmod +x $(git rev-parse --git-dir)/hooks/pre-commit; fi"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
     "firebase": "^12.9.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
