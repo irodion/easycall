@@ -1,0 +1,10 @@
+#!/bin/sh
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ "$branch" = "main" ]; then
+  echo "ERROR: Direct commits to 'main' are not allowed."
+  echo "Create a feature branch first: git checkout -b feat/<name>"
+  exit 1
+fi
+
+echo "Running tests before commit..."
+pnpm test
