@@ -1,29 +1,41 @@
-/* Design tokens for EasyCall — elderly-friendly defaults */
+/* Design tokens for EasyCall — PRD Section 11 UX/UI Specification */
 :root {
-  /* Font sizes — larger for readability */
-  --font-size-sm: 1rem; /* 16px — minimum readable */
-  --font-size-base: 1.25rem; /* 20px — body text */
-  --font-size-lg: 1.5rem; /* 24px — subheadings */
-  --font-size-xl: 2rem; /* 32px — headings */
-  --font-size-2xl: 2.5rem; /* 40px — page titles */
+  /* Font sizes — responsive, scale with user preference */
+  --text-body: clamp(18px, 4vw, 22px);
+  --text-heading: clamp(24px, 6vw, 32px);
+  --text-button: clamp(20px, 5vw, 26px);
+  --text-display: clamp(32px, 8vw, 48px);
 
-  /* Touch targets — minimum 56px per WCAG / elderly UX */
-  --touch-target-min: 3.5rem; /* 56px */
-  --touch-target-comfortable: 4rem; /* 64px */
-  --touch-target-large: 5rem; /* 80px — primary call buttons */
+  /* Touch targets */
+  --touch-min: 56px; /* WCAG minimum */
+  --touch-primary: 80px; /* Primary action buttons */
+  --touch-call: 100px; /* Call/answer buttons */
 
   /* Spacing */
-  --spacing-xs: 0.5rem; /* 8px */
-  --spacing-sm: 0.75rem; /* 12px */
-  --spacing-md: 1rem; /* 16px */
-  --spacing-lg: 1.5rem; /* 24px */
-  --spacing-xl: 2rem; /* 32px */
-  --spacing-2xl: 3rem; /* 48px */
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 20px;
+  --space-lg: 32px;
+  --space-xl: 48px;
 
-  /* Colors (semantic aliases) */
-  --color-call-active: #166534; /* green-800 */
-  --color-call-end: #991b1b; /* red-800 */
-  --color-text-primary: #1a1a2e;
-  --color-text-secondary: #4a4a6a;
-  --color-bg-primary: #f0fdf4; /* green-50 */
+  /* Colors (WCAG AAA compliant) */
+  --color-call-green: #1b7a1b;
+  --color-call-red: #c41e1e;
+  --color-bg: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #4a4a4a;
+  --color-border: #cccccc;
+  --color-warning: #b35c00;
+
+  /* Typography */
+  --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+  --line-height: 1.6;
+
+  /* Borders */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-round: 9999px;
 }

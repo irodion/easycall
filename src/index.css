@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './styles/tokens.css';
 @plugin "daisyui";
 
 /* Custom "elderly" theme — WCAG AAA high-contrast colors */
@@ -45,4 +46,17 @@
   --animation-input: 0;
   --btn-focus-scale: 1;
   --tab-radius: 0.75rem;
+}
+
+@utility touch-target-min {
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+}
+@utility touch-target-primary {
+  min-height: var(--touch-primary);
+  min-width: var(--touch-primary);
+}
+@utility touch-target-call {
+  min-height: var(--touch-call);
+  min-width: var(--touch-call);
 }
