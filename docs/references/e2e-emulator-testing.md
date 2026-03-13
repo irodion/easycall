@@ -91,7 +91,9 @@ DELETE 127.0.0.1:8080/emulator/v1/projects/easycall-dev/databases/(default)/docu
 DELETE 127.0.0.1:9099/emulator/v1/projects/easycall-dev/accounts
 ```
 
-Both emulator suites use `test.describe.configure({ mode: 'serial' })` to prevent parallel workers from calling `clearEmulators()` concurrently and wiping each other's seeded data mid-test.
+All emulator suites use `test.describe.configure({ mode: 'serial' })` to prevent parallel workers from calling `clearEmulators()` concurrently and wiping each other's seeded data mid-test.
+
+Additionally, the Playwright config forces `workers: 1` when `USE_EMULATORS=true` because emulator tests share global state (a single Auth + Firestore instance). Without this, separate spec files run in parallel workers and their `clearEmulators()` calls race against each other.
 
 ### Jitsi + JWT mocking
 
@@ -117,6 +119,15 @@ No pre-seeding. Verifies:
 > **Why reload?** React Router does not remount `AuthGuard` when navigating to
 > the same route (`/elderly → /elderly`). Reloading lets `AuthGuard` re-evaluate
 > the user doc from a clean state, using auth restored from IndexedDB.
+
+### `Incoming Call Flow` — 1 test
+
+Pre-seeded with an elderly user doc (no contacts). Verifies:
+- Writing an `incomingCall/current` doc via Firestore REST triggers the IncomingCallScreen overlay
+- Answer and Decline buttons appear with the caller name
+- Declining dismisses the ringing screen
+
+Uses the same auth intercept pattern as the elderly-call suite. Does **not** need Jitsi or Cloud Function mocks since it only tests the incoming call overlay, not the call screen itself.
 
 ### `Smoke tests` — 2 tests
 
@@ -165,4 +176,4 @@ Add this export to `~/.zshrc` to make it permanent.
 
 ### Tests interfere with each other (flaky parallel runs)
 
-The emulator suites use `mode: 'serial'`. If you add new emulator tests to a different `describe` block, make sure to also add `test.describe.configure({ mode: 'serial' })`.
+The emulator suites use `mode: 'serial'` and `workers: 1`. If you add new emulator tests to a different `describe` block, make sure to also add `test.describe.configure({ mode: 'serial' })`. The `workers: 1` config is enforced in `playwright.config.ts` when `USE_EMULATORS=true`.

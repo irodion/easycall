@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 interface EasyCallButtonProps {
   variant?: 'primary' | 'danger' | 'secondary';
   size?: 'default' | 'large' | 'call';
+  type?: 'button' | 'submit';
   onClick?: () => void;
   disabled?: boolean;
   'aria-label'?: string;
@@ -24,6 +25,7 @@ const sizeClass: Record<NonNullable<EasyCallButtonProps['size']>, string> = {
 export function EasyCallButton({
   variant = 'primary',
   size = 'default',
+  type = 'button',
   onClick,
   disabled,
   'aria-label': ariaLabel,
@@ -31,7 +33,7 @@ export function EasyCallButton({
 }: EasyCallButtonProps) {
   return (
     <button
-      type="button"
+      type={type}
       className={`btn ${variantClass[variant]} ${sizeClass[size]} font-bold text-[length:var(--text-button)]`}
       onClick={onClick}
       disabled={disabled}

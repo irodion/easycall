@@ -4,10 +4,10 @@ const useEmulators = process.env['USE_EMULATORS'] === 'true';
 
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  fullyParallel: !useEmulators,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 2 : 0,
-  workers: process.env['CI'] ? 1 : undefined,
+  workers: (process.env['CI'] || useEmulators) ? 1 : undefined,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:5173',

@@ -4,8 +4,8 @@ test.describe('Smoke tests', () => {
   test('renders role selection page', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveURL('/');
-    // Wait for either the loading spinner or the role selector to appear
-    await page.waitForSelector('.loading-spinner, [role="button"]', { timeout: 5000 });
+    // Wait for the app to render — either a button (RoleSelector) or loading indicator
+    await page.locator('button, .loading').first().waitFor({ timeout: 10_000 });
   });
 
   test('page title is accessible', async ({ page }) => {
