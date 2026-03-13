@@ -101,7 +101,7 @@ describe('Firebase service layer', () => {
       expect(connectFirestoreEmulator).toHaveBeenCalledWith(mockDb, '127.0.0.1', 8080);
     });
 
-    it('does NOT call emulator connectors when VITE_USE_EMULATORS is not set', async () => {
+    it('does NOT call emulator connectors when VITE_USE_EMULATORS is false', async () => {
       vi.resetModules();
       vi.stubEnv('VITE_USE_EMULATORS', 'false');
       mockAllFirebaseModules();
