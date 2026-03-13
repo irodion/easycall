@@ -2196,7 +2196,7 @@ The following JSON represents the complete task backlog. Each task has:
     "phase": 3,
     "feature": "security",
     "title": "Server-Side Pairing Code Generation",
-    "description": "Replace client-side pairing code generation (usePairingCode → setDoc) with a server-side Cloud Function that issues codes transactionally. The function should: generate a unique 6-digit code server-side (reject client-generated codes), ensure no collisions via Firestore transaction, atomically revoke/expire any previous active code for the same elderlyUserId, set expiresAt using serverTimestamp() + 10 minutes so expiry is authoritative, and return the issued code to the client. Update the client hook to call this endpoint instead of writing directly to Firestore. Update Firestore security rules to deny client writes to the pairingCodes collection.",
+    "description": "Replace client-side pairing code generation (usePairingCode → setDoc) with a server-side Cloud Function that issues codes transactionally. The function should: generate a unique 6-digit code server-side (reject client-generated codes), ensure no collisions via Firestore transaction, atomically revoke/expire any previous active code for the same elderlyUserId, set expiresAt using serverTimestamp() + 10 minutes so expiry is authoritative, and return the issued code to the client. Enforce rate limiting (per-IP and per-elderlyUserId) to prevent DoS and brute-force attacks, returning HTTP 429 when limits are exceeded. Use exponential backoff with a max retry cap on transaction collisions to avoid infinite retry loops. Log and emit metrics for throttled requests. Update the client hook to call this endpoint instead of writing directly to Firestore, with graceful handling of 429 responses. Update Firestore security rules to deny client writes to the pairingCodes collection.",
     "acceptance_criteria": [
       "Cloud Function `generatePairingCode` exists and is deployed",
       "Function generates unique 6-digit codes server-side (no client-generated codes accepted)",
@@ -2204,12 +2204,17 @@ The following JSON represents the complete task backlog. Each task has:
       "Previous active codes for the same elderlyUserId are revoked atomically",
       "expiresAt is set using server timestamp (not client Date)",
       "Firestore rules deny direct client writes to pairingCodes collection",
+      "Per-IP rate limit enforced (e.g., 5 calls/minute) — returns HTTP 429 on exceed",
+      "Per-elderlyUserId rate limit enforced (e.g., 10 calls/hour) — returns HTTP 429 on exceed",
+      "Transaction collision retries use exponential backoff with a max retry cap (e.g., 3 attempts)",
+      "Throttled/rejected requests are logged with caller IP and elderlyUserId for observability",
       "usePairingCode hook calls the Cloud Function instead of writing to Firestore directly",
+      "usePairingCode handles 429 responses gracefully (shows user-friendly message, does not auto-retry)",
       "Existing pairing flow (display code, countdown, refresh) works unchanged from UX perspective",
-      "Unit tests for Cloud Function (collision handling, revocation, expiry)",
-      "Unit tests for updated usePairingCode hook"
+      "Unit tests for Cloud Function (collision handling, revocation, expiry, rate limiting)",
+      "Unit tests for updated usePairingCode hook (including 429 handling)"
     ],
-    "test_first": "Write Cloud Function unit tests: generates 6-digit code, rejects collisions via transaction retry, revokes previous codes for same user, sets server-side expiresAt. Write client hook tests: calls Cloud Function, handles errors, updates state on success.",
+    "test_first": "Write Cloud Function unit tests: generates 6-digit code, rejects collisions via transaction retry with exponential backoff, revokes previous codes for same user, sets server-side expiresAt, returns 429 when rate limits exceeded. Write client hook tests: calls Cloud Function, handles errors, handles 429 with user-friendly message, updates state on success.",
     "estimated_hours": 5,
     "dependencies": ["2.2.1"],
     "done": false
