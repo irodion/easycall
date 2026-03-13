@@ -90,7 +90,11 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
           <EasyCallButton
             size="large"
             onClick={async () => {
-              await requestPermission();
+              try {
+                await requestPermission();
+              } catch {
+                // Permission denied or unavailable — continue onboarding
+              }
               nextStep();
             }}
           >

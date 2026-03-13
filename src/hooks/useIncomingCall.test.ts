@@ -123,6 +123,42 @@ describe('useIncomingCall', () => {
     vi.useRealTimers();
   });
 
+  it('clears call store when userId changes', () => {
+    useCallStore.getState().setIncomingCall({
+      callerName: 'Alex',
+      callerPhotoURL: '',
+      roomId: 'room-1',
+      elderlyUserId: 'user-1',
+    });
+
+    const { rerender } = renderHook(({ uid }) => useIncomingCall(uid), {
+      initialProps: { uid: 'user-1' as string | null },
+    });
+
+    // Simulate auth change — new user
+    rerender({ uid: 'user-2' });
+    expect(useCallStore.getState().isRinging).toBe(false);
+    expect(useCallStore.getState().incomingCall).toBeNull();
+  });
+
+  it('clears call store on logout', () => {
+    useCallStore.getState().setIncomingCall({
+      callerName: 'Alex',
+      callerPhotoURL: '',
+      roomId: 'room-1',
+      elderlyUserId: 'user-1',
+    });
+
+    const { rerender } = renderHook(({ uid }) => useIncomingCall(uid), {
+      initialProps: { uid: 'user-1' as string | null },
+    });
+
+    // Simulate logout
+    rerender({ uid: null });
+    expect(useCallStore.getState().isRinging).toBe(false);
+    expect(useCallStore.getState().incomingCall).toBeNull();
+  });
+
   it('unsubscribes on unmount', () => {
     const { unmount } = renderHook(() => useIncomingCall('user-1'));
     unmount();

@@ -5,6 +5,9 @@ import { incomingCallRef } from '@/services/callSignaling';
 
 export function useIncomingCall(userId: string | null): void {
   useEffect(() => {
+    // Clear stale incoming call state when userId changes (logout/switch)
+    useCallStore.getState().clearIncomingCall();
+
     if (!userId) return;
 
     const ref = incomingCallRef(userId);
