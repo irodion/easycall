@@ -19,7 +19,7 @@ export function EasyCallCard({
     return (
       <button
         type="button"
-        className={`${baseClass} touch-target-min`}
+        className={`${baseClass} touch-target-min min-h-14 min-w-14`}
         onClick={onClick}
         aria-label={ariaLabel}
       >
