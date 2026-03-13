@@ -2190,6 +2190,29 @@ The following JSON represents the complete task backlog. Each task has:
     "estimated_hours": 5,
     "dependencies": ["All previous tasks"],
     "done": false
+  },
+  {
+    "id": "3.8.1",
+    "phase": 3,
+    "feature": "security",
+    "title": "Server-Side Pairing Code Generation",
+    "description": "Replace client-side pairing code generation (usePairingCode → setDoc) with a server-side Cloud Function that issues codes transactionally. The function should: generate a unique 6-digit code server-side (reject client-generated codes), ensure no collisions via Firestore transaction, atomically revoke/expire any previous active code for the same elderlyUserId, set expiresAt using serverTimestamp() + 10 minutes so expiry is authoritative, and return the issued code to the client. Update the client hook to call this endpoint instead of writing directly to Firestore. Update Firestore security rules to deny client writes to the pairingCodes collection.",
+    "acceptance_criteria": [
+      "Cloud Function `generatePairingCode` exists and is deployed",
+      "Function generates unique 6-digit codes server-side (no client-generated codes accepted)",
+      "Function uses Firestore transaction to prevent code collisions",
+      "Previous active codes for the same elderlyUserId are revoked atomically",
+      "expiresAt is set using server timestamp (not client Date)",
+      "Firestore rules deny direct client writes to pairingCodes collection",
+      "usePairingCode hook calls the Cloud Function instead of writing to Firestore directly",
+      "Existing pairing flow (display code, countdown, refresh) works unchanged from UX perspective",
+      "Unit tests for Cloud Function (collision handling, revocation, expiry)",
+      "Unit tests for updated usePairingCode hook"
+    ],
+    "test_first": "Write Cloud Function unit tests: generates 6-digit code, rejects collisions via transaction retry, revokes previous codes for same user, sets server-side expiresAt. Write client hook tests: calls Cloud Function, handles errors, updates state on success.",
+    "estimated_hours": 5,
+    "dependencies": ["2.2.1"],
+    "done": false
   }
 ]
 ```
