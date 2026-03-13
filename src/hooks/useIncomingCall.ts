@@ -12,36 +12,43 @@ export function useIncomingCall(userId: string | null): void {
 
     const ref = incomingCallRef(userId);
 
-    const unsubscribe = onSnapshot(ref, (snap) => {
-      const store = useCallStore.getState();
+    const unsubscribe = onSnapshot(
+      ref,
+      (snap) => {
+        const store = useCallStore.getState();
 
-      if (!snap.exists()) {
-        if (store.isRinging) store.clearIncomingCall();
-        return;
-      }
+        if (!snap.exists()) {
+          if (store.isRinging) store.clearIncomingCall();
+          return;
+        }
 
-      const data = snap.data();
-      const status = data['status'] as string;
+        const data = snap.data();
+        const status = data['status'] as string;
 
-      if (status !== 'ringing') {
-        if (store.isRinging) store.clearIncomingCall();
-        return;
-      }
+        if (status !== 'ringing') {
+          if (store.isRinging) store.clearIncomingCall();
+          return;
+        }
 
-      // Ignore stale calls (>60 seconds old)
-      const timestamp = (data['timestamp'] as { toDate?: () => Date })?.toDate?.() ?? new Date(0);
-      if (Date.now() - timestamp.getTime() > 60_000) {
-        if (store.isRinging) store.clearIncomingCall();
-        return;
-      }
+        // Ignore stale calls (>60 seconds old)
+        const timestamp = (data['timestamp'] as { toDate?: () => Date })?.toDate?.() ?? new Date(0);
+        if (Date.now() - timestamp.getTime() > 60_000) {
+          if (store.isRinging) store.clearIncomingCall();
+          return;
+        }
 
-      useCallStore.getState().setIncomingCall({
-        callerName: String(data['callerName'] ?? ''),
-        callerPhotoURL: String(data['callerPhotoURL'] ?? ''),
-        roomId: String(data['jitsiRoomId'] ?? ''),
-        elderlyUserId: userId,
-      });
-    });
+        useCallStore.getState().setIncomingCall({
+          callerName: String(data['callerName'] ?? ''),
+          callerPhotoURL: String(data['callerPhotoURL'] ?? ''),
+          roomId: String(data['jitsiRoomId'] ?? ''),
+          elderlyUserId: userId,
+        });
+      },
+      () => {
+        // Listener error (permission/network) — clear stale ringing state
+        useCallStore.getState().clearIncomingCall();
+      },
+    );
 
     return unsubscribe;
   }, [userId]);

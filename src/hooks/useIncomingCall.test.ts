@@ -8,11 +8,13 @@ type SnapshotCallback = (snap: {
 }) => void;
 
 let capturedCallback: SnapshotCallback | null = null;
+let capturedErrorCallback: ((error: Error) => void) | null = null;
 const mockUnsubscribe = vi.fn();
 
 vi.mock('firebase/firestore', () => ({
-  onSnapshot: vi.fn((_ref: unknown, cb: SnapshotCallback) => {
+  onSnapshot: vi.fn((_ref: unknown, cb: SnapshotCallback, errCb?: (error: Error) => void) => {
     capturedCallback = cb;
+    capturedErrorCallback = errCb ?? null;
     return mockUnsubscribe;
   }),
 }));
@@ -27,11 +29,13 @@ describe('useIncomingCall', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     capturedCallback = null;
+    capturedErrorCallback = null;
     useCallStore.setState({ isRinging: false, incomingCall: null });
   });
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
   });
 
   it('does not subscribe when userId is null', () => {
@@ -120,7 +124,6 @@ describe('useIncomingCall', () => {
     });
 
     expect(useCallStore.getState().isRinging).toBe(false);
-    vi.useRealTimers();
   });
 
   it('clears call store when userId changes', () => {
@@ -155,6 +158,24 @@ describe('useIncomingCall', () => {
 
     // Simulate logout
     rerender({ uid: null });
+    expect(useCallStore.getState().isRinging).toBe(false);
+    expect(useCallStore.getState().incomingCall).toBeNull();
+  });
+
+  it('clears incoming call on listener error', () => {
+    useCallStore.getState().setIncomingCall({
+      callerName: 'Alex',
+      callerPhotoURL: '',
+      roomId: 'room-1',
+      elderlyUserId: 'user-1',
+    });
+
+    renderHook(() => useIncomingCall('user-1'));
+    expect(capturedErrorCallback).not.toBeNull();
+
+    // Simulate a permission/network error
+    capturedErrorCallback!(new Error('permission-denied'));
+
     expect(useCallStore.getState().isRinging).toBe(false);
     expect(useCallStore.getState().incomingCall).toBeNull();
   });
