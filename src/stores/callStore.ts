@@ -17,6 +17,10 @@ interface CallState {
 export const useCallStore = create<CallState>((set) => ({
   isRinging: false,
   incomingCall: null,
-  setIncomingCall: (data) => set({ isRinging: true, incomingCall: data }),
+  setIncomingCall: (data) =>
+    set((state) => {
+      if (state.incomingCall?.roomId === data.roomId) return state;
+      return { isRinging: true, incomingCall: data };
+    }),
   clearIncomingCall: () => set({ isRinging: false, incomingCall: null }),
 }));

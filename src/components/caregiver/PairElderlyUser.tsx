@@ -13,9 +13,11 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!code.trim() || status === 'loading') return;
     setStatus('loading');
     try {
       const result = await validatePairingCode(code);
+      setStatus('idle');
       onSuccess(result.elderlyUserId);
     } catch (err) {
       const message =

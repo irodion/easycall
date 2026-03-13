@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useParams } from 'react-router';
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/services/firebase';
 import { AuthGuard } from '@/components/shared/AuthGuard';
@@ -28,6 +28,15 @@ function CaregiverSettingsPage() {
   const { elderlyUserId } = useParams<{ elderlyUserId: string }>();
   if (!elderlyUserId) return null;
   return <ElderlyUserSettings elderlyUserId={elderlyUserId} />;
+}
+
+function PairElderlyUserPage() {
+  const navigate = useNavigate();
+  return (
+    <PairElderlyUser
+      onSuccess={(elderlyUserId) => void navigate(`/caregiver/settings/${elderlyUserId}`)}
+    />
+  );
 }
 
 function AuthenticatedApp() {
@@ -80,7 +89,7 @@ function AuthenticatedApp() {
           />
           <Route
             path="/caregiver/pair"
-            element={<PairElderlyUser onSuccess={() => {}} />}
+            element={<PairElderlyUserPage />}
           />
           <Route
             path="/caregiver/settings/:elderlyUserId"

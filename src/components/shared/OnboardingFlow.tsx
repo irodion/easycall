@@ -17,6 +17,8 @@ const TOTAL_STEPS = 4;
 
 export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { requestPermission } = usePushNotifications(user.uid);
 
   const nextStep = () => {
@@ -26,9 +28,17 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
   };
 
   const handleFinish = async () => {
-    const ref = doc(db, 'users', user.uid);
-    await updateDoc(ref, { onboardingComplete: true });
-    onComplete();
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const ref = doc(db, 'users', user.uid);
+      await updateDoc(ref, { onboardingComplete: true });
+      onComplete();
+    } catch {
+      setError('Failed to complete setup. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -100,17 +110,24 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
           {user.role === 'elderly' ? (
             <PairingCodeDisplay userId={user.uid} />
           ) : (
-            <PairElderlyUser onSuccess={() => {}} />
+            <PairElderlyUser onSuccess={() => void handleFinish()} />
+          )}
+          {error && (
+            <p role="alert" className="text-error text-[length:var(--text-body)]">
+              {error}
+            </p>
           )}
           <EasyCallButton
             size="large"
+            disabled={isSubmitting}
             onClick={() => void handleFinish()}
           >
-            Done
+            {isSubmitting ? 'Saving...' : 'Done'}
           </EasyCallButton>
           <EasyCallButton
             variant="secondary"
             size="large"
+            disabled={isSubmitting}
             onClick={() => void handleFinish()}
           >
             Skip

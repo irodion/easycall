@@ -140,6 +140,23 @@ describe('OnboardingFlow', () => {
     expect(nextBtn).toHaveClass('touch-target-primary');
   });
 
+  it('shows error and does not call onComplete when updateDoc fails', async () => {
+    mockUpdateDoc.mockRejectedValueOnce(new Error('fail'));
+    const u = userEvent.setup();
+    const user = createMockUser({ role: 'elderly' });
+    renderWithProviders(<OnboardingFlow user={user} onComplete={onComplete} />);
+
+    // Navigate through all steps
+    await u.click(screen.getByRole('button', { name: /next/i }));
+    await u.click(screen.getByRole('button', { name: /grant permissions/i }));
+    await u.click(screen.getByRole('button', { name: /next/i }));
+    // Final step — click Done
+    await u.click(screen.getByRole('button', { name: /done/i }));
+
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(screen.getByRole('alert')).toHaveTextContent(/failed to complete setup/i);
+  });
+
   it('passes vitest-axe on step 1', async () => {
     const user = createMockUser({ role: 'elderly' });
     const { container } = renderWithProviders(

@@ -36,14 +36,16 @@ export function usePairingCode(userId: string | null) {
       if (cancelled) return;
       setCode(newCode);
       setSecondsRemaining(600);
+      // Start countdown only after first code is ready
+      if (!countdownRef.current) {
+        countdownRef.current = setInterval(() => {
+          setSecondsRemaining((s) => (s <= 1 ? 0 : s - 1));
+        }, 1000);
+      }
       refreshRef.current = setTimeout(() => void generateAndSchedule(), AUTO_REFRESH_MS);
     }
 
     void generateAndSchedule();
-
-    countdownRef.current = setInterval(() => {
-      setSecondsRemaining((s) => (s <= 1 ? 0 : s - 1));
-    }, 1000);
 
     return () => {
       cancelled = true;
@@ -55,11 +57,16 @@ export function usePairingCode(userId: string | null) {
   const refresh = async () => {
     if (!userId) return;
     clearTimeout(refreshRef.current);
-    saveCode(userId).then((newCode) => {
+    try {
+      const newCode = await saveCode(userId);
       setCode(newCode);
       setSecondsRemaining(600);
       refreshRef.current = setTimeout(() => void refresh(), AUTO_REFRESH_MS);
-    });
+    } catch (err) {
+      console.error('Failed to refresh pairing code:', err);
+      // Retry after the normal interval
+      refreshRef.current = setTimeout(() => void refresh(), AUTO_REFRESH_MS);
+    }
   };
 
   const formattedCountdown = `${String(Math.floor(secondsRemaining / 60)).padStart(2, '0')}:${String(secondsRemaining % 60).padStart(2, '0')}`;

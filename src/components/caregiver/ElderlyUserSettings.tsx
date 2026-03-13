@@ -15,14 +15,13 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   useEffect(() => {
     const ref = doc(db, 'users', elderlyUserId);
     const unsubscribe = onSnapshot(ref, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        const incoming = (data['settings'] as UserSettings) ?? DEFAULT_USER_SETTINGS;
-        setSettings((prev) => {
-          if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
-          return incoming;
-        });
-      }
+      const incoming = snap.exists()
+        ? ((snap.data()['settings'] as UserSettings) ?? DEFAULT_USER_SETTINGS)
+        : DEFAULT_USER_SETTINGS;
+      setSettings((prev) => {
+        if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
+        return incoming;
+      });
     });
     return unsubscribe;
   }, [elderlyUserId]);
@@ -36,10 +35,13 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   }
 
   const updateSettings = (partial: Partial<UserSettings>) => {
+    const previous = settings;
     const updated = { ...settings, ...partial };
     setSettings(updated);
     const ref = doc(db, 'users', elderlyUserId);
-    void updateDoc(ref, { settings: updated });
+    updateDoc(ref, { settings: updated }).catch(() => {
+      setSettings(previous);
+    });
   };
 
   return (

@@ -22,6 +22,7 @@ export function PairingCodeDisplay({ userId }: PairingCodeDisplayProps) {
       ) : (
         <span
           className="loading loading-spinner loading-lg"
+          role="status"
           aria-label="Generating code"
         />
       )}

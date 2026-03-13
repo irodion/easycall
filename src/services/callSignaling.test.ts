@@ -22,7 +22,11 @@ vi.mock('@/services/firebase', () => ({
   db: { type: 'mock-db' },
 }));
 
-import { initiateCall, declineCall } from './callSignaling';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { initiateCall, declineCall, validatePairingCode } from './callSignaling';
+
+const mockGetFunctions = vi.mocked(getFunctions);
+const mockHttpsCallable = vi.mocked(httpsCallable);
 
 describe('callSignaling', () => {
   beforeEach(() => {
@@ -98,6 +102,21 @@ describe('callSignaling', () => {
         'current',
       );
       expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', { status: 'declined' });
+    });
+  });
+
+  describe('validatePairingCode', () => {
+    it('calls httpsCallable with correct function name and payload', async () => {
+      const mockCallable = vi.fn().mockResolvedValue({ data: { elderlyUserId: 'elderly-42' } });
+      mockGetFunctions.mockReturnValue('functions-instance' as never);
+      mockHttpsCallable.mockReturnValue(mockCallable as never);
+
+      const result = await validatePairingCode('123456');
+
+      expect(mockGetFunctions).toHaveBeenCalledWith({});
+      expect(mockHttpsCallable).toHaveBeenCalledWith('functions-instance', 'validatePairingCode');
+      expect(mockCallable).toHaveBeenCalledWith({ code: '123456' });
+      expect(result).toEqual({ elderlyUserId: 'elderly-42' });
     });
   });
 });
