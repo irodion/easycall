@@ -1,0 +1,62 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { screen, fireEvent } from '@testing-library/react';
+import { axe } from 'vitest-axe';
+import { renderWithProviders } from '@/test/helpers';
+
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn().mockReturnValue('doc-ref'),
+  setDoc: vi.fn().mockResolvedValue(undefined),
+  getFirestore: vi.fn(),
+}));
+
+vi.mock('@/services/firebase', () => ({
+  auth: { currentUser: { uid: 'user-1' } },
+  db: {},
+  app: {},
+}));
+
+describe('RoleSelector', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders two role buttons', async () => {
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    expect(screen.getByRole('button', { name: /elderly user/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeInTheDocument();
+  });
+
+  it('buttons are at least 56px (touch-target-min class)', async () => {
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    const elderlyBtn = screen.getByRole('button', { name: /elderly user/i });
+    expect(elderlyBtn.className).toContain('touch-target-min');
+  });
+
+  it('clicking elderly role calls setDoc with role: elderly', async () => {
+    const { setDoc } = await import('firebase/firestore');
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+    await vi.waitFor(() => {
+      expect(setDoc).toHaveBeenCalledWith('doc-ref', expect.objectContaining({ role: 'elderly' }), expect.any(Object));
+    });
+  });
+
+  it('clicking caregiver role calls setDoc with role: caregiver', async () => {
+    const { setDoc } = await import('firebase/firestore');
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /family caregiver/i }));
+    await vi.waitFor(() => {
+      expect(setDoc).toHaveBeenCalledWith('doc-ref', expect.objectContaining({ role: 'caregiver' }), expect.any(Object));
+    });
+  });
+
+  it('passes vitest-axe', async () => {
+    const { RoleSelector } = await import('./RoleSelector');
+    const { container } = renderWithProviders(<RoleSelector />);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});

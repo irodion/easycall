@@ -11,9 +11,11 @@ function mockAllFirebaseModules() {
   }));
   vi.doMock('firebase/auth', () => ({
     getAuth: vi.fn(() => mockAuth),
+    connectAuthEmulator: vi.fn(),
   }));
   vi.doMock('firebase/firestore', () => ({
     getFirestore: vi.fn(() => mockDb),
+    connectFirestoreEmulator: vi.fn(),
   }));
 }
 

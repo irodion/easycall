@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const useEmulators = process.env['USE_EMULATORS'] === 'true';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -31,8 +33,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev',
+    command: useEmulators ? 'VITE_USE_EMULATORS=true pnpm dev' : 'pnpm dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env['CI'],
+    env: useEmulators ? { VITE_USE_EMULATORS: 'true' } : {},
   },
 });

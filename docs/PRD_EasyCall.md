@@ -1620,7 +1620,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write tests for each base component: verify minimum dimensions via computed styles, verify text sizes, verify ARIA attributes, verify vitest-axe passes.",
     "estimated_hours": 4,
     "dependencies": ["1.0.1", "1.0.2"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.1.1",
@@ -1639,7 +1639,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write unit tests for each store action using MSW to mock Firestore. Test: initial state is empty, fetchContacts populates the list sorted by displayOrder, addContact adds to both Firestore and local state, removeContact removes from both, onSnapshot callback updates local state.",
     "estimated_hours": 4,
     "dependencies": ["1.0.2", "1.0.3"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.1.2",
@@ -1661,7 +1661,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write component tests: renders N contact cards for N contacts, each card has correct name text, tapping a card calls navigate('/call/contactId'), empty state renders when contacts=[], settings icon renders with correct size, vitest-axe passes on the full component.",
     "estimated_hours": 5,
     "dependencies": ["1.0.4", "1.1.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.2.1",
@@ -1680,7 +1680,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write unit tests mocking navigator.mediaDevices: test granted path (mock resolves with stream, verify tracks stopped), test denied path (mock rejects with NotAllowedError), test no-device path, test retry resets state and re-invokes.",
     "estimated_hours": 3,
     "dependencies": ["1.0.2"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.2.2",
@@ -1698,7 +1698,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write component tests for each state: checking shows spinner, granted calls onReady callback, denied shows recovery text and Try Again button, Try Again click calls retry.",
     "estimated_hours": 4,
     "dependencies": ["1.0.4", "1.2.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.3.1",
@@ -1716,7 +1716,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write unit tests: mock document.createElement and script onload/onerror. Test single load resolves, double load returns same promise, error rejects with message.",
     "estimated_hours": 3,
     "dependencies": ["1.0.2"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.3.2",
@@ -1735,7 +1735,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write unit tests for the token generation logic (extract to a pure function): verify JWT structure with jsonwebtoken.verify(), verify payload fields, verify expiration. Test the Cloud Function wrapper separately with a mock auth context.",
     "estimated_hours": 4,
     "dependencies": ["1.0.3"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.3.3",
@@ -1756,7 +1756,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write component tests using the Jitsi mock: verify API constructor options, verify toggleAudio command on mic button click, verify toggleVideo on camera click, verify hangup on end call click, verify navigation on readyToClose event, verify 'Call Ended' message on participantLeft with empty room.",
     "estimated_hours": 8,
     "dependencies": ["1.0.4", "1.2.2", "1.3.1", "1.3.2"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.3.4",
@@ -1774,7 +1774,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write tests using the Jitsi mock: emit connectionQuality events with varying quality levels, verify indicator color changes, verify setVideoQuality command called when quality drops below threshold.",
     "estimated_hours": 3,
     "dependencies": ["1.3.3"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.4.1",
@@ -1794,7 +1794,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write component tests: renders all 4 options, font size change updates store, pairing code displays, navigation works on button clicks.",
     "estimated_hours": 4,
     "dependencies": ["1.0.4", "1.1.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.4.2",
@@ -1814,7 +1814,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write component tests for each step: step 1 renders name input with correct font size, step 2 renders file input with capture attribute, step 3 shows confirmation, save button calls addContact with correct data including generated roomId.",
     "estimated_hours": 4,
     "dependencies": ["1.1.1", "1.0.4"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.5.1",
@@ -1833,7 +1833,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write component tests: renders N cards for N linked users, each card shows name and last-seen, empty state renders link button, manage button navigates correctly.",
     "estimated_hours": 4,
     "dependencies": ["1.0.3", "1.0.4"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.5.2",
@@ -1852,7 +1852,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write component tests: add form renders and submits to Firestore, edit inline works, remove shows confirmation, reorder updates displayOrder values, photo upload triggers compression.",
     "estimated_hours": 6,
     "dependencies": ["1.1.1", "1.5.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.6.1",
@@ -1872,7 +1872,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write tests: AuthGuard renders children when authenticated, redirects when not, RoleSelector renders two buttons, clicking a role button writes to Firestore and redirects.",
     "estimated_hours": 5,
     "dependencies": ["1.0.3", "1.1.2", "1.5.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.7.1",
@@ -1891,7 +1891,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write tests: manifest JSON has correct fields (parse the generated file), InstallPrompt component renders when beforeinstallprompt fires, Install button calls prompt() on the deferred event, component hides after install.",
     "estimated_hours": 4,
     "dependencies": ["1.0.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "1.8.1",
@@ -1909,7 +1909,7 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "This IS the test. Write the Playwright test file first, verify it fails, then ensure all prior components support it.",
     "estimated_hours": 5,
     "dependencies": ["1.1.2", "1.3.3", "1.6.1"],
-    "done": false
+    "done": true
   },
   {
     "id": "2.1.1",

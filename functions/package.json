@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "serve": "npm run build && firebase emulators:start --only functions",
-    "deploy": "firebase deploy --only functions"
+    "deploy": "firebase deploy --only functions",
+    "test": "vitest run"
   },
   "engines": {
     "node": "20"
@@ -18,6 +19,8 @@
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
-    "typescript": "~5.9.3"
+    "@types/node": "^25.5.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.0"
   }
 }
