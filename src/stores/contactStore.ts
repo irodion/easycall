@@ -60,12 +60,18 @@ export const useContactStore = create<ContactStore>((set) => ({
 
   subscribeToContacts: (userId) => {
     const q = query(collection(db, 'users', userId, 'contacts'), orderBy('displayOrder'));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const contacts = (snap as { docs: Array<{ id: string; data: () => Record<string, unknown> }> }).docs.map(
-        (d) => ({ id: d.id, ...d.data() }) as Contact,
-      );
-      set({ contacts });
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const contacts = (snap as { docs: Array<{ id: string; data: () => Record<string, unknown> }> }).docs.map(
+          (d) => ({ id: d.id, ...d.data() }) as Contact,
+        );
+        set({ contacts, error: null });
+      },
+      (err) => {
+        set({ error: String(err) });
+      },
+    );
     return unsubscribe;
   },
 }));

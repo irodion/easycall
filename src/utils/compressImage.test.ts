@@ -12,9 +12,11 @@ describe('compressImage', () => {
       getContext: vi.fn().mockReturnValue(mockContext),
     };
 
+    // Capture the original before spying to avoid infinite recursion in the else branch
+    const originalCreateElement = document.createElement.bind(document);
     vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
       if (tag === 'canvas') return mockCanvas as unknown as HTMLCanvasElement;
-      return document.createElement(tag);
+      return originalCreateElement(tag);
     });
 
     // Mock Image loading
@@ -67,5 +69,38 @@ describe('compressImage', () => {
     await compressImage(file);
 
     expect(mockContext.drawImage).toHaveBeenCalled();
+  });
+
+  it('rejects when canvas.getContext returns null', async () => {
+    mockCanvas.getContext.mockReturnValue(null);
+
+    const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' });
+    await expect(compressImage(file)).rejects.toThrow('Canvas 2D context not available');
+  });
+
+  it('rejects when canvas.toBlob calls back with null', async () => {
+    mockCanvas.toBlob.mockImplementation((cb: (b: Blob | null) => void) => cb(null));
+
+    const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' });
+    await expect(compressImage(file)).rejects.toThrow('Failed to compress image');
+  });
+
+  it('rejects when image fails to load', async () => {
+    // Override the Image stub to trigger onerror instead of onload
+    vi.stubGlobal('Image', class {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      width = 400;
+      height = 300;
+      _src = '';
+      set src(value: string) {
+        this._src = value;
+        setTimeout(() => this.onerror?.(), 0);
+      }
+      get src() { return this._src; }
+    });
+
+    const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' });
+    await expect(compressImage(file)).rejects.toThrow('Failed to load image');
   });
 });

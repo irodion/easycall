@@ -32,7 +32,10 @@ export function ConnectionIndicator({ api }: ConnectionIndicatorProps) {
       const q = getQuality(d.connectionQuality);
       setQuality(q);
 
-      if (q === 'poor' && !degradedRef.current) {
+      if (q !== 'poor') {
+        // Reset the latch so a future drop to 'poor' re-triggers degradation
+        degradedRef.current = false;
+      } else if (!degradedRef.current) {
         degradedRef.current = true;
         api.executeCommand('setVideoQuality', 180);
         setShowToast(true);

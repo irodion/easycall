@@ -77,6 +77,32 @@ describe('ConnectionIndicator', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
+  it('re-triggers setVideoQuality and toast after quality recovers then drops again', async () => {
+    const api = createApi();
+    renderWithProviders(<ConnectionIndicator api={api as unknown as JitsiMeetExternalAPI} />);
+
+    // First poor event — should trigger setVideoQuality
+    act(() => {
+      api._emit('connectionQuality', { connectionQuality: 25 });
+    });
+    let cmds = api.getExecutedCommands().filter((c) => c.command === 'setVideoQuality');
+    expect(cmds).toHaveLength(1);
+
+    // Quality recovers — latch should reset
+    act(() => {
+      api._emit('connectionQuality', { connectionQuality: 80 });
+    });
+
+    // Second poor event — should trigger setVideoQuality again
+    act(() => {
+      api._emit('connectionQuality', { connectionQuality: 20 });
+    });
+    cmds = api.getExecutedCommands().filter((c) => c.command === 'setVideoQuality');
+    expect(cmds).toHaveLength(2);
+    // Toast should be visible again
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
   it('passes vitest-axe', async () => {
     const api = createApi();
     const { container } = renderWithProviders(

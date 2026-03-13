@@ -18,8 +18,12 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        await signInAnonymously(auth);
-        setAuthState('loading'); // will re-trigger on next auth change
+        try {
+          await signInAnonymously(auth);
+          setAuthState('loading'); // will re-trigger on next auth change
+        } catch {
+          setAuthState('no-role');
+        }
         return;
       }
 

@@ -20,10 +20,14 @@ export function InstallPrompt() {
 
   const handleInstall = async () => {
     const prompt = deferredPrompt;
-    setDeferredPrompt(null);
-    await prompt.prompt();
-    await prompt.userChoice;
-    setDeferredPrompt(null);
+    if (!prompt) return;
+    try {
+      await prompt.prompt();
+      await prompt.userChoice;
+      setDeferredPrompt(null);
+    } catch {
+      // prompt() or userChoice failed — keep deferredPrompt so the user can retry
+    }
   };
 
   return (

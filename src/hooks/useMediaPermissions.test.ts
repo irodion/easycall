@@ -20,10 +20,17 @@ describe('useMediaPermissions', () => {
     vi.unstubAllGlobals();
   });
 
-  it('starts with status checking', () => {
+  it('shows prompt status while getUserMedia is pending (fast-path check failed)', async () => {
+    // permissionsQuery returns 'prompt' (not 'granted'), so fast path fails.
+    // Hook transitions: checking → prompt (while getUserMedia is pending).
     getUserMedia.mockReturnValue(new Promise(() => {})); // never resolves
     const { result } = renderHook(() => useMediaPermissions());
-    expect(result.current.status).toBe('checking');
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(result.current.status).toBe('prompt');
   });
 
   it('status becomes granted when getUserMedia resolves with stream', async () => {

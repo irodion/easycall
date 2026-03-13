@@ -11,13 +11,16 @@ export function RoleSelector() {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
 
-    await setDoc(
-      doc(db, 'users', uid),
-      { role, onboardingComplete: false },
-      { merge: true }
-    );
-
-    void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
+    try {
+      await setDoc(
+        doc(db, 'users', uid),
+        { role, onboardingComplete: false },
+        { merge: true }
+      );
+      void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
+    } catch (err) {
+      console.error('Failed to save role selection:', err);
+    }
   };
 
   return (

@@ -21,7 +21,7 @@ firebase emulators:start --only auth,firestore
 ```
 
 Expected output:
-```
+```text
 ✔  All emulators ready! ...
 ┌─────────────────────────────────────────────────────────┐
 │ Emulator  | Host:Port        │
@@ -62,7 +62,7 @@ The `USE_EMULATORS=true` flag causes:
 
 Each test pre-creates an anonymous user in the **Auth emulator** from the Node.js test process:
 
-```
+```text
 Test runner (Node.js) → POST 127.0.0.1:9099/accounts:signUp → { localId, idToken }
 ```
 
@@ -72,7 +72,7 @@ The test then intercepts the **browser's** `signInAnonymously` request and retur
 
 Data is seeded via the Firestore emulator REST API **before** `page.goto()`, using the admin bypass header:
 
-```
+```text
 Authorization: Bearer owner
 ```
 
@@ -86,7 +86,7 @@ Seeded paths per test:
 
 Each test calls `clearEmulators()` in `beforeEach`, which deletes all Firestore documents and all Auth users via the emulator admin REST endpoints:
 
-```
+```text
 DELETE 127.0.0.1:8080/emulator/v1/projects/easycall-dev/databases/(default)/documents
 DELETE 127.0.0.1:9099/emulator/v1/projects/easycall-dev/accounts
 ```
@@ -147,7 +147,7 @@ The seeding requests must include `Authorization: Bearer owner`. If you see this
 
 ### Java version error
 
-```
+```text
 Error: firebase-tools no longer supports Java version before 21.
 ```
 

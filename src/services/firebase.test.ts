@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
 const mockApp = { name: '[DEFAULT]' };
 const mockAuth = { app: mockApp };
@@ -73,6 +73,43 @@ describe('Firebase service layer', () => {
           projectId: expect.any(String),
         }),
       );
+    });
+  });
+
+  describe('emulator wiring (VITE_USE_EMULATORS)', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it('calls connectAuthEmulator and connectFirestoreEmulator when VITE_USE_EMULATORS=true', async () => {
+      vi.resetModules();
+      vi.stubEnv('VITE_USE_EMULATORS', 'true');
+      mockAllFirebaseModules();
+      vi.doMock('firebase/messaging', () => ({
+        getMessaging: vi.fn(() => mockMessaging),
+        isSupported: vi.fn(),
+      }));
+
+      await import('./firebase');
+      const { connectAuthEmulator } = await import('firebase/auth');
+      const { connectFirestoreEmulator } = await import('firebase/firestore');
+      expect(connectAuthEmulator).toHaveBeenCalled();
+      expect(connectFirestoreEmulator).toHaveBeenCalled();
+    });
+
+    it('does NOT call emulator connectors when VITE_USE_EMULATORS is not set', async () => {
+      vi.resetModules();
+      mockAllFirebaseModules();
+      vi.doMock('firebase/messaging', () => ({
+        getMessaging: vi.fn(() => mockMessaging),
+        isSupported: vi.fn(),
+      }));
+
+      await import('./firebase');
+      const { connectAuthEmulator } = await import('firebase/auth');
+      const { connectFirestoreEmulator } = await import('firebase/firestore');
+      expect(connectAuthEmulator).not.toHaveBeenCalled();
+      expect(connectFirestoreEmulator).not.toHaveBeenCalled();
     });
   });
 

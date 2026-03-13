@@ -32,7 +32,8 @@ export function AddContact({ userId }: AddContactProps) {
   };
 
   const handleSave = async () => {
-    const displayOrder = contacts.length + 1;
+    const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
+    const displayOrder = maxOrder + 1;
     await addContact(userId, {
       name,
       photoURL: null,

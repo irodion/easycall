@@ -18,15 +18,16 @@ describe('SettingsScreen', () => {
       <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />
     );
     expect(screen.getByRole('radiogroup')).toBeInTheDocument();
-    expect(screen.getByLabelText(/large/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/extra large/i)).toBeInTheDocument();
+    // Use exact name to avoid 'Large' matching 'Extra Large'
+    expect(screen.getByRole('radio', { name: 'Large' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Extra Large' })).toBeInTheDocument();
   });
 
   it('reflects current fontSize in radio selection', () => {
     renderWithProviders(
       <SettingsScreen settings={{ ...defaultSettings, fontSize: 'x-large' }} onSettingsChange={vi.fn()} userId="user-1" />
     );
-    const xlarge = screen.getByLabelText(/extra large/i) as HTMLInputElement;
+    const xlarge = screen.getByRole('radio', { name: 'Extra Large' }) as HTMLInputElement;
     expect(xlarge.checked).toBe(true);
   });
 
@@ -35,7 +36,7 @@ describe('SettingsScreen', () => {
     renderWithProviders(
       <SettingsScreen settings={defaultSettings} onSettingsChange={onSettingsChange} userId="user-1" />
     );
-    fireEvent.click(screen.getByLabelText(/extra large/i));
+    fireEvent.click(screen.getByRole('radio', { name: 'Extra Large' }));
     expect(onSettingsChange).toHaveBeenCalledWith({ ...defaultSettings, fontSize: 'x-large' });
   });
 

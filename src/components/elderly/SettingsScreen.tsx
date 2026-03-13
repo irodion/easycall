@@ -29,7 +29,7 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
           Text Size
         </EasyCallText>
         <div role="radiogroup" aria-labelledby={labelId} className="flex flex-col gap-3">
-          <div className="flex items-center gap-3 min-h-14">
+          <label htmlFor="font-large" className="flex items-center gap-3 cursor-pointer min-h-14 min-w-14">
             <input
               id="font-large"
               type="radio"
@@ -38,11 +38,10 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
               checked={settings.fontSize === 'large'}
               onChange={() => onSettingsChange({ ...settings, fontSize: 'large' })}
               className="radio radio-primary"
-              aria-label="Standard text"
             />
-            <EasyCallText as="span" variant="body" aria-hidden="true">Large</EasyCallText>
-          </div>
-          <label htmlFor="font-xlarge" className="flex items-center gap-3 cursor-pointer min-h-14">
+            <EasyCallText as="span" variant="body">Large</EasyCallText>
+          </label>
+          <label htmlFor="font-xlarge" className="flex items-center gap-3 cursor-pointer min-h-14 min-w-14">
             <input
               id="font-xlarge"
               type="radio"
@@ -51,9 +50,8 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
               checked={settings.fontSize === 'x-large'}
               onChange={() => onSettingsChange({ ...settings, fontSize: 'x-large' })}
               className="radio radio-primary"
-              aria-label="Extra Large"
             />
-            <EasyCallText as="span" variant="body" aria-hidden="true">Extra Large</EasyCallText>
+            <EasyCallText as="span" variant="body">Extra Large</EasyCallText>
           </label>
         </div>
       </section>

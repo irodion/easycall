@@ -25,7 +25,8 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
 
   const handleAdd = async () => {
     if (!newName.trim()) return;
-    const displayOrder = contacts.length + 1;
+    const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
+    const displayOrder = maxOrder + 1;
     const sanitized = newName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
     const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
     const jitsiRoomId = `easycall-${sanitized}-${suffix}`;

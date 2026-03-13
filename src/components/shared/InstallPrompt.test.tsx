@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 import { InstallPrompt } from './InstallPrompt';
@@ -40,10 +40,7 @@ describe('InstallPrompt', () => {
     const fakeEvent = createFakeBeforeInstallPromptEvent('accepted');
     window.dispatchEvent(fakeEvent);
     fireEvent.click(screen.getByRole('button', { name: /install/i }));
-    // Wait for userChoice promise to resolve
-    await fakeEvent.userChoice;
-    // Overlay should hide
-    expect(screen.queryByText(/Install EasyCall/i)).not.toBeInTheDocument();
+    await waitForElementToBeRemoved(() => screen.queryByText(/Install EasyCall/i));
   });
 
   it('hides overlay after userChoice resolves (dismissed)', async () => {
@@ -51,15 +48,12 @@ describe('InstallPrompt', () => {
     const fakeEvent = createFakeBeforeInstallPromptEvent('dismissed');
     window.dispatchEvent(fakeEvent);
     fireEvent.click(screen.getByRole('button', { name: /install/i }));
-    await fakeEvent.userChoice;
-    expect(screen.queryByText(/Install EasyCall/i)).not.toBeInTheDocument();
+    await waitForElementToBeRemoved(() => screen.queryByText(/Install EasyCall/i));
   });
 
   it('passes vitest-axe accessibility check', async () => {
-    renderWithProviders(<InstallPrompt />);
-    const fakeEvent = createFakeBeforeInstallPromptEvent();
-    window.dispatchEvent(fakeEvent);
     const { container } = renderWithProviders(<InstallPrompt />);
+    const fakeEvent = createFakeBeforeInstallPromptEvent();
     window.dispatchEvent(fakeEvent);
     expect(await axe(container)).toHaveNoViolations();
   });

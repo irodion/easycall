@@ -24,8 +24,8 @@ export async function compressImage(file: File): Promise<Blob> {
       }
 
       const canvas = document.createElement('canvas');
-      (canvas as unknown as { width: number; height: number }).width = newWidth;
-      (canvas as unknown as { width: number; height: number }).height = newHeight;
+      canvas.width = newWidth;
+      canvas.height = newHeight;
 
       const ctx = canvas.getContext('2d');
       if (!ctx) {

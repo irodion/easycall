@@ -24,7 +24,11 @@ export function loadJitsiApi(): Promise<void> {
     script.src = src;
     script.async = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Jitsi external API'));
+    script.onerror = () => {
+      script.remove();
+      loadPromise = null;
+      reject(new Error('Failed to load Jitsi external API'));
+    };
     document.head.appendChild(script);
   });
 

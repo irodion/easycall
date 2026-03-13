@@ -42,11 +42,10 @@ describe('App', () => {
     expect(container).toBeTruthy();
   });
 
-  it('shows loading spinner while auth initializes', () => {
+  it('renders the app shell without error', () => {
     render(<App />);
-    // onAuthStateChanged is mocked to never call its callback,
-    // so AuthGuard stays in loading state showing a spinner or
-    // the root route shows RoleSelector. Either way the app renders.
+    // The root '/' renders RoleSelector; AuthGuard-protected routes show
+    // loading spinner. Either way the app shell mounts without throwing.
     expect(document.body).toBeTruthy();
   });
 

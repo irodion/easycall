@@ -13,16 +13,21 @@ export function CallScreen() {
   const navigate = useNavigate();
   const apiRef = useRef<JitsiMeetExternalAPI | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const autoNavigateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [loading, setLoading] = useState(true);
   const [audioMuted, setAudioMuted] = useState(false);
   const [videoMuted, setVideoMuted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
 
   const contacts = useContactStore((s) => s.contacts);
+  // Derive contact for rendering; effect uses stable contactId to avoid re-running on snapshots
   const contact = contacts.find((c) => c.id === contactId);
 
   useEffect(() => {
-    if (!contact) return;
+    // Reference contact by id (stable string) rather than the contact object,
+    // so snapshot refreshes (which create new contact objects) don't re-run this effect.
+    const currentContact = contacts.find((c) => c.id === contactId);
+    if (!currentContact) return;
 
     let mounted = true;
 
@@ -38,14 +43,14 @@ export function CallScreen() {
 
         const displayName = auth.currentUser?.displayName ?? 'User';
         const { data } = await generateJwt({
-          roomName: contact!.jitsiRoomId,
+          roomName: currentContact.jitsiRoomId,
           displayName,
         });
 
         if (!mounted || !containerRef.current) return;
 
         const api = new window.JitsiMeetExternalAPI('8x8.vc', {
-          roomName: contact!.jitsiRoomId,
+          roomName: currentContact.jitsiRoomId,
           parentNode: containerRef.current,
           jwt: data.token,
           configOverwrite: {
@@ -76,13 +81,19 @@ export function CallScreen() {
         let participantCount = 0;
         api.addListener('participantJoined', () => {
           participantCount += 1;
+          // Cancel any pending auto-navigate in case the participant rejoined
+          if (autoNavigateTimerRef.current) {
+            clearTimeout(autoNavigateTimerRef.current);
+            autoNavigateTimerRef.current = null;
+          }
+          setCallEnded(false);
         });
 
         api.addListener('participantLeft', () => {
           participantCount = Math.max(0, participantCount - 1);
           if (participantCount === 0) {
             setCallEnded(true);
-            setTimeout(() => {
+            autoNavigateTimerRef.current = setTimeout(() => {
               if (mounted) void navigate('/elderly');
             }, 3000);
           }
@@ -98,12 +109,16 @@ export function CallScreen() {
 
     return () => {
       mounted = false;
+      if (autoNavigateTimerRef.current) {
+        clearTimeout(autoNavigateTimerRef.current);
+        autoNavigateTimerRef.current = null;
+      }
       if (apiRef.current) {
         apiRef.current.dispose();
         apiRef.current = null;
       }
     };
-  }, [contact, navigate]);
+  }, [contactId, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleHangup = () => {
     apiRef.current?.executeCommand('hangup');

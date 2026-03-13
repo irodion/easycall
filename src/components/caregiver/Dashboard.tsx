@@ -12,6 +12,15 @@ interface DashboardProps {
 
 type LinkedUser = Pick<EasyCallUser, 'uid' | 'displayName' | 'lastSeen'>;
 
+/** Firestore 'in' queries are limited to 30 items. Split array into chunks. */
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
 export function Dashboard({ userId }: DashboardProps) {
   const [linkedUsers, setLinkedUsers] = useState<LinkedUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +29,21 @@ export function Dashboard({ userId }: DashboardProps) {
     let cancelled = false;
 
     async function fetchData() {
+      // Reset stale UI state at the start of each fetch
+      if (!cancelled) {
+        setLinkedUsers([]);
+        setLoading(true);
+      }
+
       try {
         const caregiverDocSnap = await getDoc(doc(db, 'users', userId));
-        if (!caregiverDocSnap.exists() || cancelled) return;
+        if (cancelled) return;
+
+        if (!caregiverDocSnap.exists()) {
+          setLinkedUsers([]);
+          setLoading(false);
+          return;
+        }
 
         const caregiverData = caregiverDocSnap.data();
         const linkedIds: string[] = Array.isArray(caregiverData['linkedElderlyUsers'])
@@ -34,17 +55,22 @@ export function Dashboard({ userId }: DashboardProps) {
           return;
         }
 
-        // Fetch elderly user docs
-        const usersSnap = await getDocs(
-          query(collection(db, 'users'), where('__name__', 'in', linkedIds))
+        // Firestore 'in' queries support at most 30 items — chunk if needed
+        const chunks = chunkArray(linkedIds, 30);
+        const snapshots = await Promise.all(
+          chunks.map((chunk) =>
+            getDocs(query(collection(db, 'users'), where('__name__', 'in', chunk)))
+          )
         );
 
         if (!cancelled) {
-          const users: LinkedUser[] = usersSnap.docs.map((d) => ({
-            uid: d.id,
-            displayName: String(d.data()['displayName'] ?? 'Unknown'),
-            lastSeen: d.data()['lastSeen'] as EasyCallUser['lastSeen'],
-          }));
+          const users: LinkedUser[] = snapshots.flatMap((snap) =>
+            snap.docs.map((d) => ({
+              uid: d.id,
+              displayName: String(d.data()['displayName'] ?? 'Unknown'),
+              lastSeen: d.data()['lastSeen'] as EasyCallUser['lastSeen'],
+            }))
+          );
           setLinkedUsers(users);
           setLoading(false);
         }

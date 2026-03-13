@@ -53,8 +53,7 @@ export function HomeScreen({ userId }: HomeScreenProps) {
               {contact.photoURL ? (
                 <img
                   src={contact.photoURL}
-                  alt={contact.name}
-                  aria-hidden="true"
+                  alt=""
                   className="w-20 h-20 rounded-full object-cover"
                 />
               ) : (

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { loadJitsiApi, _resetLoadPromise } from './jitsi';
+import { MockJitsiMeetExternalAPI } from '@/test/mocks/jitsi';
 
 describe('loadJitsiApi', () => {
   beforeEach(() => {
@@ -52,9 +53,25 @@ describe('loadJitsiApi', () => {
   });
 
   it('resolves immediately if window.JitsiMeetExternalAPI already exists', async () => {
-    (window as unknown as Record<string, unknown>)['JitsiMeetExternalAPI'] = class {};
+    (window as unknown as Record<string, unknown>)['JitsiMeetExternalAPI'] =
+      MockJitsiMeetExternalAPI as unknown as typeof window.JitsiMeetExternalAPI;
     await expect(loadJitsiApi()).resolves.toBeUndefined();
     // Should NOT append a script
     expect(document.head.querySelector('script[src*="8x8.vc"]')).toBeNull();
+  });
+
+  it('allows retry after script error (loadPromise is reset)', async () => {
+    const loadPromise = loadJitsiApi();
+    const script = document.head.querySelector('script[src*="8x8.vc"]');
+    script?.dispatchEvent(new Event('error'));
+    await expect(loadPromise).rejects.toThrow();
+
+    // Script should have been removed and loadPromise reset — a new call should create a new script
+    _resetLoadPromise(); // reset manually since onerror already did it, but ensure clean state
+    const loadPromise2 = loadJitsiApi();
+    const script2 = document.head.querySelector('script[src*="8x8.vc"]');
+    expect(script2).not.toBeNull();
+    script2?.dispatchEvent(new Event('load'));
+    await expect(loadPromise2).resolves.toBeUndefined();
   });
 });

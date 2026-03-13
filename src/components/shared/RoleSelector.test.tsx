@@ -31,7 +31,9 @@ describe('RoleSelector', () => {
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
     const elderlyBtn = screen.getByRole('button', { name: /elderly user/i });
+    const caregiverBtn = screen.getByRole('button', { name: /family caregiver/i });
     expect(elderlyBtn.className).toContain('touch-target-min');
+    expect(caregiverBtn.className).toContain('touch-target-min');
   });
 
   it('clicking elderly role calls setDoc with role: elderly', async () => {

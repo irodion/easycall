@@ -42,8 +42,10 @@ describe('HomeScreen', () => {
     const contact = createMockContact({ name: 'Alice', photoURL: 'https://example.com/alice.jpg' });
     mockContacts.push(contact);
     renderWithProviders(<HomeScreen userId="user-1" />);
-    const img = screen.getByAltText('Alice');
-    expect(img).toBeInTheDocument();
+    // Image is decorative (alt="") since the contact name is shown as text below
+    const img = document.querySelector('img[src="https://example.com/alice.jpg"]') as HTMLImageElement;
+    expect(img).not.toBeNull();
+    expect(img.alt).toBe('');
     expect(img.className).toContain('rounded-full');
   });
 

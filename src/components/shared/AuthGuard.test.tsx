@@ -114,6 +114,32 @@ describe('AuthGuard', () => {
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
   });
 
+  it('redirects when user has wrong role', async () => {
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { getDoc } = await import('firebase/firestore');
+    vi.mocked(getDoc).mockResolvedValue({
+      exists: () => true,
+      data: () => ({ role: 'caregiver', onboardingComplete: true }),
+    } as never);
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="elderly">
+          <div>Elderly Content</div>
+        </AuthGuard>,
+        { routerProps: { initialEntries: ['/elderly'] } }
+      );
+    });
+    // Wrong role → Navigate renders, child content is NOT shown
+    expect(screen.queryByText('Elderly Content')).not.toBeInTheDocument();
+  });
+
   it('passes vitest-axe while loading', async () => {
     const { onAuthStateChanged } = await import('firebase/auth');
     vi.mocked(onAuthStateChanged).mockImplementation(() => () => {});

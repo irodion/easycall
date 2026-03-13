@@ -19,37 +19,48 @@ async function checkViaPermissionsApi(): Promise<boolean> {
   }
 }
 
-async function requestMediaAccess(): Promise<MediaPermissionStatus> {
-  // Fast path: if permissions API says both are granted, skip getUserMedia
-  const alreadyGranted = await checkViaPermissionsApi();
-  if (alreadyGranted) return 'granted';
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    stream.getTracks().forEach((t) => t.stop());
-    return 'granted';
-  } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        return 'denied';
-      }
-      if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        return 'no-device';
-      }
-    }
-    return 'denied';
-  }
-}
-
 export function useMediaPermissions(): UseMediaPermissionsResult {
   const [status, setStatus] = useState<MediaPermissionStatus>('checking');
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    requestMediaAccess().then((result) => {
-      if (!cancelled) setStatus(result);
-    });
+
+    async function check() {
+      // Fast path: if permissions API says both are granted, skip getUserMedia
+      const alreadyGranted = await checkViaPermissionsApi();
+      if (cancelled) return;
+      if (alreadyGranted) {
+        setStatus('granted');
+        return;
+      }
+
+      // Transition to 'prompt' before invoking getUserMedia so the UI can
+      // show a message while the native browser permission dialog is open.
+      setStatus('prompt');
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        if (cancelled) return;
+        stream.getTracks().forEach((t) => t.stop());
+        setStatus('granted');
+      } catch (err) {
+        if (cancelled) return;
+        if (err instanceof Error) {
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            setStatus('denied');
+          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            setStatus('no-device');
+          } else {
+            setStatus('denied');
+          }
+        } else {
+          setStatus('denied');
+        }
+      }
+    }
+
+    void check();
     return () => { cancelled = true; };
   }, [retryCount]);
 

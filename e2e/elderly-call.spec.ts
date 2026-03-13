@@ -9,16 +9,22 @@ const PROJECT_ID = 'easycall-dev';
 // ---------------------------------------------------------------------------
 
 async function clearEmulators(): Promise<void> {
-  await Promise.all([
+  const [firestoreRes, authRes] = await Promise.all([
     fetch(
       `${FIRESTORE_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/databases/(default)/documents`,
       { method: 'DELETE' },
-    ).catch(() => {}),
+    ),
     fetch(
       `${AUTH_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/accounts`,
       { method: 'DELETE' },
-    ).catch(() => {}),
+    ),
   ]);
+  if (!firestoreRes.ok) {
+    throw new Error(`clearEmulators: Firestore DELETE failed (${firestoreRes.status}): ${await firestoreRes.text()}`);
+  }
+  if (!authRes.ok) {
+    throw new Error(`clearEmulators: Auth DELETE failed (${authRes.status}): ${await authRes.text()}`);
+  }
 }
 
 interface EmulatorUser {
@@ -254,7 +260,7 @@ test.describe('Role selection flow (emulators)', () => {
   test.describe.configure({ mode: 'serial' });
   test.beforeAll(checkEmulators);
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async () => {
     // Clear everything — no pre-seeding, no auth mock
     // The browser signs in anonymously via the real auth emulator.
     // AuthGuard reads user doc → not found → shows RoleSelector.
