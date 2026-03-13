@@ -93,8 +93,12 @@ describe('Firebase service layer', () => {
       await import('./firebase');
       const { connectAuthEmulator } = await import('firebase/auth');
       const { connectFirestoreEmulator } = await import('firebase/firestore');
-      expect(connectAuthEmulator).toHaveBeenCalled();
-      expect(connectFirestoreEmulator).toHaveBeenCalled();
+      expect(connectAuthEmulator).toHaveBeenCalledWith(
+        mockAuth,
+        'http://127.0.0.1:9099',
+        { disableWarnings: true },
+      );
+      expect(connectFirestoreEmulator).toHaveBeenCalledWith(mockDb, '127.0.0.1', 8080);
     });
 
     it('does NOT call emulator connectors when VITE_USE_EMULATORS is not set', async () => {
