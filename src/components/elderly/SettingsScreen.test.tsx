@@ -52,7 +52,9 @@ describe('SettingsScreen', () => {
       <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
       { routerProps: { initialEntries: ['/elderly/settings'] } }
     );
-    expect(screen.getByRole('link', { name: /add contact/i })).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: /add contact/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '/elderly/add-contact');
   });
 
   it('Back button/link navigates to /elderly', () => {
@@ -60,7 +62,9 @@ describe('SettingsScreen', () => {
       <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
       { routerProps: { initialEntries: ['/elderly/settings'] } }
     );
-    expect(screen.getByRole('link', { name: /back/i })).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: /back/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '/elderly');
   });
 
   it('passes vitest-axe accessibility check', async () => {

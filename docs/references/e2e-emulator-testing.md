@@ -49,7 +49,7 @@ pnpm test:e2e:emulators
 
 This is equivalent to:
 ```bash
-USE_EMULATORS=true playwright test --project=chromium
+USE_EMULATORS=true npx playwright test --project=chromium
 ```
 
 The `USE_EMULATORS=true` flag causes:

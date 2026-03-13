@@ -41,8 +41,10 @@ export function useMediaPermissions(): UseMediaPermissionsResult {
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        if (cancelled) return;
+        // Always stop tracks immediately to avoid leaking media resources,
+        // even if the component unmounted while getUserMedia was pending.
         stream.getTracks().forEach((t) => t.stop());
+        if (cancelled) return;
         setStatus('granted');
       } catch (err) {
         if (cancelled) return;

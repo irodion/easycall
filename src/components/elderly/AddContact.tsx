@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useContactStore } from '@/stores/contactStore';
 import { EasyCallText } from '@/components/shared/EasyCallText';
@@ -23,25 +23,48 @@ export function AddContact({ userId }: AddContactProps) {
   const [step, setStep] = useState<Step>(1);
   const [name, setName] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const blobUrlRef = useRef<string | null>(null);
+
+  // Revoke blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+    };
+  }, []);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setPhotoPreview(URL.createObjectURL(file));
+      // Revoke previous blob URL to prevent memory leaks
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+      const url = URL.createObjectURL(file);
+      blobUrlRef.current = url;
+      setPhotoPreview(url);
     }
   };
 
   const handleSave = async () => {
-    const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
-    const displayOrder = maxOrder + 1;
-    await addContact(userId, {
-      name,
-      photoURL: null,
-      jitsiRoomId: generateRoomId(name),
-      contactUserId: '',
-      displayOrder,
-    });
-    void navigate('/elderly');
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
+      const displayOrder = maxOrder + 1;
+      await addContact(userId, {
+        name,
+        photoURL: null,
+        jitsiRoomId: generateRoomId(name),
+        contactUserId: '',
+        displayOrder,
+      });
+      void navigate('/elderly');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (step === 1) {
@@ -87,7 +110,7 @@ export function AddContact({ userId }: AddContactProps) {
           type="file"
           accept="image/*"
           onChange={handlePhotoChange}
-          className="file-input file-input-bordered w-full"
+          className="file-input file-input-bordered w-full min-h-14 min-w-14"
           aria-label="Choose photo"
         />
         <div className="flex gap-3 mt-auto">
@@ -124,9 +147,10 @@ export function AddContact({ userId }: AddContactProps) {
         <EasyCallButton
           variant="primary"
           onClick={() => { void handleSave(); }}
+          disabled={isSaving}
           aria-label="Save"
         >
-          Save
+          {isSaving ? 'Saving...' : 'Save'}
         </EasyCallButton>
       </div>
     </div>

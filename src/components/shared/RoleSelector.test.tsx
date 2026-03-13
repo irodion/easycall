@@ -42,7 +42,11 @@ describe('RoleSelector', () => {
     renderWithProviders(<RoleSelector />);
     fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
     await vi.waitFor(() => {
-      expect(setDoc).toHaveBeenCalledWith('doc-ref', expect.objectContaining({ role: 'elderly' }), expect.any(Object));
+      expect(setDoc).toHaveBeenCalledWith(
+        'doc-ref',
+        expect.objectContaining({ role: 'elderly', onboardingComplete: false }),
+        expect.objectContaining({ merge: true }),
+      );
     });
   });
 
@@ -52,7 +56,11 @@ describe('RoleSelector', () => {
     renderWithProviders(<RoleSelector />);
     fireEvent.click(screen.getByRole('button', { name: /family caregiver/i }));
     await vi.waitFor(() => {
-      expect(setDoc).toHaveBeenCalledWith('doc-ref', expect.objectContaining({ role: 'caregiver' }), expect.any(Object));
+      expect(setDoc).toHaveBeenCalledWith(
+        'doc-ref',
+        expect.objectContaining({ role: 'caregiver', onboardingComplete: false }),
+        expect.objectContaining({ merge: true }),
+      );
     });
   });
 

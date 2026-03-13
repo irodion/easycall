@@ -43,9 +43,9 @@ describe('HomeScreen', () => {
     mockContacts.push(contact);
     renderWithProviders(<HomeScreen userId="user-1" />);
     // Image is decorative (alt="") since the contact name is shown as text below
-    const img = document.querySelector('img[src="https://example.com/alice.jpg"]') as HTMLImageElement;
-    expect(img).not.toBeNull();
-    expect(img.alt).toBe('');
+    const img = screen.getByAltText('');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', 'https://example.com/alice.jpg');
     expect(img.className).toContain('rounded-full');
   });
 

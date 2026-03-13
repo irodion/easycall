@@ -282,7 +282,11 @@ test.describe('Role selection flow (emulators)', () => {
     // setDoc writes role to Firestore. AuthGuard doesn't re-run on same-route navigate,
     // so we reload — on reload, auth state is restored from IndexedDB, AuthGuard reads
     // the written role doc, and renders HomeScreen instead of RoleSelector.
-    await page.waitForTimeout(1000); // allow setDoc to commit
+    // Wait for the Firestore write to complete before reloading.
+    await page.waitForResponse(
+      (resp) => resp.url().includes('firestore') && resp.status() === 200,
+      { timeout: 5000 },
+    );
     await page.reload();
 
     await expect(page).toHaveURL(/\/elderly/, { timeout: 15000 });

@@ -99,6 +99,7 @@ describe('Firebase service layer', () => {
 
     it('does NOT call emulator connectors when VITE_USE_EMULATORS is not set', async () => {
       vi.resetModules();
+      vi.stubEnv('VITE_USE_EMULATORS', 'false');
       mockAllFirebaseModules();
       vi.doMock('firebase/messaging', () => ({
         getMessaging: vi.fn(() => mockMessaging),

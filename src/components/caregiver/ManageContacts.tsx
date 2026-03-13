@@ -18,33 +18,52 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     return subscribeToContacts(elderlyUserId);
   }, [elderlyUserId, subscribeToContacts]);
 
   const handleAdd = async () => {
-    if (!newName.trim()) return;
-    const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
-    const displayOrder = maxOrder + 1;
-    const sanitized = newName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
-    const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
-    const jitsiRoomId = `easycall-${sanitized}-${suffix}`;
-    await addContact(elderlyUserId, {
-      name: newName.trim(),
-      photoURL: null,
-      jitsiRoomId,
-      contactUserId: '',
-      displayOrder,
-    });
-    setNewName('');
-    setShowAddForm(false);
+    if (!newName.trim() || isAdding) return;
+    setIsAdding(true);
+    setError(null);
+    try {
+      const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
+      const displayOrder = maxOrder + 1;
+      const sanitized = newName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+      const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
+      const jitsiRoomId = `easycall-${sanitized}-${suffix}`;
+      await addContact(elderlyUserId, {
+        name: newName.trim(),
+        photoURL: null,
+        jitsiRoomId,
+        contactUserId: '',
+        displayOrder,
+      });
+      setNewName('');
+      setShowAddForm(false);
+    } catch (err) {
+      setError(`Failed to add contact: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const handleConfirmDelete = async () => {
-    if (!confirmDeleteId) return;
-    await removeContact(elderlyUserId, confirmDeleteId);
-    setConfirmDeleteId(null);
+    if (!confirmDeleteId || isDeleting) return;
+    setIsDeleting(true);
+    setError(null);
+    try {
+      await removeContact(elderlyUserId, confirmDeleteId);
+      setConfirmDeleteId(null);
+    } catch (err) {
+      setError(`Failed to remove contact: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const contactToDelete = contacts.find((c) => c.id === confirmDeleteId);
@@ -61,6 +80,12 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
         + Add Contact
       </EasyCallButton>
 
+      {error && (
+        <div role="alert" className="alert alert-error">
+          <EasyCallText as="span" variant="body">{error}</EasyCallText>
+        </div>
+      )}
+
       {showAddForm && (
         <div className="card card-body bg-base-200 gap-3">
           <label htmlFor="new-contact-name" className="sr-only">Contact name</label>
@@ -72,15 +97,15 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
             placeholder="Contact name"
             className="input input-bordered w-full text-[length:var(--text-body)] min-h-14"
           />
-          <input type="file" accept="image/*" className="file-input file-input-bordered w-full" />
+          <input type="file" accept="image/*" className="file-input file-input-bordered w-full min-h-14 min-w-14" />
           <div className="flex gap-3">
             <EasyCallButton
               variant="primary"
               onClick={() => { void handleAdd(); }}
-              disabled={!newName.trim()}
+              disabled={!newName.trim() || isAdding}
               aria-label="Save new contact"
             >
-              Save
+              {isAdding ? 'Saving...' : 'Save'}
             </EasyCallButton>
             <EasyCallButton
               variant="secondary"
@@ -102,6 +127,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
             <EasyCallButton
               variant="danger"
               onClick={() => setConfirmDeleteId(contact.id)}
+              disabled={isDeleting}
               aria-label={`Remove ${contact.name}`}
             >
               Remove

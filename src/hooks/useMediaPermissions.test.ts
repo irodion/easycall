@@ -101,6 +101,31 @@ describe('useMediaPermissions', () => {
     expect(result.current.status).toBe('granted');
   });
 
+  it('stops tracks even if component unmounts while getUserMedia is pending', async () => {
+    const mockTrack = { stop: vi.fn() };
+    const mockStream = { getTracks: () => [mockTrack] };
+    let resolveGetUserMedia: (v: typeof mockStream) => void;
+    getUserMedia.mockReturnValue(new Promise((resolve) => { resolveGetUserMedia = resolve; }));
+
+    const { unmount } = renderHook(() => useMediaPermissions());
+
+    // Wait for the hook to reach the getUserMedia call
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // Unmount while getUserMedia is still pending
+    unmount();
+
+    // Now resolve getUserMedia — tracks should still be stopped
+    await act(async () => {
+      resolveGetUserMedia!(mockStream);
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(mockTrack.stop).toHaveBeenCalled();
+  });
+
   it('skips getUserMedia if permissions.query returns granted for both', async () => {
     permissionsQuery.mockResolvedValue({ state: 'granted' });
 

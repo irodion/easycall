@@ -28,8 +28,13 @@ export function ConnectionIndicator({ api }: ConnectionIndicatorProps) {
 
   useEffect(() => {
     const handler = (data: unknown) => {
-      const d = data as { connectionQuality: number };
-      const q = getQuality(d.connectionQuality);
+      if (
+        typeof data !== 'object' || data === null ||
+        typeof (data as Record<string, unknown>).connectionQuality !== 'number'
+      ) {
+        return;
+      }
+      const q = getQuality((data as { connectionQuality: number }).connectionQuality);
       setQuality(q);
 
       if (q !== 'poor') {
