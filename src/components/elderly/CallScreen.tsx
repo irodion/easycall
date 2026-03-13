@@ -28,6 +28,7 @@ export function CallScreen() {
     // so snapshot refreshes (which create new contact objects) don't re-run this effect.
     const currentContact = contacts.find((c) => c.id === contactId);
     if (!currentContact) return;
+    const { jitsiRoomId } = currentContact;
 
     let mounted = true;
 
@@ -43,14 +44,14 @@ export function CallScreen() {
 
         const displayName = auth.currentUser?.displayName ?? 'User';
         const { data } = await generateJwt({
-          roomName: currentContact.jitsiRoomId,
+          roomName: jitsiRoomId,
           displayName,
         });
 
         if (!mounted || !containerRef.current) return;
 
         const api = new window.JitsiMeetExternalAPI('8x8.vc', {
-          roomName: currentContact.jitsiRoomId,
+          roomName: jitsiRoomId,
           parentNode: containerRef.current,
           jwt: data.token,
           configOverwrite: {

@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useParams } from 'react-router';
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/services/firebase';
 import { AuthGuard } from '@/components/shared/AuthGuard';
 import { RoleSelector } from '@/components/shared/RoleSelector';
 import { InstallPrompt } from '@/components/shared/InstallPrompt';
+import { IncomingCallScreen } from '@/components/elderly/IncomingCallScreen';
+import { useIncomingCall } from '@/hooks/useIncomingCall';
 import { HomeScreen } from '@/components/elderly/HomeScreen';
 import { SettingsScreen } from '@/components/elderly/SettingsScreen';
 import { AddContact } from '@/components/elderly/AddContact';
 import { CallScreen } from '@/components/elderly/CallScreen';
 import { Dashboard } from '@/components/caregiver/Dashboard';
 import { ManageContacts } from '@/components/caregiver/ManageContacts';
+import { PairElderlyUser } from '@/components/caregiver/PairElderlyUser';
+import { ElderlyUserSettings } from '@/components/caregiver/ElderlyUserSettings';
+import { DEFAULT_USER_SETTINGS } from '@/types/user';
 import type { UserSettings } from '@/types/user';
 
 function ManageContactsPage() {
@@ -19,22 +24,32 @@ function ManageContactsPage() {
   return <ManageContacts elderlyUserId={elderlyUserId} />;
 }
 
-const defaultSettings: UserSettings = {
-  fontSize: 'large',
-  highContrast: false,
-  ringtoneVolume: 80,
-  autoAnswer: false,
-};
+function CaregiverSettingsPage() {
+  const { elderlyUserId } = useParams<{ elderlyUserId: string }>();
+  if (!elderlyUserId) return null;
+  return <ElderlyUserSettings elderlyUserId={elderlyUserId} />;
+}
+
+function PairElderlyUserPage() {
+  const navigate = useNavigate();
+  return (
+    <PairElderlyUser
+      onSuccess={(elderlyUserId) => void navigate(`/caregiver/settings/${elderlyUserId}`)}
+    />
+  );
+}
 
 function AuthenticatedApp() {
   const [userId, setUserId] = useState<string | null>(null);
-  const [settings, setSettings] = useState<UserSettings>(defaultSettings);
+  const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS);
 
   useEffect(() => {
     return onAuthStateChanged(auth, (user) => {
       setUserId(user?.uid ?? null);
     });
   }, []);
+
+  useIncomingCall(userId);
 
   return (
     <>
@@ -72,10 +87,18 @@ function AuthenticatedApp() {
             path="/caregiver/manage/:elderlyUserId"
             element={<ManageContactsPage />}
           />
-          <Route path="/caregiver/pair" element={<div>Pairing (Phase 2)</div>} />
+          <Route
+            path="/caregiver/pair"
+            element={<PairElderlyUserPage />}
+          />
+          <Route
+            path="/caregiver/settings/:elderlyUserId"
+            element={<CaregiverSettingsPage />}
+          />
         </Route>
       </Routes>
       <InstallPrompt />
+      <IncomingCallScreen />
     </>
   );
 }

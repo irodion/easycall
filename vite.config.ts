@@ -11,11 +11,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'firebase-messaging-sw.ts',
       manifest: pwaManifest,
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-      },
+      devOptions: { enabled: true, type: 'module' },
     }),
   ],
   resolve: {

@@ -24,6 +24,13 @@ export interface UserSettings {
   autoAnswer: boolean;
 }
 
+export const DEFAULT_USER_SETTINGS: UserSettings = {
+  fontSize: 'large',
+  highContrast: false,
+  ringtoneVolume: 80,
+  autoAnswer: false,
+};
+
 export interface Contact {
   id: string;
   name: string;

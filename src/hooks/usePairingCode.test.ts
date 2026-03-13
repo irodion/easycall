@@ -1,0 +1,112 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn(() => 'doc-ref'),
+  setDoc: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('@/services/firebase', () => ({
+  db: {},
+}));
+
+import { setDoc } from 'firebase/firestore';
+import { usePairingCode, generateCode } from './usePairingCode';
+
+const mockSetDoc = vi.mocked(setDoc);
+
+describe('generateCode', () => {
+  it('returns a 6-digit string', () => {
+    const code = generateCode();
+    expect(code).toMatch(/^\d{6}$/);
+    expect(code).toHaveLength(6);
+  });
+
+  it('pads with leading zeros when needed', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.000001);
+    const code = generateCode();
+    expect(code).toHaveLength(6);
+    vi.restoreAllMocks();
+  });
+});
+
+describe('usePairingCode', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('does nothing when userId is null', async () => {
+    renderHook(() => usePairingCode(null));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    expect(mockSetDoc).not.toHaveBeenCalled();
+  });
+
+  it('calls setDoc on mount with correct fields', async () => {
+    renderHook(() => usePairingCode('user-1'));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    expect(mockSetDoc).toHaveBeenCalledWith(
+      'doc-ref',
+      expect.objectContaining({
+        elderlyUserId: 'user-1',
+        used: false,
+        expiresAt: expect.any(Date),
+      }),
+    );
+  });
+
+  it('code is updated in state after successful setDoc', async () => {
+    const { result } = renderHook(() => usePairingCode('user-1'));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    expect(result.current.code).toMatch(/^\d{6}$/);
+  });
+
+  it('formattedCountdown is MM:SS format', async () => {
+    const { result } = renderHook(() => usePairingCode('user-1'));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    expect(result.current.formattedCountdown).toBe('10:00');
+  });
+
+  it('secondsRemaining decrements by 1 each second', async () => {
+    const { result } = renderHook(() => usePairingCode('user-1'));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    expect(result.current.secondsRemaining).toBe(600);
+
+    await act(() => vi.advanceTimersByTimeAsync(1000));
+    expect(result.current.secondsRemaining).toBe(599);
+
+    await act(() => vi.advanceTimersByTimeAsync(1000));
+    expect(result.current.secondsRemaining).toBe(598);
+  });
+
+  it('refresh generates a new code', async () => {
+    const { result } = renderHook(() => usePairingCode('user-1'));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    const firstCode = result.current.code;
+
+    mockSetDoc.mockClear();
+    await act(() => result.current.refresh());
+
+    expect(mockSetDoc).toHaveBeenCalledTimes(1);
+    expect(result.current.code).toMatch(/^\d{6}$/);
+    expect(result.current.secondsRemaining).toBe(600);
+    expect(typeof firstCode).toBe('string');
+  });
+
+  it('cleans up timers on unmount', async () => {
+    const { unmount } = renderHook(() => usePairingCode('user-1'));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    unmount();
+
+    await act(() => vi.advanceTimersByTimeAsync(601_000));
+  });
+});
