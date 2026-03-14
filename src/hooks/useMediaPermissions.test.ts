@@ -92,7 +92,9 @@ describe('useMediaPermissions', () => {
     });
     expect(result.current.status).toBe('denied');
 
-    act(() => { result.current.retry(); });
+    act(() => {
+      result.current.retry();
+    });
     expect(result.current.status).toBe('checking');
 
     await act(async () => {
@@ -105,7 +107,11 @@ describe('useMediaPermissions', () => {
     const mockTrack = { stop: vi.fn() };
     const mockStream = { getTracks: () => [mockTrack] };
     let resolveGetUserMedia: (v: typeof mockStream) => void;
-    getUserMedia.mockReturnValue(new Promise((resolve) => { resolveGetUserMedia = resolve; }));
+    getUserMedia.mockReturnValue(
+      new Promise((resolve) => {
+        resolveGetUserMedia = resolve;
+      }),
+    );
 
     const { unmount } = renderHook(() => useMediaPermissions());
 

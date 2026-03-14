@@ -26,19 +26,19 @@ pnpm preview    # Preview production build
 
 ## Scripts
 
-| Command             | Description                   |
-| ------------------- | ----------------------------- |
-| `pnpm dev`          | Start development server      |
-| `pnpm build`        | Type check + production build |
-| `pnpm preview`      | Preview production build      |
-| `pnpm test`         | Run tests once                |
-| `pnpm test:watch`   | Run tests in watch mode       |
-| `pnpm lint`         | Run ESLint                    |
-| `pnpm lint:fix`     | Run ESLint with auto-fix      |
-| `pnpm format`       | Format code with Prettier     |
+| Command              | Description                    |
+| -------------------- | ------------------------------ |
+| `pnpm dev`           | Start development server       |
+| `pnpm build`         | Type check + production build  |
+| `pnpm preview`       | Preview production build       |
+| `pnpm test`          | Run tests once                 |
+| `pnpm test:watch`    | Run tests in watch mode        |
+| `pnpm lint`          | Run ESLint                     |
+| `pnpm lint:fix`      | Run ESLint with auto-fix       |
+| `pnpm format`        | Format code with Prettier      |
 | `pnpm test:coverage` | Run tests with coverage report |
-| `pnpm test:e2e`     | Run Playwright E2E tests      |
-| `pnpm format:check` | Check formatting              |
+| `pnpm test:e2e`      | Run Playwright E2E tests       |
+| `pnpm format:check`  | Check formatting               |
 
 ## Project Structure
 

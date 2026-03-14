@@ -20,18 +20,14 @@ describe('vitest-axe integration', () => {
       </div>,
     );
     const results = await axe(container);
-    const contrastIncomplete = results.incomplete.find(
-      (v) => v.id === 'color-contrast',
-    );
+    const contrastIncomplete = results.incomplete.find((v) => v.id === 'color-contrast');
     expect(contrastIncomplete).toBeDefined();
   });
 
   it('detects missing form labels', async () => {
     const { container } = render(<input type="text" />);
     const results = await axe(container);
-    const labelViolation = results.violations.find(
-      (v) => v.id === 'label',
-    );
+    const labelViolation = results.violations.find((v) => v.id === 'label');
     expect(labelViolation).toBeDefined();
   });
 });

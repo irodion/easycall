@@ -18,9 +18,7 @@ describe('MockJitsiMeetExternalAPI', () => {
   it('registers event listeners via addListener', () => {
     const listener = () => {};
     api.addListener('videoConferenceJoined', listener);
-    expect(api.listeners.get('videoConferenceJoined')?.has(listener)).toBe(
-      true,
-    );
+    expect(api.listeners.get('videoConferenceJoined')?.has(listener)).toBe(true);
   });
 
   it('emits events to registered listeners via _emit', () => {

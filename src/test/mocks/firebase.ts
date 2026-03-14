@@ -20,15 +20,12 @@ export const firebaseHandlers = [
   ),
 
   // Firestore document write
-  http.post(
-    'https://firestore.googleapis.com/v1/projects/*/databases/*/documents/*',
-    () => {
-      return HttpResponse.json({
-        name: `projects/test-project/databases/(default)/documents/users/${crypto.randomUUID()}`,
-        fields: {},
-        createTime: new Date().toISOString(),
-        updateTime: new Date().toISOString(),
-      });
-    },
-  ),
+  http.post('https://firestore.googleapis.com/v1/projects/*/databases/*/documents/*', () => {
+    return HttpResponse.json({
+      name: `projects/test-project/databases/(default)/documents/users/${crypto.randomUUID()}`,
+      fields: {},
+      createTime: new Date().toISOString(),
+      updateTime: new Date().toISOString(),
+    });
+  }),
 ];

@@ -106,7 +106,7 @@ describe('ConnectionIndicator', () => {
   it('passes vitest-axe', async () => {
     const api = createApi();
     const { container } = renderWithProviders(
-      <ConnectionIndicator api={api as unknown as JitsiMeetExternalAPI} />
+      <ConnectionIndicator api={api as unknown as JitsiMeetExternalAPI} />,
     );
     expect(await axe(container)).toHaveNoViolations();
   });

@@ -67,9 +67,7 @@ export function IncomingCallScreen() {
       )}
 
       <div className="text-center">
-        <p className="text-[length:var(--text-heading)] font-bold">
-          {incomingCall.callerName}
-        </p>
+        <p className="text-[length:var(--text-heading)] font-bold">{incomingCall.callerName}</p>
         <p className="text-[length:var(--text-body)] text-[color:var(--color-text-secondary)] animate-pulse">
           is calling...
         </p>

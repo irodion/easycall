@@ -7,24 +7,14 @@ import { ConfirmDialog } from './ConfirmDialog';
 describe('ConfirmDialog', () => {
   it('does not render when open is false', () => {
     renderWithProviders(
-      <ConfirmDialog
-        open={false}
-        message="Are you sure?"
-        onConfirm={vi.fn()}
-        onCancel={vi.fn()}
-      />
+      <ConfirmDialog open={false} message="Are you sure?" onConfirm={vi.fn()} onCancel={vi.fn()} />,
     );
     expect(screen.queryByText('Are you sure?')).not.toBeInTheDocument();
   });
 
   it('renders message when open is true', () => {
     renderWithProviders(
-      <ConfirmDialog
-        open={true}
-        message="Are you sure?"
-        onConfirm={vi.fn()}
-        onCancel={vi.fn()}
-      />
+      <ConfirmDialog open={true} message="Are you sure?" onConfirm={vi.fn()} onCancel={vi.fn()} />,
     );
     expect(screen.getByText('Are you sure?')).toBeInTheDocument();
   });
@@ -37,7 +27,7 @@ describe('ConfirmDialog', () => {
         message="Are you sure?"
         onConfirm={onConfirm}
         onCancel={vi.fn()}
-      />
+      />,
     );
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
     expect(onConfirm).toHaveBeenCalled();
@@ -46,12 +36,7 @@ describe('ConfirmDialog', () => {
   it('calls onCancel when Cancel button clicked', () => {
     const onCancel = vi.fn();
     renderWithProviders(
-      <ConfirmDialog
-        open={true}
-        message="Are you sure?"
-        onConfirm={vi.fn()}
-        onCancel={onCancel}
-      />
+      <ConfirmDialog open={true} message="Are you sure?" onConfirm={vi.fn()} onCancel={onCancel} />,
     );
     fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onCancel).toHaveBeenCalled();
@@ -64,7 +49,7 @@ describe('ConfirmDialog', () => {
         message="Are you sure you want to delete this contact?"
         onConfirm={vi.fn()}
         onCancel={vi.fn()}
-      />
+      />,
     );
     expect(await axe(container)).toHaveNoViolations();
   });

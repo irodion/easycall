@@ -270,7 +270,7 @@ npx prettier
 | Component tests | Vitest + React Testing Library                    | UI rendering, user interactions       |
 | E2E tests       | Playwright                                        | Full user flows, cross-browser        |
 | WebRTC testing  | Playwright + `--use-fake-device-for-media-stream` | Simulated camera/mic for CI           |
-| Accessibility   | vitest-axe + Lighthouse CI                          | WCAG AAA compliance checks            |
+| Accessibility   | vitest-axe + Lighthouse CI                        | WCAG AAA compliance checks            |
 | API mocking     | MSW (Mock Service Worker)                         | Firebase + Jitsi API mocking in tests |
 
 ### DevOps

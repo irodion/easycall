@@ -63,9 +63,9 @@ export const useContactStore = create<ContactStore>((set) => ({
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
-        const contacts = (snap as { docs: Array<{ id: string; data: () => Record<string, unknown> }> }).docs.map(
-          (d) => ({ id: d.id, ...d.data() }) as Contact,
-        );
+        const contacts = (
+          snap as { docs: Array<{ id: string; data: () => Record<string, unknown> }> }
+        ).docs.map((d) => ({ id: d.id, ...d.data() }) as Contact);
         set({ contacts, error: null });
       },
       (err) => {

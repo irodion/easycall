@@ -20,22 +20,15 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
       setStatus('idle');
       onSuccess(result.elderlyUserId);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Something went wrong';
+      const message = err instanceof Error ? err.message : 'Something went wrong';
       setErrorMessage(message);
       setStatus('error');
     }
   };
 
   return (
-    <form
-      onSubmit={(e) => void handleSubmit(e)}
-      className="flex flex-col gap-[var(--space-md)]"
-    >
-      <label
-        htmlFor="pairing-code"
-        className="text-[length:var(--text-body)] font-bold"
-      >
+    <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-[var(--space-md)]">
+      <label htmlFor="pairing-code" className="text-[length:var(--text-body)] font-bold">
         Enter the 6-digit code shown on the elderly user's screen:
       </label>
       <input
@@ -50,18 +43,11 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
         aria-describedby={status === 'error' ? 'pairing-error' : undefined}
       />
       {status === 'error' && (
-        <p
-          id="pairing-error"
-          role="alert"
-          className="text-error text-[length:var(--text-body)]"
-        >
+        <p id="pairing-error" role="alert" className="text-error text-[length:var(--text-body)]">
           {errorMessage}
         </p>
       )}
-      <EasyCallButton
-        type="submit"
-        disabled={code.length !== 6 || status === 'loading'}
-      >
+      <EasyCallButton type="submit" disabled={code.length !== 6 || status === 'loading'}>
         {status === 'loading' ? 'Linking...' : 'Link Account'}
       </EasyCallButton>
     </form>

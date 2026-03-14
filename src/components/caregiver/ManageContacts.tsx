@@ -33,7 +33,10 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
     try {
       const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
       const displayOrder = maxOrder + 1;
-      const sanitized = newName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+      const sanitized = newName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+        .slice(0, 8);
       const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
       const jitsiRoomId = `easycall-${sanitized}-${suffix}`;
       await addContact(elderlyUserId, {
@@ -70,7 +73,9 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
 
   return (
     <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
-      <EasyCallText as="h1" variant="heading">Manage Contacts</EasyCallText>
+      <EasyCallText as="h1" variant="heading">
+        Manage Contacts
+      </EasyCallText>
 
       <EasyCallButton
         variant="primary"
@@ -82,13 +87,17 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
 
       {error && (
         <div role="alert" className="alert alert-error">
-          <EasyCallText as="span" variant="body">{error}</EasyCallText>
+          <EasyCallText as="span" variant="body">
+            {error}
+          </EasyCallText>
         </div>
       )}
 
       {showAddForm && (
         <div className="card card-body bg-base-200 gap-3">
-          <label htmlFor="new-contact-name" className="sr-only">Contact name</label>
+          <label htmlFor="new-contact-name" className="sr-only">
+            Contact name
+          </label>
           <input
             id="new-contact-name"
             type="text"
@@ -97,11 +106,17 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
             placeholder="Contact name"
             className="input input-bordered w-full text-[length:var(--text-body)] min-h-14"
           />
-          <input type="file" accept="image/*" className="file-input file-input-bordered w-full min-h-14 min-w-14" />
+          <input
+            type="file"
+            accept="image/*"
+            className="file-input file-input-bordered w-full min-h-14 min-w-14"
+          />
           <div className="flex gap-3">
             <EasyCallButton
               variant="primary"
-              onClick={() => { void handleAdd(); }}
+              onClick={() => {
+                void handleAdd();
+              }}
               disabled={!newName.trim() || isAdding}
               aria-label="Save new contact"
             >
@@ -109,7 +124,10 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
             </EasyCallButton>
             <EasyCallButton
               variant="secondary"
-              onClick={() => { setShowAddForm(false); setNewName(''); }}
+              onClick={() => {
+                setShowAddForm(false);
+                setNewName('');
+              }}
               aria-label="Cancel add"
             >
               Cancel
@@ -120,7 +138,10 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
 
       <div className="flex flex-col gap-3">
         {contacts.map((contact: Contact) => (
-          <div key={contact.id} className="card card-body bg-base-200 flex-row items-center justify-between gap-3">
+          <div
+            key={contact.id}
+            className="card card-body bg-base-200 flex-row items-center justify-between gap-3"
+          >
             <EasyCallText as="span" variant="button" className="font-bold">
               {contact.name}
             </EasyCallText>
@@ -139,7 +160,9 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
       <ConfirmDialog
         open={confirmDeleteId !== null}
         message={`Are you sure you want to remove ${contactToDelete?.name ?? 'this contact'}?`}
-        onConfirm={() => { void handleConfirmDelete(); }}
+        onConfirm={() => {
+          void handleConfirmDelete();
+        }}
         onCancel={() => setConfirmDeleteId(null)}
       />
     </div>

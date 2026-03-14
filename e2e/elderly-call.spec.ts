@@ -14,16 +14,17 @@ async function clearEmulators(): Promise<void> {
       `${FIRESTORE_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/databases/(default)/documents`,
       { method: 'DELETE' },
     ),
-    fetch(
-      `${AUTH_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/accounts`,
-      { method: 'DELETE' },
-    ),
+    fetch(`${AUTH_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/accounts`, { method: 'DELETE' }),
   ]);
   if (!firestoreRes.ok) {
-    throw new Error(`clearEmulators: Firestore DELETE failed (${firestoreRes.status}): ${await firestoreRes.text()}`);
+    throw new Error(
+      `clearEmulators: Firestore DELETE failed (${firestoreRes.status}): ${await firestoreRes.text()}`,
+    );
   }
   if (!authRes.ok) {
-    throw new Error(`clearEmulators: Auth DELETE failed (${authRes.status}): ${await authRes.text()}`);
+    throw new Error(
+      `clearEmulators: Auth DELETE failed (${authRes.status}): ${await authRes.text()}`,
+    );
   }
 }
 
@@ -216,9 +217,7 @@ test.describe('Elderly user call flow (emulators)', () => {
     await expect(page.getByText('Contact 1')).toBeVisible({ timeout: 15000 });
     await page.getByRole('button', { name: /call contact 1/i }).click();
 
-    await expect(
-      page.getByRole('button', { name: /end call/i }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: /end call/i })).toBeVisible({ timeout: 15000 });
   });
 
   test('elderly user can end a call and return to home screen', async ({ page }) => {
@@ -243,10 +242,7 @@ test.describe('Elderly user call flow (emulators)', () => {
     await expect(page.getByText('Contact 1')).toBeVisible({ timeout: 15000 });
 
     const critical = errors.filter(
-      (e) =>
-        !e.includes('ResizeObserver') &&
-        !e.includes('Non-Error') &&
-        !e.includes('cancelled'),
+      (e) => !e.includes('ResizeObserver') && !e.includes('Non-Error') && !e.includes('cancelled'),
     );
     expect(critical).toHaveLength(0);
   });
@@ -273,9 +269,9 @@ test.describe('Role selection flow (emulators)', () => {
     // Navigate to /elderly — AuthGuard signs in (no user doc) → shows RoleSelector
     await page.goto('/elderly');
 
-    await expect(
-      page.getByRole('button', { name: /elderly user/i }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: /elderly user/i })).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.getByRole('button', { name: /elderly user/i }).click();
 
@@ -290,8 +286,8 @@ test.describe('Role selection flow (emulators)', () => {
     await page.reload();
 
     await expect(page).toHaveURL(/\/elderly/, { timeout: 15000 });
-    await expect(
-      page.getByRole('button', { name: /elderly user/i }),
-    ).not.toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: /elderly user/i })).not.toBeVisible({
+      timeout: 10000,
+    });
   });
 });

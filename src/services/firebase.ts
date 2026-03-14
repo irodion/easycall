@@ -18,8 +18,7 @@ if (import.meta.env.MODE !== 'test') {
     .map(([k]) => k);
   if (missing.length > 0) {
     throw new Error(
-      `Missing Firebase config: ${missing.join(', ')}. ` +
-        'Check your .env.local file.',
+      `Missing Firebase config: ${missing.join(', ')}. ` + 'Check your .env.local file.',
     );
   }
 }

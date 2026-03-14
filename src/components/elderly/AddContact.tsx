@@ -11,7 +11,10 @@ interface AddContactProps {
 type Step = 1 | 2 | 3;
 
 function generateRoomId(name: string): string {
-  const sanitized = name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+  const sanitized = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .slice(0, 8);
   const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
   return `easycall-${sanitized}-${suffix}`;
 }
@@ -70,8 +73,12 @@ export function AddContact({ userId }: AddContactProps) {
   if (step === 1) {
     return (
       <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
-        <EasyCallText as="h1" variant="heading">Add Contact</EasyCallText>
-        <EasyCallText as="h2" variant="body" className="font-bold">Step 1: Name</EasyCallText>
+        <EasyCallText as="h1" variant="heading">
+          Add Contact
+        </EasyCallText>
+        <EasyCallText as="h2" variant="body" className="font-bold">
+          Step 1: Name
+        </EasyCallText>
         <label htmlFor="contact-name" className="sr-only">
           Contact Name
         </label>
@@ -101,10 +108,18 @@ export function AddContact({ userId }: AddContactProps) {
   if (step === 2) {
     return (
       <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
-        <EasyCallText as="h1" variant="heading">Add Photo</EasyCallText>
-        <EasyCallText variant="body" className="font-bold">Step 2: Photo (optional)</EasyCallText>
+        <EasyCallText as="h1" variant="heading">
+          Add Photo
+        </EasyCallText>
+        <EasyCallText variant="body" className="font-bold">
+          Step 2: Photo (optional)
+        </EasyCallText>
         {photoPreview && (
-          <img src={photoPreview} alt="Preview" className="w-32 h-32 rounded-full object-cover mx-auto" />
+          <img
+            src={photoPreview}
+            alt="Preview"
+            className="w-32 h-32 rounded-full object-cover mx-auto"
+          />
         )}
         <input
           type="file"
@@ -128,10 +143,18 @@ export function AddContact({ userId }: AddContactProps) {
   // Step 3: Confirm
   return (
     <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
-      <EasyCallText as="h1" variant="heading">Confirm</EasyCallText>
-      <EasyCallText variant="body" className="font-bold">Step 3: Confirm</EasyCallText>
+      <EasyCallText as="h1" variant="heading">
+        Confirm
+      </EasyCallText>
+      <EasyCallText variant="body" className="font-bold">
+        Step 3: Confirm
+      </EasyCallText>
       {photoPreview ? (
-        <img src={photoPreview} alt={name} className="w-32 h-32 rounded-full object-cover mx-auto" />
+        <img
+          src={photoPreview}
+          alt={name}
+          className="w-32 h-32 rounded-full object-cover mx-auto"
+        />
       ) : (
         <div className="w-32 h-32 rounded-full bg-primary flex items-center justify-center text-4xl font-bold text-primary-content mx-auto">
           {name[0] ?? '?'}
@@ -146,7 +169,9 @@ export function AddContact({ userId }: AddContactProps) {
         </EasyCallButton>
         <EasyCallButton
           variant="primary"
-          onClick={() => { void handleSave(); }}
+          onClick={() => {
+            void handleSave();
+          }}
           disabled={isSaving}
           aria-label="Save"
         >

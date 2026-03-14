@@ -24,7 +24,10 @@ describe('signJitsiToken', () => {
 
   it('produces a valid RS256 JWT verifiable with the matching public key', () => {
     const token = signJitsiToken(params);
-    const decoded = jwt.verify(token, publicKey, { algorithms: ['RS256'] }) as Record<string, unknown>;
+    const decoded = jwt.verify(token, publicKey, { algorithms: ['RS256'] }) as Record<
+      string,
+      unknown
+    >;
     expect(decoded).toBeTruthy();
   });
 

@@ -62,9 +62,7 @@ describe('EasyCallButton', () => {
   });
 
   it('passes vitest-axe with aria-label', async () => {
-    const { container } = render(
-      <EasyCallButton aria-label="Call contact">📞</EasyCallButton>,
-    );
+    const { container } = render(<EasyCallButton aria-label="Call contact">📞</EasyCallButton>);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

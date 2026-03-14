@@ -9,7 +9,8 @@ export function incomingCallRef(elderlyUserId: string) {
 export async function validatePairingCode(code: string): Promise<{ elderlyUserId: string }> {
   const functions = getFunctions(app);
   const fn = httpsCallable<{ code: string }, { elderlyUserId: string }>(
-    functions, 'validatePairingCode'
+    functions,
+    'validatePairingCode',
   );
   return (await fn({ code })).data;
 }

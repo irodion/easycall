@@ -20,19 +20,24 @@ describe('compressImage', () => {
     });
 
     // Mock Image loading
-    vi.stubGlobal('Image', class {
-      onload: (() => void) | null = null;
-      onerror: (() => void) | null = null;
-      width = 400;
-      height = 300;
-      _src = '';
-      set src(value: string) {
-        this._src = value;
-        // Trigger onload asynchronously
-        setTimeout(() => this.onload?.(), 0);
-      }
-      get src() { return this._src; }
-    });
+    vi.stubGlobal(
+      'Image',
+      class {
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        width = 400;
+        height = 300;
+        _src = '';
+        set src(value: string) {
+          this._src = value;
+          // Trigger onload asynchronously
+          setTimeout(() => this.onload?.(), 0);
+        }
+        get src() {
+          return this._src;
+        }
+      },
+    );
   });
 
   afterEach(() => {
@@ -47,7 +52,11 @@ describe('compressImage', () => {
     const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' });
     const result = await compressImage(file);
 
-    expect(mockCanvas.toBlob).toHaveBeenCalledWith(expect.any(Function), 'image/jpeg', expect.any(Number));
+    expect(mockCanvas.toBlob).toHaveBeenCalledWith(
+      expect.any(Function),
+      'image/jpeg',
+      expect.any(Number),
+    );
     expect(result).toBeInstanceOf(Blob);
   });
 
@@ -87,18 +96,23 @@ describe('compressImage', () => {
 
   it('rejects when image fails to load', async () => {
     // Override the Image stub to trigger onerror instead of onload
-    vi.stubGlobal('Image', class {
-      onload: (() => void) | null = null;
-      onerror: (() => void) | null = null;
-      width = 400;
-      height = 300;
-      _src = '';
-      set src(value: string) {
-        this._src = value;
-        setTimeout(() => this.onerror?.(), 0);
-      }
-      get src() { return this._src; }
-    });
+    vi.stubGlobal(
+      'Image',
+      class {
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        width = 400;
+        height = 300;
+        _src = '';
+        set src(value: string) {
+          this._src = value;
+          setTimeout(() => this.onerror?.(), 0);
+        }
+        get src() {
+          return this._src;
+        }
+      },
+    );
 
     const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' });
     await expect(compressImage(file)).rejects.toThrow('Failed to load image');

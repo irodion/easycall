@@ -27,13 +27,13 @@ export function EasyCallText({
   className,
   id,
 }: EasyCallTextProps) {
-  const classes = [
-    variantClass[variant],
-    fontSize === 'x-large' ? 'text-xl' : undefined,
-    className,
-  ]
+  const classes = [variantClass[variant], fontSize === 'x-large' ? 'text-xl' : undefined, className]
     .filter(Boolean)
     .join(' ');
 
-  return <Tag className={classes} id={id}>{children}</Tag>;
+  return (
+    <Tag className={classes} id={id}>
+      {children}
+    </Tag>
+  );
 }

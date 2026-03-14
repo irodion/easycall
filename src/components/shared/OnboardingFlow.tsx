@@ -45,9 +45,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
     <div className="min-h-screen flex flex-col items-center justify-center p-[var(--space-md)] gap-[var(--space-lg)]">
       {step === 1 && (
         <div className="flex flex-col items-center gap-[var(--space-md)] text-center max-w-md">
-          <h1 className="text-[length:var(--text-heading)] font-bold">
-            Welcome to EasyCall
-          </h1>
+          <h1 className="text-[length:var(--text-heading)] font-bold">Welcome to EasyCall</h1>
           <p className="text-[length:var(--text-body)]">
             {user.role === 'elderly'
               ? 'Simple video calling with your family. Just tap a photo to call!'
@@ -66,9 +64,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
 
       {step === 2 && (
         <div className="flex flex-col items-center gap-[var(--space-md)] max-w-md">
-          <h2 className="text-[length:var(--text-heading)] font-bold">
-            Camera & Microphone
-          </h2>
+          <h2 className="text-[length:var(--text-heading)] font-bold">Camera & Microphone</h2>
           <p className="text-[length:var(--text-body)] text-center">
             EasyCall needs access to your camera and microphone for video calls.
           </p>
@@ -81,9 +77,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
 
       {step === 3 && (
         <div className="flex flex-col items-center gap-[var(--space-md)] max-w-md">
-          <h2 className="text-[length:var(--text-heading)] font-bold">
-            Notification Permission
-          </h2>
+          <h2 className="text-[length:var(--text-heading)] font-bold">Notification Permission</h2>
           <p className="text-[length:var(--text-body)] text-center">
             Allow notifications so you know when someone is calling you.
           </p>
@@ -121,11 +115,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
               {error}
             </p>
           )}
-          <EasyCallButton
-            size="large"
-            disabled={isSubmitting}
-            onClick={() => void handleFinish()}
-          >
+          <EasyCallButton size="large" disabled={isSubmitting} onClick={() => void handleFinish()}>
             {isSubmitting ? 'Saving...' : 'Done'}
           </EasyCallButton>
           <EasyCallButton
@@ -139,7 +129,10 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
         </div>
       )}
 
-      <nav aria-label={`Step ${String(step)} of ${String(TOTAL_STEPS)}`} className="flex gap-[var(--space-xs)]">
+      <nav
+        aria-label={`Step ${String(step)} of ${String(TOTAL_STEPS)}`}
+        className="flex gap-[var(--space-xs)]"
+      >
         {Array.from({ length: TOTAL_STEPS }, (_, i) => (
           <div
             key={i}

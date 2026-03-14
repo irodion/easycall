@@ -20,11 +20,7 @@ export function RoleSelector() {
     setIsSaving(true);
     setError(null);
     try {
-      await setDoc(
-        doc(db, 'users', uid),
-        { role, onboardingComplete: false },
-        { merge: true }
-      );
+      await setDoc(doc(db, 'users', uid), { role, onboardingComplete: false }, { merge: true });
       void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
     } catch (err) {
       setError(`Failed to save role: ${err instanceof Error ? err.message : String(err)}`);
@@ -40,14 +36,18 @@ export function RoleSelector() {
       </EasyCallText>
       {error && (
         <div role="alert" className="alert alert-error w-full max-w-sm">
-          <EasyCallText as="span" variant="body">{error}</EasyCallText>
+          <EasyCallText as="span" variant="body">
+            {error}
+          </EasyCallText>
         </div>
       )}
       <div className="flex flex-col gap-4 w-full max-w-sm">
         <EasyCallButton
           size="default"
           variant="primary"
-          onClick={() => { void handleSelectRole('elderly'); }}
+          onClick={() => {
+            void handleSelectRole('elderly');
+          }}
           disabled={isSaving}
           aria-label="I am an elderly user"
         >
@@ -56,7 +56,9 @@ export function RoleSelector() {
         <EasyCallButton
           size="default"
           variant="secondary"
-          onClick={() => { void handleSelectRole('caregiver'); }}
+          onClick={() => {
+            void handleSelectRole('caregiver');
+          }}
           disabled={isSaving}
           aria-label="I am a family caregiver"
         >

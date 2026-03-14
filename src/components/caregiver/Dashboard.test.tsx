@@ -56,20 +56,30 @@ describe('Dashboard', () => {
         data: () => ({
           linkedElderlyUsers: ['elderly-1'],
           displayName: 'caregiver',
-          lastSeen: { seconds: Date.now() / 1000 - 300, nanoseconds: 0, toDate: () => new Date(Date.now() - 300_000) },
+          lastSeen: {
+            seconds: Date.now() / 1000 - 300,
+            nanoseconds: 0,
+            toDate: () => new Date(Date.now() - 300_000),
+          },
         }),
       });
     });
 
     // Use different getDocs for elderly user
     getDocs.mockResolvedValue({
-      docs: [{
-        id: 'elderly-1',
-        data: () => ({
-          displayName: 'Grandma',
-          lastSeen: { seconds: Date.now() / 1000 - 300, nanoseconds: 0, toDate: () => new Date(Date.now() - 300_000) },
-        }),
-      }],
+      docs: [
+        {
+          id: 'elderly-1',
+          data: () => ({
+            displayName: 'Grandma',
+            lastSeen: {
+              seconds: Date.now() / 1000 - 300,
+              nanoseconds: 0,
+              toDate: () => new Date(Date.now() - 300_000),
+            },
+          }),
+        },
+      ],
     });
 
     const { Dashboard } = await import('./Dashboard');
@@ -84,13 +94,19 @@ describe('Dashboard', () => {
       data: () => ({ linkedElderlyUsers: ['elderly-1'] }),
     });
     getDocs.mockResolvedValue({
-      docs: [{
-        id: 'elderly-1',
-        data: () => ({
-          displayName: 'Grandma',
-          lastSeen: { seconds: Date.now() / 1000 - 300, nanoseconds: 0, toDate: () => new Date(Date.now() - 300_000) },
-        }),
-      }],
+      docs: [
+        {
+          id: 'elderly-1',
+          data: () => ({
+            displayName: 'Grandma',
+            lastSeen: {
+              seconds: Date.now() / 1000 - 300,
+              nanoseconds: 0,
+              toDate: () => new Date(Date.now() - 300_000),
+            },
+          }),
+        },
+      ],
     });
 
     const { Dashboard } = await import('./Dashboard');

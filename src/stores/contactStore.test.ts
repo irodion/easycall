@@ -110,15 +110,17 @@ describe('useContactStore', () => {
     const { useContactStore } = await import('./contactStore');
     // Seed the store with a contact
     useContactStore.setState({
-      contacts: [{
-        id: 'contact-1',
-        name: 'Alice',
-        photoURL: null,
-        jitsiRoomId: 'room-1',
-        contactUserId: 'user-2',
-        displayOrder: 1,
-        createdAt: { seconds: 0, nanoseconds: 0, toDate: () => new Date() },
-      }],
+      contacts: [
+        {
+          id: 'contact-1',
+          name: 'Alice',
+          photoURL: null,
+          jitsiRoomId: 'room-1',
+          contactUserId: 'user-2',
+          displayOrder: 1,
+          createdAt: { seconds: 0, nanoseconds: 0, toDate: () => new Date() },
+        },
+      ],
     });
 
     await useContactStore.getState().removeContact('user-1', 'contact-1');
@@ -142,17 +144,19 @@ describe('useContactStore', () => {
 
     // Simulate snapshot firing
     const mockSnap = {
-      docs: [{
-        id: 'contact-1',
-        data: () => ({
-          name: 'Alice',
-          photoURL: null,
-          jitsiRoomId: 'room-1',
-          contactUserId: 'user-2',
-          displayOrder: 1,
-          createdAt: { seconds: 0, nanoseconds: 0 },
-        }),
-      }],
+      docs: [
+        {
+          id: 'contact-1',
+          data: () => ({
+            name: 'Alice',
+            photoURL: null,
+            jitsiRoomId: 'room-1',
+            contactUserId: 'user-2',
+            displayOrder: 1,
+            createdAt: { seconds: 0, nanoseconds: 0 },
+          }),
+        },
+      ],
     };
     snapshotCallback?.(mockSnap);
 
