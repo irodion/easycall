@@ -11,6 +11,7 @@ import { HomeScreen } from '@/components/elderly/HomeScreen';
 import { SettingsScreen } from '@/components/elderly/SettingsScreen';
 import { AddContact } from '@/components/elderly/AddContact';
 import { CallScreen } from '@/components/elderly/CallScreen';
+import { CallHistory } from '@/components/elderly/CallHistory';
 import { Dashboard } from '@/components/caregiver/Dashboard';
 import { ManageContacts } from '@/components/caregiver/ManageContacts';
 import { PairElderlyUser } from '@/components/caregiver/PairElderlyUser';
@@ -56,10 +57,7 @@ function AuthenticatedApp() {
       <Routes>
         <Route path="/" element={<RoleSelector />} />
         <Route element={<AuthGuard requiredRole="elderly" />}>
-          <Route
-            path="/elderly"
-            element={userId ? <HomeScreen userId={userId} /> : null}
-          />
+          <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
           <Route
             path="/elderly/settings"
             element={
@@ -67,7 +65,9 @@ function AuthenticatedApp() {
                 <SettingsScreen
                   userId={userId}
                   settings={settings}
-                  onSettingsChange={(s: UserSettings) => { setSettings(s); }}
+                  onSettingsChange={(s: UserSettings) => {
+                    setSettings(s);
+                  }}
                 />
               ) : null
             }
@@ -76,25 +76,17 @@ function AuthenticatedApp() {
             path="/elderly/add-contact"
             element={userId ? <AddContact userId={userId} /> : null}
           />
+          <Route
+            path="/elderly/history"
+            element={userId ? <CallHistory userId={userId} /> : null}
+          />
           <Route path="/call/:contactId" element={<CallScreen />} />
         </Route>
         <Route element={<AuthGuard requiredRole="caregiver" />}>
-          <Route
-            path="/caregiver"
-            element={userId ? <Dashboard userId={userId} /> : null}
-          />
-          <Route
-            path="/caregiver/manage/:elderlyUserId"
-            element={<ManageContactsPage />}
-          />
-          <Route
-            path="/caregiver/pair"
-            element={<PairElderlyUserPage />}
-          />
-          <Route
-            path="/caregiver/settings/:elderlyUserId"
-            element={<CaregiverSettingsPage />}
-          />
+          <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />
+          <Route path="/caregiver/manage/:elderlyUserId" element={<ManageContactsPage />} />
+          <Route path="/caregiver/pair" element={<PairElderlyUserPage />} />
+          <Route path="/caregiver/settings/:elderlyUserId" element={<CaregiverSettingsPage />} />
         </Route>
       </Routes>
       <InstallPrompt />

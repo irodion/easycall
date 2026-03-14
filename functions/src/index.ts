@@ -1,6 +1,6 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue, type Firestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { initializeApp } from 'firebase-admin/app';
 import jwt from 'jsonwebtoken';
@@ -84,8 +84,7 @@ export const generateJitsiJwt = onCall(async (request) => {
     throw new HttpsError('unauthenticated', 'Authentication required.');
   }
 
-  const requestData =
-    typeof request.data === 'object' && request.data !== null ? request.data : {};
+  const requestData = typeof request.data === 'object' && request.data !== null ? request.data : {};
   const { roomName, displayName } = requestData as {
     roomName?: unknown;
     displayName?: unknown;
@@ -122,7 +121,8 @@ export const generateJitsiJwt = onCall(async (request) => {
   const elderlyUserId = contactDoc.ref.parent.parent!.id;
 
   const isElderlyUser = uid === elderlyUserId;
-  const isContactUser = contactData['contactUserId'] != null && uid === contactData['contactUserId'];
+  const isContactUser =
+    contactData['contactUserId'] != null && uid === contactData['contactUserId'];
 
   let isCaregiverUser = false;
   if (!isElderlyUser && !isContactUser) {
@@ -195,10 +195,7 @@ export const onIncomingCall = onDocumentWritten(
     const elderlyDoc = await db.doc(`users/${event.params['elderlyUserId']}`).get();
     const rawTokens: unknown = elderlyDoc.data()?.['pushTokens'] ?? [];
 
-    if (
-      !Array.isArray(rawTokens) ||
-      !rawTokens.every((t) => typeof t === 'string')
-    ) {
+    if (!Array.isArray(rawTokens) || !rawTokens.every((t) => typeof t === 'string')) {
       console.warn(
         `pushTokens for user ${event.params['elderlyUserId']} is not a string array; skipping FCM send.`,
       );
@@ -265,5 +262,64 @@ export const onIncomingCall = onDocumentWritten(
         `FCM: ${totalFails} of ${pushTokens.length} sends failed for user ${event.params['elderlyUserId']}`,
       );
     }
+  },
+);
+
+// ---------------------------------------------------------------------------
+// writeCallHistoryForMissedOrDeclined (exported for testing)
+//
+// Core logic for the onCallStatusChange trigger. Extracted so it can be
+// unit-tested without mocking the Cloud Functions trigger harness.
+// ---------------------------------------------------------------------------
+export async function writeCallHistoryForMissedOrDeclined(
+  db: Firestore,
+  elderlyUserId: string,
+  before: Record<string, unknown> | undefined,
+  after: Record<string, unknown> | undefined,
+): Promise<boolean> {
+  if (!after) return false; // doc deleted
+
+  const status = after['status'] as string;
+  if (status !== 'missed' && status !== 'declined') return false;
+  if (before && before['status'] === status) return false;
+
+  const timestamp = after['timestamp'] as FirebaseFirestore.Timestamp | undefined;
+  const now = FieldValue.serverTimestamp();
+
+  const callerName = String(after['callerName'] ?? 'Unknown').slice(0, 100);
+
+  await db
+    .collection('users')
+    .doc(elderlyUserId)
+    .collection('callHistory')
+    .add({
+      contactId: '',
+      contactName: callerName,
+      direction: 'incoming' as const,
+      outcome: status,
+      duration: 0,
+      startedAt: timestamp ?? now,
+      endedAt: now,
+    });
+
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// onCallStatusChange
+//
+// Triggers when incomingCall/current is updated. When the status transitions
+// to 'missed' or 'declined', writes a callHistory entry for the elderly user.
+// Completed calls are written client-side (CallScreen has accurate duration).
+// ---------------------------------------------------------------------------
+export const onCallStatusChange = onDocumentWritten(
+  'users/{elderlyUserId}/incomingCall/current',
+  async (event) => {
+    const after = event.data?.after.data();
+    const before = event.data?.before.data();
+    const elderlyUserId = event.params['elderlyUserId'];
+    const db = getFirestore();
+
+    await writeCallHistoryForMissedOrDeclined(db, elderlyUserId, before, after);
   },
 );

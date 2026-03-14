@@ -4,9 +4,7 @@
     {
       "collectionGroup": "contacts",
       "fieldPath": "jitsiRoomId",
-      "indexes": [
-        { "queryScope": "COLLECTION_GROUP", "order": "ASCENDING" }
-      ]
+      "indexes": [{ "queryScope": "COLLECTION_GROUP", "order": "ASCENDING" }]
     }
   ]
 }

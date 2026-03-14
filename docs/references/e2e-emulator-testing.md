@@ -2,10 +2,10 @@
 
 ## Prerequisites
 
-| Requirement | Version | Check |
-|---|---|---|
-| Java JDK | ≥ 21 | `java -version` |
-| Firebase CLI | ≥ 15 | `firebase --version` |
+| Requirement         | Version | Check                                   |
+| ------------------- | ------- | --------------------------------------- |
+| Java JDK            | ≥ 21    | `java -version`                         |
+| Firebase CLI        | ≥ 15    | `firebase --version`                    |
 | Playwright browsers | current | `pnpm exec playwright install chromium` |
 
 The Firebase Emulator Suite requires Java 21+. Older JDK versions will fail silently with exit code 1.
@@ -21,6 +21,7 @@ firebase emulators:start --only auth,firestore
 ```
 
 Expected output:
+
 ```text
 ✔  All emulators ready! ...
 ┌─────────────────────────────────────────────────────────┐
@@ -48,11 +49,13 @@ pnpm test:e2e:emulators
 ```
 
 This is equivalent to:
+
 ```bash
 USE_EMULATORS=true npx playwright test --project=chromium
 ```
 
 The `USE_EMULATORS=true` flag causes:
+
 1. Playwright to start the Vite dev server with `VITE_USE_EMULATORS=true`
 2. The app to call `connectAuthEmulator` + `connectFirestoreEmulator` at startup
 
@@ -79,6 +82,7 @@ Authorization: Bearer owner
 This header skips security rules evaluation entirely — it is accepted only by the emulator, never by production Firestore.
 
 Seeded paths per test:
+
 - `users/{uid}` — role: `elderly`, onboardingComplete: `true`
 - `users/{uid}/contacts/contact-1` — name: `Contact 1`
 
@@ -104,6 +108,7 @@ The Jitsi CDN script and the `generateJitsiJwt` Cloud Function are mocked via `p
 ### `Elderly user call flow (emulators)` — 4 tests
 
 Pre-seeded with an elderly user doc and one contact. Verifies:
+
 - Contact 1 appears on HomeScreen
 - Tapping contact navigates to CallScreen (end call button visible)
 - Ending a call returns to HomeScreen
@@ -112,6 +117,7 @@ Pre-seeded with an elderly user doc and one contact. Verifies:
 ### `Role selection flow (emulators)` — 1 test
 
 No pre-seeding. Verifies:
+
 - AuthGuard shows RoleSelector when user has no role doc
 - Clicking "I am an elderly user" writes role to Firestore
 - After page reload, AuthGuard reads the written role and shows HomeScreen
@@ -123,11 +129,37 @@ No pre-seeding. Verifies:
 ### `Incoming Call Flow` — 1 test
 
 Pre-seeded with an elderly user doc (no contacts). Verifies:
+
 - Writing an `incomingCall/current` doc via Firestore REST triggers the IncomingCallScreen overlay
 - Answer and Decline buttons appear with the caller name
 - Declining dismisses the ringing screen
 
 Uses the same auth intercept pattern as the elderly-call suite. Does **not** need Jitsi or Cloud Function mocks since it only tests the incoming call overlay, not the call screen itself.
+
+### `Call History (emulators)` — 4 tests
+
+Pre-seeded with an elderly user doc and callHistory entries. Verifies:
+
+- Empty state shows "No calls yet"
+- Call history entries render with correct outcome badges (completed/missed/declined)
+- Tapping an entry navigates to CallScreen
+- Navigation between HomeScreen and CallHistory screen
+
+### `Auto-Rejoin on Disconnect (emulators)` — 5 tests
+
+Pre-seeded with an elderly user doc, contact, and activeCall doc. Verifies:
+
+- Rejoin prompt appears when active call exists (within 5 minutes)
+- Clicking rejoin navigates to CallScreen
+- Dismiss clears the prompt
+- No prompt for stale calls (>5 minutes old)
+- No prompt when no activeCall document exists
+
+### `Call history writing (emulators)` — 1 test
+
+Verifies end-to-end that call history entries are written to Firestore:
+
+- Completing a call writes an entry with outcome 'completed' and direction 'outgoing'
 
 ### `Smoke tests` — 2 tests
 
@@ -135,12 +167,12 @@ These run without emulators and do not require `USE_EMULATORS=true`.
 
 ## Ports used
 
-| Service | Port | Purpose |
-|---|---|---|
-| Auth emulator | 9099 | `signInAnonymously`, token issuance |
+| Service            | Port | Purpose                             |
+| ------------------ | ---- | ----------------------------------- |
+| Auth emulator      | 9099 | `signInAnonymously`, token issuance |
 | Firestore emulator | 8080 | Document reads/writes, `onSnapshot` |
-| Vite dev server | 5173 | App under test |
-| Emulator UI | 4000 | Optional — view data in browser |
+| Vite dev server    | 5173 | App under test                      |
+| Emulator UI        | 4000 | Optional — view data in browser     |
 
 ## Troubleshooting
 
@@ -163,11 +195,13 @@ Error: firebase-tools no longer supports Java version before 21.
 ```
 
 Install Java 21+:
+
 ```bash
 brew install --cask temurin@21
 ```
 
 Then set `JAVA_HOME`:
+
 ```bash
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 ```

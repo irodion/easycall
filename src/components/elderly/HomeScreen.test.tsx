@@ -4,25 +4,41 @@ import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 import { createMockContact } from '@/test/helpers/factories';
 import { HomeScreen } from './HomeScreen';
+import type { ActiveCallData } from '@/types/user';
 
 // Mock the contactStore
 const mockSubscribeToContacts = vi.fn().mockReturnValue(() => {});
 const mockContacts: ReturnType<typeof createMockContact>[] = [];
 
 vi.mock('@/stores/contactStore', () => ({
-  useContactStore: vi.fn((selector) => selector({
-    contacts: mockContacts,
-    loading: false,
-    error: null,
-    subscribeToContacts: mockSubscribeToContacts,
-  })),
+  useContactStore: vi.fn((selector) =>
+    selector({
+      contacts: mockContacts,
+      loading: false,
+      error: null,
+      subscribeToContacts: mockSubscribeToContacts,
+    }),
+  ),
+}));
+
+let mockActiveCall: ActiveCallData | null = null;
+const mockDismiss = vi.fn();
+
+vi.mock('@/hooks/useActiveCall', () => ({
+  useActiveCall: () => ({ activeCall: mockActiveCall, dismiss: mockDismiss }),
+}));
+
+vi.mock('@/services/callHistory', () => ({
+  clearActiveCall: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('HomeScreen', () => {
   beforeEach(() => {
     mockContacts.length = 0;
+    mockActiveCall = null;
     mockSubscribeToContacts.mockClear();
     mockSubscribeToContacts.mockReturnValue(() => {});
+    mockDismiss.mockClear();
   });
 
   it('calls subscribeToContacts with userId on mount', () => {
@@ -85,5 +101,31 @@ describe('HomeScreen', () => {
     mockContacts.push(createMockContact({ name: 'Alice' }));
     const { container } = renderWithProviders(<HomeScreen userId="user-1" />);
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('renders RejoinPrompt when activeCall is non-null', () => {
+    mockActiveCall = {
+      contactId: 'c1',
+      contactName: 'Alice',
+      jitsiRoomId: 'room-1',
+      startedAt: {
+        seconds: Math.floor(Date.now() / 1000),
+        nanoseconds: 0,
+        toDate: () => new Date(),
+      },
+      status: 'active',
+    };
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    expect(screen.getByText(/Return to call with Alice\?/)).toBeInTheDocument();
+  });
+
+  it('does not render RejoinPrompt when activeCall is null', () => {
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    expect(screen.queryByText(/Return to call with/)).not.toBeInTheDocument();
+  });
+
+  it('call history button is present with aria-label', () => {
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    expect(screen.getByRole('button', { name: /call history/i })).toBeInTheDocument();
   });
 });
