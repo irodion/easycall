@@ -6,5 +6,18 @@ if [ "$branch" = "main" ]; then
   exit 1
 fi
 
+echo "Running semgrep security scan..."
+if command -v semgrep >/dev/null 2>&1; then
+  semgrep --config auto --config .semgrep.yml --error --quiet
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Semgrep found security issues. Fix them before committing."
+    exit 1
+  fi
+  echo "Semgrep scan passed."
+else
+  echo "WARNING: semgrep not installed — skipping security scan."
+  echo "Install with: brew install semgrep"
+fi
+
 echo "Running tests before commit..."
 pnpm test

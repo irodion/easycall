@@ -1,0 +1,78 @@
+rules:
+  # -- XSS prevention --
+  - id: no-dangerouslysetinnerhtml
+    patterns:
+      - pattern: dangerouslySetInnerHTML={...}
+    message: >
+      Avoid dangerouslySetInnerHTML — it can lead to XSS vulnerabilities.
+      Use safe rendering alternatives instead.
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  - id: no-document-write
+    patterns:
+      - pattern: document.write(...)
+    message: >
+      document.write() can introduce XSS vulnerabilities. Use DOM APIs instead.
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  # -- Injection prevention --
+  - id: no-eval
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: new Function(...)
+    message: >
+      eval() and new Function() can execute arbitrary code. Avoid them.
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  - id: no-innerhtml-assignment
+    patterns:
+      - pattern: $EL.innerHTML = ...
+    message: >
+      Direct innerHTML assignment can lead to XSS. Use textContent or safe
+      DOM APIs instead.
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  # -- Sensitive data --
+  - id: no-hardcoded-secrets
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $KEY = "sk-..."
+          - pattern: |
+              $KEY = "AIza..."
+          - pattern: |
+              password = "..."
+    message: >
+      Potential hardcoded secret detected. Use environment variables instead.
+    languages: [typescript, javascript]
+    severity: WARNING
+
+  - id: no-console-log-sensitive
+    patterns:
+      - pattern-either:
+          - pattern: console.log(..., $TOKEN, ...)
+          - pattern: console.log($TOKEN)
+    metavariable-regex:
+      metavariable: $TOKEN
+      regex: .*(token|secret|password|apiKey|api_key).*
+    message: >
+      Avoid logging potentially sensitive data (tokens, secrets, passwords).
+    languages: [typescript, javascript]
+    severity: WARNING
+
+  # -- Firebase security --
+  - id: no-unvalidated-firestore-input
+    patterns:
+      - pattern: setDoc($REF, $DATA)
+      - pattern-not-inside: |
+          if (...) { ... setDoc($REF, $DATA) ... }
+    message: >
+      Firestore setDoc should validate data before writing. Consider adding
+      input validation.
+    languages: [typescript, javascript]
+    severity: WARNING

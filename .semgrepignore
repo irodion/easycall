@@ -1,0 +1,12 @@
+# Test files — emulator HTTP calls are expected
+*.test.ts
+*.test.tsx
+src/test/
+e2e/
+
+# Build output
+dist/
+dev-dist/
+
+# Dependencies
+node_modules/

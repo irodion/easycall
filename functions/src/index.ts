@@ -249,6 +249,7 @@ export const onIncomingCall = onDocumentWritten(
 
     // Remove stale tokens so future sends don't hit dead registrations.
     if (staleTokens.length > 0) {
+      // nosemgrep: no-console-log-sensitive — logs token count, not token values
       console.log(
         `Removing ${staleTokens.length} stale FCM token(s) for user ${event.params['elderlyUserId']}`,
       );
