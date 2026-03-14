@@ -14,31 +14,34 @@ export function useActiveCall(userId: string | null) {
     let cancelled = false;
 
     async function checkActiveCall() {
-      const snap = await getDoc(activeCallRef(userId));
-      if (cancelled) return;
-      if (!snap.exists()) return;
-      const raw = snap.data();
+      try {
+        const snap = await getDoc(activeCallRef(userId));
+        if (cancelled) return;
+        if (!snap.exists()) return;
+        const raw = snap.data();
 
-      // Validate shape before trusting the data
-      if (
-        typeof raw?.['status'] !== 'string' ||
-        !raw['startedAt'] ||
-        typeof (raw['startedAt'] as { toDate?: unknown }).toDate !== 'function'
-      ) {
-        void clearActiveCall(userId);
-        return;
-      }
+        // Validate shape before trusting the data
+        if (
+          typeof raw?.['status'] !== 'string' ||
+          !raw['startedAt'] ||
+          typeof (raw['startedAt'] as { toDate?: unknown }).toDate !== 'function'
+        ) {
+          await clearActiveCall(userId);
+          return;
+        }
 
-      const data = raw as ActiveCallData;
+        const data = raw as ActiveCallData;
 
-      // Only show rejoin if call is active and started within 5 minutes
-      const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-      const startedAtMs = data.startedAt.toDate().getTime();
-      if (data.status === 'active' && startedAtMs > fiveMinutesAgo) {
-        setActiveCall(data);
-      } else {
-        // Clean up stale/ended activeCall docs
-        void clearActiveCall(userId);
+        // Only show rejoin if call is active and started within 5 minutes
+        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+        const startedAtMs = data.startedAt.toDate().getTime();
+        if (data.status === 'active' && startedAtMs > fiveMinutesAgo) {
+          setActiveCall(data);
+        } else {
+          await clearActiveCall(userId);
+        }
+      } catch {
+        // Network/permission errors — silently fail, no rejoin prompt shown
       }
     }
 
