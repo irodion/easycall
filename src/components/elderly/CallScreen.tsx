@@ -166,8 +166,6 @@ export function CallScreen() {
         clearTimeout(autoNavigateTimerRef.current);
         autoNavigateTimerRef.current = null;
       }
-      const uid = auth.currentUser?.uid;
-      if (uid) void clearActiveCall(uid);
       if (apiRef.current) {
         apiRef.current.dispose();
         apiRef.current = null;

@@ -7,10 +7,15 @@ export function useActiveCall(userId: string | null) {
   const [activeCall, setActiveCall] = useState<ActiveCallData | null>(null);
 
   useEffect(() => {
+    setActiveCall(null);
+
     if (!userId) return;
+
+    let cancelled = false;
 
     async function checkActiveCall() {
       const snap = await getDoc(activeCallRef(userId));
+      if (cancelled) return;
       if (!snap.exists()) return;
       const raw = snap.data();
 
@@ -38,6 +43,10 @@ export function useActiveCall(userId: string | null) {
     }
 
     void checkActiveCall();
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
   const dismiss = useCallback(() => setActiveCall(null), []);

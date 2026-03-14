@@ -2218,6 +2218,24 @@ The following JSON represents the complete task backlog. Each task has:
     "estimated_hours": 5,
     "dependencies": ["2.2.1"],
     "done": false
+  },
+  {
+    "id": "3.9.1",
+    "phase": 3,
+    "feature": "setup",
+    "title": "Extract Shared E2E Emulator Helpers",
+    "description": "The E2E test specs (elderly-call, incoming-call, call-history, auto-rejoin, call-history-write) each duplicate identical helper functions: clearEmulators, createEmulatorUser, seedUserAsElderly, seedContact, checkEmulators, MOCK_JITSI_SCRIPT, and the EmulatorUser interface. Extract these into a shared module (e2e/helpers/emulator.ts) and update all spec files to import from it. Also replace the ad-hoc `(page as unknown as { _testUid: string })._testUid` pattern with a closure-scoped variable in each describe block. Extract entity-specific seeders (seedCallHistoryEntry, seedActiveCall) into the shared module as well.",
+    "acceptance_criteria": [
+      "e2e/helpers/emulator.ts exists and exports: clearEmulators, createEmulatorUser, seedUserAsElderly, seedContact, checkEmulators, MOCK_JITSI_SCRIPT, FIRESTORE_EMULATOR, AUTH_EMULATOR, PROJECT_ID, EMULATOR_AUTH_HEADER, EmulatorUser",
+      "All 5 E2E spec files import helpers from e2e/helpers/emulator.ts instead of defining them locally",
+      "No duplicate helper function definitions remain across spec files",
+      "The _testUid pattern is replaced with closure-scoped variables",
+      "All 18 E2E tests pass without modification to test logic"
+    ],
+    "test_first": "No new tests needed — this is a refactor of existing test infrastructure. Verify all 18 E2E tests pass before and after.",
+    "estimated_hours": 2,
+    "dependencies": ["3.1.1"],
+    "done": false
   }
 ]
 ```

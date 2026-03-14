@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { formatRelativeTime, formatDuration, formatDateTime } from './formatTime';
 
+function ts(date: Date) {
+  return {
+    seconds: Math.floor(date.getTime() / 1000),
+    nanoseconds: 0,
+    toDate: () => date,
+  };
+}
+
 describe('formatRelativeTime', () => {
   const now = new Date('2026-03-13T12:00:00Z');
-
-  function ts(date: Date) {
-    return {
-      seconds: Math.floor(date.getTime() / 1000),
-      nanoseconds: 0,
-      toDate: () => date,
-    };
-  }
 
   it('returns "just now" for timestamps within 1 minute', () => {
     const t = ts(new Date(now.getTime() - 30_000)); // 30s ago
@@ -79,14 +79,6 @@ describe('formatDateTime', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
-
-  function ts(date: Date) {
-    return {
-      seconds: Math.floor(date.getTime() / 1000),
-      nanoseconds: 0,
-      toDate: () => date,
-    };
-  }
 
   it('returns "Today HH:MM" for today', () => {
     vi.useFakeTimers();

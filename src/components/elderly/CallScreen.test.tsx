@@ -179,10 +179,21 @@ describe('CallScreen', () => {
     );
   });
 
-  it('calls clearActiveCall on component unmount', async () => {
+  it('does not clear activeCall on unmount (preserves for rejoin)', async () => {
     const { unmount } = await renderLoaded();
+    mockClearActiveCall.mockClear();
     await act(async () => {
       unmount();
+    });
+    expect(mockClearActiveCall).not.toHaveBeenCalled();
+  });
+
+  it('calls clearActiveCall on explicit hangup', async () => {
+    await renderLoaded();
+    mockClearActiveCall.mockClear();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /end call/i }));
+      await new Promise((r) => setTimeout(r, 50));
     });
     expect(mockClearActiveCall).toHaveBeenCalledWith('user-1');
   });
