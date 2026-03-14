@@ -63,6 +63,7 @@ export function usePairingCode(userId: string | null) {
       setSecondsRemaining(600);
       refreshRef.current = setTimeout(() => void refresh(), AUTO_REFRESH_MS);
     } catch (err) {
+      // nosemgrep: no-console-log-sensitive — logs error object, not the code itself
       console.error('Failed to refresh pairing code:', err);
       // Retry after the normal interval
       refreshRef.current = setTimeout(() => void refresh(), AUTO_REFRESH_MS);
