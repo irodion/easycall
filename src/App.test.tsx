@@ -22,6 +22,15 @@ vi.mock('@/services/firebase', () => ({
   app: {},
 }));
 
+vi.mock('@/hooks/useActiveCall', () => ({
+  useActiveCall: () => ({ activeCall: null, dismiss: vi.fn() }),
+}));
+
+vi.mock('@/services/callHistory', () => ({
+  clearActiveCall: vi.fn().mockResolvedValue(undefined),
+  fetchCallHistory: vi.fn().mockResolvedValue({ entries: [], lastDoc: null, hasMore: false }),
+}));
+
 vi.mock('@/stores/contactStore', () => ({
   useContactStore: vi.fn((selector: (s: unknown) => unknown) =>
     selector({
@@ -32,7 +41,7 @@ vi.mock('@/stores/contactStore', () => ({
       addContact: vi.fn(),
       removeContact: vi.fn(),
       fetchContacts: vi.fn(),
-    })
+    }),
   ),
 }));
 

@@ -6,6 +6,7 @@ interface EasyCallButtonProps {
   type?: 'button' | 'submit';
   onClick?: () => void;
   disabled?: boolean;
+  className?: string;
   'aria-label'?: string;
   children: ReactNode;
 }
@@ -28,13 +29,14 @@ export function EasyCallButton({
   type = 'button',
   onClick,
   disabled,
+  className,
   'aria-label': ariaLabel,
   children,
 }: EasyCallButtonProps) {
   return (
     <button
       type={type}
-      className={`btn ${variantClass[variant]} ${sizeClass[size]} font-bold text-[length:var(--text-button)]`}
+      className={`btn ${variantClass[variant]} ${sizeClass[size]} font-bold text-[length:var(--text-button)]${className ? ` ${className}` : ''}`}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}

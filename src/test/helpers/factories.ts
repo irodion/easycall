@@ -1,11 +1,13 @@
-import type { EasyCallUser, Contact, FirestoreTimestamp } from '@/types/user';
+import type { EasyCallUser, Contact, CallHistoryEntry, FirestoreTimestamp } from '@/types/user';
 
 let userIdCounter = 0;
 let contactIdCounter = 0;
+let callHistoryIdCounter = 0;
 
 export function resetFactoryCounters(): void {
   userIdCounter = 0;
   contactIdCounter = 0;
+  callHistoryIdCounter = 0;
 }
 
 function mockTimestamp(date = new Date()): FirestoreTimestamp {
@@ -16,9 +18,7 @@ function mockTimestamp(date = new Date()): FirestoreTimestamp {
   };
 }
 
-export function createMockUser(
-  overrides: Partial<EasyCallUser> = {},
-): EasyCallUser {
+export function createMockUser(overrides: Partial<EasyCallUser> = {}): EasyCallUser {
   userIdCounter += 1;
   return {
     uid: `user-${String(userIdCounter)}`,
@@ -39,9 +39,7 @@ export function createMockUser(
   };
 }
 
-export function createMockContact(
-  overrides: Partial<Contact> = {},
-): Contact {
+export function createMockContact(overrides: Partial<Contact> = {}): Contact {
   contactIdCounter += 1;
   return {
     id: `contact-${String(contactIdCounter)}`,
@@ -51,6 +49,23 @@ export function createMockContact(
     contactUserId: `user-${String(contactIdCounter)}`,
     displayOrder: contactIdCounter,
     createdAt: mockTimestamp(),
+    ...overrides,
+  };
+}
+
+export function createMockCallHistoryEntry(
+  overrides: Partial<CallHistoryEntry> = {},
+): CallHistoryEntry {
+  callHistoryIdCounter += 1;
+  return {
+    id: `call-${String(callHistoryIdCounter)}`,
+    contactId: `contact-${String(callHistoryIdCounter)}`,
+    contactName: `Contact ${String(callHistoryIdCounter)}`,
+    direction: 'outgoing',
+    outcome: 'completed',
+    duration: 300,
+    startedAt: mockTimestamp(),
+    endedAt: mockTimestamp(),
     ...overrides,
   };
 }

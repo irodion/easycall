@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useContactStore } from '@/stores/contactStore';
+import { useActiveCall } from '@/hooks/useActiveCall';
+import { RejoinPrompt } from './RejoinPrompt';
 import { EasyCallCard } from '@/components/shared/EasyCallCard';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
@@ -13,6 +15,7 @@ export function HomeScreen({ userId }: HomeScreenProps) {
   const navigate = useNavigate();
   const contacts = useContactStore((s) => s.contacts);
   const subscribeToContacts = useContactStore((s) => s.subscribeToContacts);
+  const { activeCall, dismiss } = useActiveCall(userId);
 
   useEffect(() => {
     return subscribeToContacts(userId);
@@ -20,16 +23,30 @@ export function HomeScreen({ userId }: HomeScreenProps) {
 
   return (
     <div className="min-h-screen bg-base-100 p-4 flex flex-col">
+      {activeCall && <RejoinPrompt activeCall={activeCall} userId={userId} onDismiss={dismiss} />}
+
       <div className="flex justify-between items-center mb-6">
-        <EasyCallText as="h1" variant="heading">Your Contacts</EasyCallText>
-        <EasyCallButton
-          variant="secondary"
-          size="default"
-          onClick={() => void navigate('/elderly/settings')}
-          aria-label="Settings"
-        >
-          ⚙
-        </EasyCallButton>
+        <EasyCallText as="h1" variant="heading">
+          Your Contacts
+        </EasyCallText>
+        <div className="flex gap-2">
+          <EasyCallButton
+            variant="secondary"
+            size="default"
+            onClick={() => void navigate('/elderly/history')}
+            aria-label="Call history"
+          >
+            History
+          </EasyCallButton>
+          <EasyCallButton
+            variant="secondary"
+            size="default"
+            onClick={() => void navigate('/elderly/settings')}
+            aria-label="Settings"
+          >
+            ⚙
+          </EasyCallButton>
+        </div>
       </div>
 
       {contacts.length === 0 ? (

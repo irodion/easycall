@@ -41,11 +41,31 @@ service cloud.firestore {
         allow delete: if request.auth.uid == userId;
       }
 
-      // Call history: owner or linked caregiver can read, owner can write
+      // Active call tracking (single doc "current", for auto-rejoin)
+      match /activeCall/current {
+        allow read: if request.auth.uid == userId;
+        allow create, update: if request.auth.uid == userId
+          && request.resource.data.keys().hasOnly(['contactId', 'contactName', 'jitsiRoomId', 'startedAt', 'status'])
+          && request.resource.data.keys().hasAll(['contactId', 'contactName', 'jitsiRoomId', 'startedAt', 'status'])
+          && request.resource.data.status in ['active', 'ended'];
+        allow delete: if request.auth.uid == userId;
+      }
+
+      // Call history: owner or linked caregiver can read; owner can create (immutable)
       match /callHistory/{callId} {
         allow read: if request.auth.uid == userId
           || isCaregiverOf(userId, request.auth.uid);
-        allow write: if request.auth.uid == userId;
+        allow create: if request.auth.uid == userId
+          && request.resource.data.keys().hasOnly(['contactId', 'contactName', 'direction', 'outcome', 'duration', 'startedAt', 'endedAt'])
+          && request.resource.data.keys().hasAll(['contactId', 'contactName', 'direction', 'outcome', 'duration', 'startedAt', 'endedAt'])
+          && request.resource.data.direction in ['outgoing', 'incoming']
+          && request.resource.data.outcome in ['completed', 'missed', 'declined']
+          && request.resource.data.duration is int
+          && request.resource.data.duration >= 0
+          && request.resource.data.startedAt is timestamp
+          && request.resource.data.startedAt <= request.time;
+        allow update: if false;
+        allow delete: if false;
       }
     }
 

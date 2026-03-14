@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import { Timestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, auth } from '@/services/firebase';
 import { loadJitsiApi } from '@/services/jitsi';
+import { setActiveCall, clearActiveCall, writeCallHistoryEntry } from '@/services/callHistory';
 import { useContactStore } from '@/stores/contactStore';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
@@ -19,9 +21,34 @@ export function CallScreen() {
   const [videoMuted, setVideoMuted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
 
+  const callStartTimeRef = useRef<number | null>(null);
+  const historyWrittenRef = useRef(false);
+  const beforeUnloadRef = useRef<((e: BeforeUnloadEvent) => void) | null>(null);
+  const contactNameRef = useRef<string>('');
+
   const contacts = useContactStore((s) => s.contacts);
   // Derive contact for rendering; effect uses stable contactId to avoid re-running on snapshots
   const contact = contacts.find((c) => c.id === contactId);
+
+  // Shared helper to write a single call history entry (guarded by ref to prevent double-writes)
+  function writeHistory() {
+    if (historyWrittenRef.current) return;
+    historyWrittenRef.current = true;
+    const uid = auth.currentUser?.uid;
+    if (!uid || !callStartTimeRef.current) return;
+    const startMs = callStartTimeRef.current;
+    const endMs = Date.now();
+    const durationSec = Math.floor((endMs - startMs) / 1000);
+    void writeCallHistoryEntry(uid, {
+      contactId: contactId ?? '',
+      contactName: contactNameRef.current,
+      direction: 'outgoing',
+      outcome: 'completed',
+      duration: durationSec,
+      startedAt: Timestamp.fromMillis(startMs),
+      endedAt: Timestamp.fromMillis(endMs),
+    });
+  }
 
   useEffect(() => {
     // Reference contact by id (stable string) rather than the contact object,
@@ -64,6 +91,25 @@ export function CallScreen() {
         });
 
         apiRef.current = api;
+        callStartTimeRef.current = Date.now();
+        contactNameRef.current = currentContact.name;
+
+        // Write activeCall doc so HomeScreen can offer rejoin on disconnect
+        const userId = auth.currentUser?.uid;
+        if (userId) {
+          void setActiveCall(userId, {
+            contactId: contactId!,
+            contactName: currentContact.name,
+            jitsiRoomId,
+            startedAt: Timestamp.now(),
+          });
+        }
+
+        // Warn user before closing tab during active call
+        beforeUnloadRef.current = (e: BeforeUnloadEvent) => {
+          e.preventDefault();
+        };
+        window.addEventListener('beforeunload', beforeUnloadRef.current);
 
         api.addListener('audioMuteStatusChanged', (eventData: unknown) => {
           const d = eventData as { muted: boolean };
@@ -76,6 +122,7 @@ export function CallScreen() {
         });
 
         api.addListener('readyToClose', () => {
+          writeHistory();
           if (mounted) void navigate('/elderly');
         });
 
@@ -95,6 +142,7 @@ export function CallScreen() {
           if (participantCount === 0) {
             setCallEnded(true);
             autoNavigateTimerRef.current = setTimeout(() => {
+              writeHistory();
               if (mounted) void navigate('/elderly');
             }, 3000);
           }
@@ -110,10 +158,15 @@ export function CallScreen() {
 
     return () => {
       mounted = false;
+      if (beforeUnloadRef.current) {
+        window.removeEventListener('beforeunload', beforeUnloadRef.current);
+      }
       if (autoNavigateTimerRef.current) {
         clearTimeout(autoNavigateTimerRef.current);
         autoNavigateTimerRef.current = null;
       }
+      const uid = auth.currentUser?.uid;
+      if (uid) void clearActiveCall(uid);
       if (apiRef.current) {
         apiRef.current.dispose();
         apiRef.current = null;
@@ -122,6 +175,9 @@ export function CallScreen() {
   }, [contactId, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleHangup = () => {
+    writeHistory();
+    const uid = auth.currentUser?.uid;
+    if (uid) void clearActiveCall(uid);
     apiRef.current?.executeCommand('hangup');
     void navigate('/elderly');
   };
@@ -147,13 +203,8 @@ export function CallScreen() {
       {loading && (
         <div className="absolute inset-0 bg-base-100 flex items-center justify-center z-10">
           <div role="status" aria-label="Connecting to call">
-            <span
-              className="loading loading-spinner loading-lg text-primary"
-              aria-hidden="true"
-            />
-            <span className="sr-only">
-              Connecting to call with {contact.name}...
-            </span>
+            <span className="loading loading-spinner loading-lg text-primary" aria-hidden="true" />
+            <span className="sr-only">Connecting to call with {contact.name}...</span>
           </div>
         </div>
       )}
@@ -167,12 +218,7 @@ export function CallScreen() {
       )}
 
       {/* Jitsi iframe container */}
-      <div
-        ref={containerRef}
-        className="flex-1"
-        role="region"
-        aria-label="Video call area"
-      />
+      <div ref={containerRef} className="flex-1" role="region" aria-label="Video call area" />
 
       {/* Overlay call controls */}
       <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center gap-6">
@@ -185,12 +231,7 @@ export function CallScreen() {
           {audioMuted ? '🎤✕' : '🎤'}
         </EasyCallButton>
 
-        <EasyCallButton
-          variant="danger"
-          size="call"
-          onClick={handleHangup}
-          aria-label="End call"
-        >
+        <EasyCallButton variant="danger" size="call" onClick={handleHangup} aria-label="End call">
           ✕
         </EasyCallButton>
 

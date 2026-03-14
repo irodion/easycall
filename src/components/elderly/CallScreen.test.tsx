@@ -5,8 +5,29 @@ import { MemoryRouter, Routes, Route } from 'react-router';
 import { createMockContact } from '@/test/helpers/factories';
 import { MockJitsiMeetExternalAPI } from '@/test/mocks/jitsi';
 
+const mockSetActiveCall = vi.fn().mockResolvedValue(undefined);
+const mockClearActiveCall = vi.fn().mockResolvedValue(undefined);
+const mockWriteCallHistoryEntry = vi.fn().mockResolvedValue('call-id');
+
+vi.mock('@/services/callHistory', () => ({
+  setActiveCall: (...args: unknown[]) => mockSetActiveCall(...args),
+  clearActiveCall: (...args: unknown[]) => mockClearActiveCall(...args),
+  writeCallHistoryEntry: (...args: unknown[]) => mockWriteCallHistoryEntry(...args),
+}));
+
 vi.mock('@/services/jitsi', () => ({
   loadJitsiApi: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('firebase/firestore', () => ({
+  Timestamp: {
+    now: () => ({ seconds: 1000, nanoseconds: 0, toDate: () => new Date() }),
+    fromMillis: (ms: number) => ({
+      seconds: Math.floor(ms / 1000),
+      nanoseconds: 0,
+      toDate: () => new Date(ms),
+    }),
+  },
 }));
 
 vi.mock('firebase/functions', () => ({
@@ -36,7 +57,7 @@ vi.mock('@/stores/contactStore', () => ({
       addContact: vi.fn(),
       removeContact: vi.fn(),
       fetchContacts: vi.fn(),
-    })
+    }),
   ),
 }));
 
@@ -70,7 +91,7 @@ describe('CallScreen', () => {
           <Routes>
             <Route path="/call/:contactId" element={<CallScreen />} />
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
       // Wait for async operations to settle
       await new Promise((r) => setTimeout(r, 50));
@@ -109,9 +130,7 @@ describe('CallScreen', () => {
 
   it('renders mic button with accessible aria-label', async () => {
     await renderLoaded();
-    expect(
-      screen.getByRole('button', { name: /microphone|mute audio/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /microphone|mute audio/i })).toBeInTheDocument();
   });
 
   it('renders camera button with accessible aria-label', async () => {
@@ -146,5 +165,71 @@ describe('CallScreen', () => {
   it('passes vitest-axe accessibility check', async () => {
     const { container } = await renderLoaded();
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('calls setActiveCall after Jitsi API creation', async () => {
+    await renderLoaded();
+    expect(mockSetActiveCall).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({
+        contactId: 'contact-1',
+        contactName: 'Alice',
+        jitsiRoomId: 'easycall-alice-abc123',
+      }),
+    );
+  });
+
+  it('calls clearActiveCall on component unmount', async () => {
+    const { unmount } = await renderLoaded();
+    await act(async () => {
+      unmount();
+    });
+    expect(mockClearActiveCall).toHaveBeenCalledWith('user-1');
+  });
+
+  it('adds beforeunload handler during active call', async () => {
+    const addSpy = vi.spyOn(window, 'addEventListener');
+    await renderLoaded();
+    const calls = addSpy.mock.calls as unknown as [string, unknown][];
+    expect(calls.some(([event]) => event === 'beforeunload')).toBe(true);
+    addSpy.mockRestore();
+  });
+
+  it('removes beforeunload handler on cleanup', async () => {
+    const removeSpy = vi.spyOn(window, 'removeEventListener');
+    const { unmount } = await renderLoaded();
+    await act(async () => {
+      unmount();
+    });
+    const calls = removeSpy.mock.calls as unknown as [string, unknown][];
+    expect(calls.some(([event]) => event === 'beforeunload')).toBe(true);
+    removeSpy.mockRestore();
+  });
+
+  it('writes call history entry on hangup', async () => {
+    await renderLoaded();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /end call/i }));
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    expect(mockWriteCallHistoryEntry).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({
+        contactId: 'contact-1',
+        contactName: 'Alice',
+        direction: 'outgoing',
+        outcome: 'completed',
+      }),
+    );
+  });
+
+  it('does not write call history entry twice', async () => {
+    await renderLoaded();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /end call/i }));
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    // The hangup writes history; cleanup should not write again
+    expect(mockWriteCallHistoryEntry).toHaveBeenCalledTimes(1);
   });
 });

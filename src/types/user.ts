@@ -40,3 +40,22 @@ export interface Contact {
   displayOrder: number;
   createdAt: FirestoreTimestamp;
 }
+
+export interface CallHistoryEntry {
+  id: string;
+  contactId: string;
+  contactName: string;
+  direction: 'outgoing' | 'incoming';
+  outcome: 'completed' | 'missed' | 'declined';
+  duration: number; // seconds
+  startedAt: FirestoreTimestamp;
+  endedAt: FirestoreTimestamp;
+}
+
+export interface ActiveCallData {
+  contactId: string;
+  contactName: string;
+  jitsiRoomId: string;
+  startedAt: FirestoreTimestamp;
+  status: 'active' | 'ended';
+}

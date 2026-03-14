@@ -1,12 +1,16 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "callHistory",
+      "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "startedAt", "order": "DESCENDING" }]
+    }
+  ],
   "fieldOverrides": [
     {
       "collectionGroup": "contacts",
       "fieldPath": "jitsiRoomId",
-      "indexes": [
-        { "queryScope": "COLLECTION_GROUP", "order": "ASCENDING" }
-      ]
+      "indexes": [{ "queryScope": "COLLECTION_GROUP", "order": "ASCENDING" }]
     }
   ]
 }
