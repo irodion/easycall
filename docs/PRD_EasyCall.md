@@ -2268,3 +2268,38 @@ The following JSON represents the complete task backlog. Each task has:
 - WCAG AAA contrast requirements: https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced.html
 - Jitsi self-hosting guide: https://jitsi.github.io/handbook/docs/devops-guide/devops-guide-quickstart/
 - Docker Jitsi Meet: https://github.com/jitsi/docker-jitsi-meet
+
+## Appendix C: Optional — Migrate to Vite+ Unified Toolchain
+
+**Status:** Optional / Future
+**Trigger:** Revisit when Vite+ reaches 1.0 stable and `vite-plugin-pwa` confirms compatibility
+**Reference:** https://viteplus.dev/guide/
+
+Vite+ (`vp`) is a unified CLI that bundles Vite + Vitest + Oxlint + Oxfmt + Rolldown + tsdown + Vite Task into a single toolchain entry point. It replaces separate `vite`, `vitest`, `eslint`, and `prettier` commands with one `vp` binary.
+
+### Benefits
+
+- Single CLI (`vp dev`, `vp test`, `vp lint`, `vp fmt`) instead of four separate tools
+- Oxlint/Oxfmt are Rust-based — significantly faster than ESLint/Prettier
+- Rolldown (Rust bundler) will eventually replace esbuild+Rollup in Vite; early adoption smooths that transition
+- Fewer devDependencies to manage
+
+### Risks
+
+- Very new project — thin docs and community; debugging issues will be harder
+- `vite-plugin-pwa` (injectManifest strategy) compatibility with Rolldown is unverified
+- DaisyUI v5 + Tailwind v4 plugin compatibility through Vite+ is untested
+- Oxlint does not yet cover all ESLint rules — potential lint coverage regression
+- Migration effort with zero user-facing value
+
+### Migration checklist (when ready)
+
+- [ ] Verify `vite-plugin-pwa` works with Vite+ / Rolldown
+- [ ] Verify Tailwind v4 + DaisyUI v5 plugin compatibility
+- [ ] Install `vite-plus` locally, `vp` globally
+- [ ] Replace `vite.config.ts` commands: `pnpm dev` → `vp dev`, `pnpm build` → `vp build`, `pnpm test` → `vp test`
+- [ ] Replace ESLint flat config with Oxlint (`vp lint`)
+- [ ] Replace Prettier with Oxfmt (`vp fmt`)
+- [ ] Confirm all 255+ unit tests pass under `vp test`
+- [ ] Confirm E2E tests still pass
+- [ ] Remove old ESLint/Prettier devDependencies

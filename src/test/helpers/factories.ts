@@ -30,6 +30,8 @@ export function createMockUser(overrides: Partial<EasyCallUser> = {}): EasyCallU
       highContrast: false,
       ringtoneVolume: 80,
       autoAnswer: false,
+      appLockEnabled: false,
+      appLockPinHash: null,
     },
     pushTokens: [],
     onboardingComplete: false,
