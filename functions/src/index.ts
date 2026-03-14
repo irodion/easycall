@@ -196,6 +196,7 @@ export const onIncomingCall = onDocumentWritten(
     const rawTokens: unknown = elderlyDoc.data()?.['pushTokens'] ?? [];
 
     if (!Array.isArray(rawTokens) || !rawTokens.every((t) => typeof t === 'string')) {
+      // nosemgrep: no-console-log-sensitive — logs type validation error, not token values
       console.warn(
         `pushTokens for user ${event.params['elderlyUserId']} is not a string array; skipping FCM send.`,
       );
@@ -259,6 +260,7 @@ export const onIncomingCall = onDocumentWritten(
     }
 
     if (totalFails > 0) {
+      // nosemgrep: no-console-log-sensitive — logs failure count, not token values
       console.error(
         `FCM: ${totalFails} of ${pushTokens.length} sends failed for user ${event.params['elderlyUserId']}`,
       );

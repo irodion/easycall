@@ -15,8 +15,9 @@ if command -v semgrep >/dev/null 2>&1; then
   fi
   echo "Semgrep scan passed."
 else
-  echo "WARNING: semgrep not installed — skipping security scan."
+  echo "ERROR: semgrep not installed — security scan is required."
   echo "Install with: brew install semgrep"
+  exit 1
 fi
 
 echo "Running tests before commit..."

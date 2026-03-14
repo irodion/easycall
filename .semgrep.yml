@@ -57,6 +57,14 @@ rules:
       - pattern-either:
           - pattern: console.log(..., $TOKEN, ...)
           - pattern: console.log($TOKEN)
+          - pattern: console.warn(..., $TOKEN, ...)
+          - pattern: console.warn($TOKEN)
+          - pattern: console.error(..., $TOKEN, ...)
+          - pattern: console.error($TOKEN)
+          - pattern: console.info(..., $TOKEN, ...)
+          - pattern: console.info($TOKEN)
+          - pattern: console.debug(..., $TOKEN, ...)
+          - pattern: console.debug($TOKEN)
     metavariable-regex:
       metavariable: $TOKEN
       regex: .*(token|secret|password|apiKey|api_key).*
