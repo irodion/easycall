@@ -1,11 +1,5 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "callHistory",
-      "queryScope": "COLLECTION",
-      "fields": [{ "fieldPath": "startedAt", "order": "DESCENDING" }]
-    }
-  ],
+  "indexes": [],
   "fieldOverrides": [
     {
       "collectionGroup": "contacts",

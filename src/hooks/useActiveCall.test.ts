@@ -37,7 +37,6 @@ describe('useActiveCall', () => {
 
   afterEach(() => {
     cleanup();
-    vi.useRealTimers();
   });
 
   it('does not call getDoc when userId is null', () => {

@@ -47,6 +47,10 @@ service cloud.firestore {
         allow create, update: if request.auth.uid == userId
           && request.resource.data.keys().hasOnly(['contactId', 'contactName', 'jitsiRoomId', 'startedAt', 'status'])
           && request.resource.data.keys().hasAll(['contactId', 'contactName', 'jitsiRoomId', 'startedAt', 'status'])
+          && request.resource.data.contactId is string
+          && request.resource.data.contactName is string
+          && request.resource.data.jitsiRoomId is string
+          && request.resource.data.startedAt is timestamp
           && request.resource.data.status in ['active', 'ended'];
         allow delete: if request.auth.uid == userId;
       }
@@ -63,7 +67,10 @@ service cloud.firestore {
           && request.resource.data.duration is int
           && request.resource.data.duration >= 0
           && request.resource.data.startedAt is timestamp
-          && request.resource.data.startedAt <= request.time;
+          && request.resource.data.startedAt <= request.time
+          && request.resource.data.endedAt is timestamp
+          && request.resource.data.endedAt >= request.resource.data.startedAt
+          && request.resource.data.endedAt <= request.time;
         allow update: if false;
         allow delete: if false;
       }

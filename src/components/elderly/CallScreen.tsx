@@ -108,6 +108,7 @@ export function CallScreen() {
         // Warn user before closing tab during active call
         beforeUnloadRef.current = (e: BeforeUnloadEvent) => {
           e.preventDefault();
+          e.returnValue = '';
         };
         window.addEventListener('beforeunload', beforeUnloadRef.current);
 

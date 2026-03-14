@@ -12,7 +12,19 @@ export function useActiveCall(userId: string | null) {
     async function checkActiveCall() {
       const snap = await getDoc(activeCallRef(userId));
       if (!snap.exists()) return;
-      const data = snap.data() as ActiveCallData;
+      const raw = snap.data();
+
+      // Validate shape before trusting the data
+      if (
+        typeof raw?.['status'] !== 'string' ||
+        !raw['startedAt'] ||
+        typeof (raw['startedAt'] as { toDate?: unknown }).toDate !== 'function'
+      ) {
+        void clearActiveCall(userId);
+        return;
+      }
+
+      const data = raw as ActiveCallData;
 
       // Only show rejoin if call is active and started within 5 minutes
       const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;

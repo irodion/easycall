@@ -105,7 +105,9 @@ describe('formatDateTime', () => {
   it('returns "Mon DD HH:MM" for older dates', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-03-14T15:00:00'));
-    const result = formatDateTime(ts(new Date('2026-03-10T09:00:00')));
-    expect(result).toMatch(/Mar 10/);
+    const date = new Date('2026-03-10T09:00:00');
+    const result = formatDateTime(ts(date));
+    const expectedDate = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    expect(result).toContain(expectedDate);
   });
 });

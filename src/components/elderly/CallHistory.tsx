@@ -30,22 +30,33 @@ export function CallHistory({ userId }: CallHistoryProps) {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const result = await fetchCallHistory(userId);
-      setEntries(result.entries);
-      setLastDoc(result.lastDoc);
-      setHasMore(result.hasMore);
-      setLoading(false);
+      try {
+        const result = await fetchCallHistory(userId);
+        setEntries(result.entries);
+        setLastDoc(result.lastDoc);
+        setHasMore(result.hasMore);
+      } catch {
+        setEntries([]);
+        setHasMore(false);
+      } finally {
+        setLoading(false);
+      }
     }
     void load();
   }, [userId]);
 
   const handleShowMore = async () => {
     setLoadingMore(true);
-    const result = await fetchCallHistory(userId, 20, lastDoc);
-    setEntries((prev) => [...prev, ...result.entries]);
-    setLastDoc(result.lastDoc);
-    setHasMore(result.hasMore);
-    setLoadingMore(false);
+    try {
+      const result = await fetchCallHistory(userId, 20, lastDoc);
+      setEntries((prev) => [...prev, ...result.entries]);
+      setLastDoc(result.lastDoc);
+      setHasMore(result.hasMore);
+    } catch {
+      // Keep existing entries on pagination failure
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   return (
