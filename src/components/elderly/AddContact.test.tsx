@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, fireEvent, act } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
@@ -24,6 +24,10 @@ describe('AddContact', () => {
   beforeEach(() => {
     mockAddContact.mockClear();
     mockAddContact.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('Step 1: renders name input', () => {
@@ -96,6 +100,97 @@ describe('AddContact', () => {
         jitsiRoomId: expect.stringMatching(/^easycall-alice-[a-z0-9]{6}$/),
       }),
     );
+  });
+
+  it('selecting a photo shows preview on Step 3', () => {
+    const revokeObjectURL = vi.fn();
+    const createObjectURL = vi.fn().mockReturnValue('blob:photo-url');
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
+
+    renderWithProviders(<AddContact userId="user-1" />);
+    fireEvent.change(screen.getByRole('textbox', { name: /name/i }), {
+      target: { value: 'Alice' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    // Select a photo on Step 2
+    const fileInput = document.querySelector('input[type="file"]')!;
+    const file = new File(['img'], 'photo.jpg', { type: 'image/jpeg' });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    // Go to Step 3
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    // Photo preview should be shown as img
+    const img = screen.getByAltText('Alice');
+    expect(img).toHaveAttribute('src', 'blob:photo-url');
+  });
+
+  it('revokes previous blob URL when selecting a new photo', () => {
+    const revokeObjectURL = vi.fn();
+    const createObjectURL = vi.fn()
+      .mockReturnValueOnce('blob:first')
+      .mockReturnValueOnce('blob:second');
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
+
+    renderWithProviders(<AddContact userId="user-1" />);
+    fireEvent.change(screen.getByRole('textbox', { name: /name/i }), {
+      target: { value: 'Alice' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    const fileInput = document.querySelector('input[type="file"]')!;
+    const file1 = new File(['img1'], 'photo1.jpg', { type: 'image/jpeg' });
+    fireEvent.change(fileInput, { target: { files: [file1] } });
+
+    const file2 = new File(['img2'], 'photo2.jpg', { type: 'image/jpeg' });
+    fireEvent.change(fileInput, { target: { files: [file2] } });
+
+    // First blob URL should have been revoked
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:first');
+  });
+
+  it('shows fallback avatar circle when no photo is selected on Step 3', () => {
+    renderWithProviders(<AddContact userId="user-1" />);
+    fireEvent.change(screen.getByRole('textbox', { name: /name/i }), {
+      target: { value: 'Alice' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    // Step 3 without photo shows a div with the initial, not an img
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    // The initial avatar circle should contain the first letter
+    const avatarCircle = document.querySelector('.rounded-full.bg-primary');
+    expect(avatarCircle).not.toBeNull();
+  });
+
+  it('double-click Save does not call addContact twice', async () => {
+    let resolveAdd!: () => void;
+    mockAddContact.mockImplementationOnce(
+      () => new Promise<void>((resolve) => { resolveAdd = resolve; }),
+    );
+
+    renderWithProviders(<AddContact userId="user-1" />);
+    fireEvent.change(screen.getByRole('textbox', { name: /name/i }), {
+      target: { value: 'Alice' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    // First save
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    });
+    // Second click while first is pending
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    });
+
+    expect(mockAddContact).toHaveBeenCalledTimes(1);
+
+    // Resolve the pending promise to avoid act warnings
+    await act(async () => { resolveAdd(); });
   });
 
   it('passes vitest-axe on Step 1', async () => {

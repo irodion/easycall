@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
@@ -75,6 +75,47 @@ describe('PairElderlyUser', () => {
     await user.click(screen.getByRole('button', { name: /link account/i }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('Pairing code has expired.');
+  });
+
+  it('does not submit when code is empty via form submit', () => {
+    renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
+    // Directly submit the form to bypass the disabled button and exercise the !code.trim() guard
+    const form = document.querySelector('form')!;
+    fireEvent.submit(form);
+    expect(mockValidatePairingCode).not.toHaveBeenCalled();
+  });
+
+  it('does not double-submit while loading', async () => {
+    let resolveValidate!: (value: { elderlyUserId: string }) => void;
+    mockValidatePairingCode.mockImplementationOnce(
+      () => new Promise((resolve) => { resolveValidate = resolve; }),
+    );
+
+    const user = userEvent.setup();
+    renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
+    await user.type(screen.getByLabelText(/6-digit code/i), '123456');
+    await user.click(screen.getByRole('button', { name: /link account/i }));
+
+    // Button should now show "Linking..." and be disabled
+    const linkingBtn = screen.getByRole('button', { name: /linking/i });
+    expect(linkingBtn).toBeDisabled();
+
+    // Attempt a second click while still loading
+    await user.click(linkingBtn);
+    expect(mockValidatePairingCode).toHaveBeenCalledTimes(1);
+
+    resolveValidate({ elderlyUserId: 'elderly-1' });
+  });
+
+  it('shows generic error for non-Error rejection', async () => {
+    mockValidatePairingCode.mockRejectedValue('string error');
+
+    const user = userEvent.setup();
+    renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
+    await user.type(screen.getByLabelText(/6-digit code/i), '123456');
+    await user.click(screen.getByRole('button', { name: /link account/i }));
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
   it('passes vitest-axe', async () => {

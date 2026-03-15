@@ -6,6 +6,12 @@ import { createMockContact } from '@/test/helpers/factories';
 import { HomeScreen } from './HomeScreen';
 import type { ActiveCallData } from '@/types/user';
 
+const mockNavigate = vi.fn();
+vi.mock('react-router', async () => {
+  const actual = await vi.importActual('react-router');
+  return { ...actual, useNavigate: () => mockNavigate };
+});
+
 // Mock the contactStore
 const mockSubscribeToContacts = vi.fn().mockReturnValue(() => {});
 const mockContacts: ReturnType<typeof createMockContact>[] = [];
@@ -39,6 +45,7 @@ describe('HomeScreen', () => {
     mockSubscribeToContacts.mockClear();
     mockSubscribeToContacts.mockReturnValue(() => {});
     mockDismiss.mockClear();
+    mockNavigate.mockClear();
   });
 
   it('calls subscribeToContacts with userId on mount', () => {
@@ -127,5 +134,17 @@ describe('HomeScreen', () => {
   it('call history button is present with aria-label', () => {
     renderWithProviders(<HomeScreen userId="user-1" />);
     expect(screen.getByRole('button', { name: /call history/i })).toBeInTheDocument();
+  });
+
+  it('clicking history button navigates to /elderly/history', () => {
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    fireEvent.click(screen.getByRole('button', { name: /call history/i }));
+    expect(mockNavigate).toHaveBeenCalledWith('/elderly/history');
+  });
+
+  it('clicking settings button navigates to /elderly/settings', () => {
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    fireEvent.click(screen.getByRole('button', { name: /settings/i }));
+    expect(mockNavigate).toHaveBeenCalledWith('/elderly/settings');
   });
 });

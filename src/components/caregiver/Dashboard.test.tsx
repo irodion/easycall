@@ -117,6 +117,33 @@ describe('Dashboard', () => {
     expect(manageLink.getAttribute('href')).toBe('/caregiver/manage/elderly-1');
   });
 
+  it('handles non-existent caregiver doc gracefully', async () => {
+    getDoc.mockResolvedValue({
+      exists: () => false,
+    });
+
+    const { Dashboard } = await import('./Dashboard');
+    renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+    // Should stop loading and show the link button (no linked users)
+    await screen.findByRole('link', { name: /link elderly user/i });
+    // No spinner should remain
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('handles fetch error gracefully', async () => {
+    getDoc.mockRejectedValue(new Error('Network error'));
+
+    const { Dashboard } = await import('./Dashboard');
+    renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+    // Should stop loading despite error — spinner should disappear
+    const { waitFor } = await import('@testing-library/react');
+    await waitFor(() => {
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    });
+  });
+
   it('passes vitest-axe', async () => {
     getDoc.mockResolvedValue({
       exists: () => true,
