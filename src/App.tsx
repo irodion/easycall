@@ -65,7 +65,10 @@ function AuthenticatedApp() {
     if (!userId) return;
     const ref = doc(db, 'users', userId);
     const unsubscribe = onSnapshot(ref, (snap) => {
-      if (!snap.exists()) return;
+      if (!snap.exists()) {
+        setSettings(DEFAULT_USER_SETTINGS);
+        return;
+      }
       const data = snap.data();
       const raw = (data['settings'] as Partial<UserSettings>) ?? {};
       const incoming = { ...DEFAULT_USER_SETTINGS, ...raw };
