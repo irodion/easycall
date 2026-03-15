@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { useContactStore } from '@/stores/contactStore';
 import { useActiveCall } from '@/hooks/useActiveCall';
 import { RejoinPrompt } from './RejoinPrompt';
@@ -12,6 +13,7 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ userId }: HomeScreenProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const contacts = useContactStore((s) => s.contacts);
   const subscribeToContacts = useContactStore((s) => s.subscribeToContacts);
@@ -27,22 +29,22 @@ export function HomeScreen({ userId }: HomeScreenProps) {
 
       <div className="flex justify-between items-center mb-6">
         <EasyCallText as="h1" variant="heading">
-          Your Contacts
+          {t('home.title')}
         </EasyCallText>
         <div className="flex gap-2">
           <EasyCallButton
             variant="secondary"
             size="default"
             onClick={() => void navigate('/elderly/history')}
-            aria-label="Call history"
+            aria-label={t('callHistory.title')}
           >
-            History
+            {t('home.history')}
           </EasyCallButton>
           <EasyCallButton
             variant="secondary"
             size="default"
             onClick={() => void navigate('/elderly/settings')}
-            aria-label="Settings"
+            aria-label={t('home.settings')}
           >
             ⚙
           </EasyCallButton>
@@ -52,10 +54,10 @@ export function HomeScreen({ userId }: HomeScreenProps) {
       {contacts.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <EasyCallText as="p" variant="body" className="text-center text-base-content/60">
-            No contacts yet
+            {t('home.noContacts')}
           </EasyCallText>
           <EasyCallText as="p" variant="body" className="text-center text-base-content/40 text-sm">
-            A caregiver can add contacts for you
+            {t('home.noContactsHint')}
           </EasyCallText>
         </div>
       ) : (
@@ -64,7 +66,7 @@ export function HomeScreen({ userId }: HomeScreenProps) {
             <EasyCallCard
               key={contact.id}
               onClick={() => void navigate(`/call/${contact.id}`)}
-              aria-label={`Call ${contact.name}`}
+              aria-label={t('home.callContact', { name: contact.name })}
               className="flex flex-col items-center gap-2 p-4"
             >
               {contact.photoURL ? (

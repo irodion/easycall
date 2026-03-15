@@ -12,6 +12,7 @@ const defaultSettings: UserSettings = {
   autoAnswer: false,
   appLockEnabled: false,
   appLockPinHash: null,
+  language: 'en',
 };
 
 describe('SettingsScreen', () => {
@@ -19,7 +20,7 @@ describe('SettingsScreen', () => {
     renderWithProviders(
       <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
     );
-    expect(screen.getByRole('radiogroup')).toBeInTheDocument();
+    expect(screen.getAllByRole('radiogroup').length).toBeGreaterThanOrEqual(1);
     // Use exact name to avoid 'Large' matching 'Extra Large'
     expect(screen.getByRole('radio', { name: 'Large' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'Extra Large' })).toBeInTheDocument();
@@ -75,6 +76,42 @@ describe('SettingsScreen', () => {
     const link = screen.getByRole('link', { name: /back/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/elderly');
+  });
+
+  it('renders language radio group with 5 options', () => {
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
+    );
+    expect(screen.getByText('English')).toBeInTheDocument();
+    expect(screen.getByText('Español')).toBeInTheDocument();
+    expect(screen.getByText('עברית')).toBeInTheDocument();
+    expect(screen.getByText('Русский')).toBeInTheDocument();
+    expect(screen.getByText('Deutsch')).toBeInTheDocument();
+  });
+
+  it('clicking a language radio calls onSettingsChange with updated language', () => {
+    const onSettingsChange = vi.fn();
+    renderWithProviders(
+      <SettingsScreen
+        settings={defaultSettings}
+        onSettingsChange={onSettingsChange}
+        userId="user-1"
+      />,
+    );
+    fireEvent.click(screen.getByText('Español'));
+    expect(onSettingsChange).toHaveBeenCalledWith({ ...defaultSettings, language: 'es' });
+  });
+
+  it('reflects current language selection', () => {
+    renderWithProviders(
+      <SettingsScreen
+        settings={{ ...defaultSettings, language: 'he' }}
+        onSettingsChange={vi.fn()}
+        userId="user-1"
+      />,
+    );
+    const hebrewRadio = screen.getByRole('radio', { name: 'עברית' }) as HTMLInputElement;
+    expect(hebrewRadio.checked).toBe(true);
   });
 
   it('passes vitest-axe accessibility check', async () => {

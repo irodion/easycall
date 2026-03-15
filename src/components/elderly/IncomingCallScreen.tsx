@@ -1,15 +1,20 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { useCallStore } from '@/stores/callStore';
 import { declineCall } from '@/services/callSignaling';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 export function IncomingCallScreen() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const isRinging = useCallStore((s) => s.isRinging);
   const incomingCall = useCallStore((s) => s.incomingCall);
   const clearIncomingCall = useCallStore((s) => s.clearIncomingCall);
   const audioRef = useRef<{ play: () => void; pause: () => void } | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, isRinging && !!incomingCall);
 
   useEffect(() => {
     if (!isRinging) return;
@@ -47,9 +52,11 @@ export function IncomingCallScreen() {
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-[var(--space-lg)] bg-base-100 p-[var(--space-md)]"
       role="alertdialog"
-      aria-label={`${incomingCall.callerName} is calling`}
+      aria-modal="true"
+      aria-label={t('incomingCall.isCalling', { name: incomingCall.callerName })}
     >
       {incomingCall.callerPhotoURL ? (
         <img
@@ -69,7 +76,7 @@ export function IncomingCallScreen() {
       <div className="text-center">
         <p className="text-[length:var(--text-heading)] font-bold">{incomingCall.callerName}</p>
         <p className="text-[length:var(--text-body)] text-[color:var(--color-text-secondary)] animate-pulse">
-          is calling...
+          {t('incomingCall.calling')}
         </p>
       </div>
 
@@ -78,17 +85,17 @@ export function IncomingCallScreen() {
           type="button"
           onClick={handleAnswer}
           className="btn btn-success touch-target-call w-full font-bold text-[length:var(--text-button)]"
-          aria-label="Answer call"
+          aria-label={t('incomingCall.answerCall')}
         >
-          Answer
+          {t('incomingCall.answer')}
         </button>
         <button
           type="button"
           onClick={handleDecline}
           className="btn btn-error touch-target-primary w-full font-bold text-[length:var(--text-button)]"
-          aria-label="Decline call"
+          aria-label={t('incomingCall.declineCall')}
         >
-          Decline
+          {t('incomingCall.decline')}
         </button>
       </div>
     </div>

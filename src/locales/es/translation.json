@@ -1,0 +1,190 @@
+{
+  "common": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Omitir",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "loading": "Cargando...",
+    "install": "Instalar",
+    "somethingWentWrong": "Algo salió mal"
+  },
+  "home": {
+    "title": "Sus Contactos",
+    "history": "Historial",
+    "settings": "Ajustes",
+    "noContacts": "No hay contactos aún",
+    "noContactsHint": "Un cuidador puede agregar contactos por usted",
+    "callContact": "Llamar a {{name}}"
+  },
+  "call": {
+    "contactNotFound": "Contacto no encontrado",
+    "connecting": "Conectando a la llamada",
+    "connectingWith": "Conectando a la llamada con {{name}}...",
+    "ended": "Llamada Finalizada",
+    "unmuteMic": "Activar micrófono",
+    "muteMic": "Silenciar micrófono",
+    "endCall": "Finalizar llamada",
+    "cameraOn": "Encender cámara",
+    "cameraOff": "Apagar cámara",
+    "videoCallArea": "Área de videollamada"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "textSize": "Tamaño de Texto",
+    "large": "Grande",
+    "extraLarge": "Muy Grande",
+    "pairingCode": "Código de Emparejamiento",
+    "addContact": "Agregar Contacto",
+    "language": "Idioma"
+  },
+  "permissions": {
+    "checking": "Verificando permisos de cámara y micrófono",
+    "cameraAndMic": "Cámara y Micrófono",
+    "allowPrompt": "Toque PERMITIR cuando se le solicite habilitar su cámara y micrófono.",
+    "blocked": "Cámara Bloqueada",
+    "blockedHint": "Por favor permita el acceso a la cámara y al micrófono en los ajustes de su navegador, luego toque Reintentar.",
+    "tryAgain": "Reintentar",
+    "noCamera": "No se Encontró Cámara",
+    "noCameraHint": "No se encontró cámara o micrófono. Por favor conecte una cámara y un micrófono e inténtelo de nuevo."
+  },
+  "addContact": {
+    "title": "Agregar Contacto",
+    "step1": "Paso 1: Nombre",
+    "contactName": "Nombre del Contacto",
+    "namePlaceholder": "Ingrese el nombre del contacto",
+    "addPhoto": "Agregar Foto",
+    "step2": "Paso 2: Foto (opcional)",
+    "preview": "Vista previa",
+    "choosePhoto": "Elegir foto",
+    "step3": "Paso 3: Confirmar",
+    "confirmTitle": "Confirmar"
+  },
+  "callHistory": {
+    "title": "Historial de Llamadas",
+    "backToContacts": "Volver a contactos",
+    "loadingHistory": "Cargando historial de llamadas",
+    "noCalls": "No hay llamadas aún",
+    "callContact": "Llamar a {{name}}",
+    "completed": "Completada",
+    "missed": "Perdida",
+    "declined": "Rechazada",
+    "showMore": "Mostrar más"
+  },
+  "dashboard": {
+    "title": "Panel del Cuidador",
+    "linkUser": "Vincular Usuario Mayor",
+    "lastSeen": "Última vez: {{time}}",
+    "manageContacts": "Administrar Contactos"
+  },
+  "manageContacts": {
+    "title": "Administrar Contactos",
+    "addContact": "+ Agregar Contacto",
+    "contactName": "Nombre del contacto",
+    "namePlaceholder": "Nombre del contacto",
+    "remove": "Eliminar",
+    "confirmRemove": "¿Está seguro de que desea eliminar a {{name}}?",
+    "removeContact": "Eliminar a {{name}}",
+    "thisContact": "este contacto",
+    "addFailed": "Error al agregar contacto: {{error}}",
+    "removeFailed": "Error al eliminar contacto: {{error}}",
+    "saveNewContact": "Guardar nuevo contacto",
+    "cancelAdd": "Cancelar agregar"
+  },
+  "elderlySettings": {
+    "fontSize": "Tamaño de Fuente",
+    "large": "Grande",
+    "xLarge": "Muy Grande",
+    "ringtoneVolume": "Volumen del Timbre",
+    "volumePercent": "{{value}}%",
+    "appLock": "Bloqueo de Aplicación",
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "enableAppLock": "Activar bloqueo de aplicación",
+    "setPin": "Establecer PIN",
+    "pinPlaceholder": "PIN de 4 dígitos",
+    "confirmPin": "Confirmar PIN",
+    "confirmPinPlaceholder": "Confirmar PIN",
+    "pinLengthError": "El PIN debe tener exactamente 4 dígitos",
+    "pinMismatchError": "Los PIN no coinciden",
+    "pinSaveError": "Error al guardar el PIN. Por favor inténtelo de nuevo.",
+    "savePin": "Guardar PIN",
+    "language": "Idioma"
+  },
+  "roleSelector": {
+    "notSignedIn": "No ha iniciado sesión. Por favor inténtelo de nuevo.",
+    "saveFailed": "Error al guardar el rol: {{error}}",
+    "whoAreYou": "¿Quién es usted?",
+    "elderlyUser": "Soy un usuario mayor",
+    "caregiver": "Soy un cuidador familiar"
+  },
+  "onboarding": {
+    "welcome": "Bienvenido a EasyCall",
+    "elderlyDescription": "Videollamadas sencillas con su familia. ¡Solo toque una foto para llamar!",
+    "caregiverDescription": "Administre videollamadas para sus familiares de forma remota.",
+    "cameraMic": "Cámara y Micrófono",
+    "cameraMicHint": "EasyCall necesita acceso a su cámara y micrófono para las videollamadas.",
+    "notifications": "Permiso de Notificaciones",
+    "notificationsHint": "Permita las notificaciones para saber cuándo alguien le está llamando.",
+    "pairWithCaregiver": "Emparejar con Cuidador",
+    "linkToElderly": "Vincular a Usuario Mayor",
+    "done": "Listo",
+    "stepOf": "Paso {{step}} de {{total}}",
+    "failedSetup": "Error al completar la configuración. Por favor inténtelo de nuevo."
+  },
+  "pairingCode": {
+    "yourCode": "Su código de emparejamiento:",
+    "generatingCode": "Generando código",
+    "pairingCodeLabel": "Código de emparejamiento: {{code}}",
+    "expiresIn": "Expira en {{time}}",
+    "getNewCode": "Obtener nuevo código"
+  },
+  "pairElderly": {
+    "enterCode": "Ingrese el código de 6 dígitos que aparece en la pantalla del usuario mayor:",
+    "linking": "Vinculando...",
+    "linkAccount": "Vincular Cuenta"
+  },
+  "incomingCall": {
+    "isCalling": "{{name}} está llamando",
+    "calling": "está llamando...",
+    "answer": "Contestar",
+    "answerCall": "Contestar llamada",
+    "decline": "Rechazar",
+    "declineCall": "Rechazar llamada"
+  },
+  "rejoinPrompt": {
+    "returnToCall": "¿Volver a la llamada con {{name}}?",
+    "returnButton": "Volver a la Llamada",
+    "returnToCallWith": "Volver a la llamada con {{name}}",
+    "dismiss": "Cerrar",
+    "rejoinCall": "Volver a la llamada"
+  },
+  "confirmDialog": {
+    "ariaLabel": "Confirmar acción"
+  },
+  "installPrompt": {
+    "title": "Instalar EasyCall",
+    "description": "Instale esta aplicación en su dispositivo para la mejor experiencia.",
+    "install": "Instalar",
+    "ariaLabel": "Instalar aplicación EasyCall",
+    "installApp": "Instalar aplicación"
+  },
+  "appLock": {
+    "title": "Pantalla de bloqueo",
+    "enterPin": "Ingrese el PIN para desbloquear",
+    "digitsEntered": "{{count}} de 4 dígitos ingresados",
+    "tooManyAttempts": "Demasiados intentos. Inténtelo de nuevo en {{seconds}}s",
+    "wrongPin": "PIN incorrecto",
+    "clear": "Borrar",
+    "backspace": "Retroceso"
+  },
+  "connection": {
+    "good": "Buena conexión",
+    "fair": "Conexión regular",
+    "poor": "Conexión débil",
+    "weakSignal": "Calidad de video reducida por señal débil"
+  },
+  "skipToContent": "Saltar al contenido"
+}

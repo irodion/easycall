@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import type { JitsiMeetExternalAPI } from '@/types/jitsi';
 
@@ -10,10 +11,10 @@ function getQuality(score: number): Quality {
   return 'good';
 }
 
-const qualityConfig: Record<Quality, { label: string; color: string }> = {
-  good: { label: 'Good connection', color: 'bg-success' },
-  fair: { label: 'Fair connection', color: 'bg-warning' },
-  poor: { label: 'Poor connection', color: 'bg-error' },
+const QUALITY_CONFIG: Record<Quality, { key: string; color: string }> = {
+  good: { key: 'connection.good', color: 'bg-success' },
+  fair: { key: 'connection.fair', color: 'bg-warning' },
+  poor: { key: 'connection.poor', color: 'bg-error' },
 };
 
 interface ConnectionIndicatorProps {
@@ -21,6 +22,7 @@ interface ConnectionIndicatorProps {
 }
 
 export function ConnectionIndicator({ api }: ConnectionIndicatorProps) {
+  const { t } = useTranslation();
   const [quality, setQuality] = useState<Quality>('good');
   const [showToast, setShowToast] = useState(false);
   const degradedRef = useRef(false);
@@ -39,7 +41,6 @@ export function ConnectionIndicator({ api }: ConnectionIndicatorProps) {
       setQuality(q);
 
       if (q !== 'poor') {
-        // Reset the latch so a future drop to 'poor' re-triggers degradation
         degradedRef.current = false;
       } else if (!degradedRef.current) {
         degradedRef.current = true;
@@ -57,19 +58,19 @@ export function ConnectionIndicator({ api }: ConnectionIndicatorProps) {
     };
   }, [api]);
 
-  const config = qualityConfig[quality];
+  const config = QUALITY_CONFIG[quality];
 
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="flex items-center gap-2">
         <span className={`w-3 h-3 rounded-full ${config.color}`} aria-hidden="true" />
         <EasyCallText as="span" variant="body">
-          {config.label}
+          {t(config.key)}
         </EasyCallText>
       </div>
       {showToast && (
         <div role="alert" className="alert alert-warning text-sm p-2 mt-1">
-          Video quality reduced due to weak signal
+          {t('connection.weakSignal')}
         </div>
       )}
     </div>

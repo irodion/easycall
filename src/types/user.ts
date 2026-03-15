@@ -17,6 +17,8 @@ export interface EasyCallUser {
   createdAt: FirestoreTimestamp;
 }
 
+import type { SupportedLanguage } from '@/i18n';
+
 export interface UserSettings {
   fontSize: 'large' | 'x-large';
   highContrast: boolean;
@@ -24,6 +26,7 @@ export interface UserSettings {
   autoAnswer: boolean;
   appLockEnabled: boolean;
   appLockPinHash: string | null;
+  language: SupportedLanguage;
 }
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
@@ -33,6 +36,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   autoAnswer: false,
   appLockEnabled: false,
   appLockPinHash: null,
+  language: 'en',
 };
 
 export interface Contact {

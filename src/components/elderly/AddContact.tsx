@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { useContactStore } from '@/stores/contactStore';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
@@ -20,6 +21,7 @@ function generateRoomId(name: string): string {
 }
 
 export function AddContact({ userId }: AddContactProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const addContact = useContactStore((s) => s.addContact);
   const contacts = useContactStore((s) => s.contacts);
@@ -29,7 +31,6 @@ export function AddContact({ userId }: AddContactProps) {
   const [isSaving, setIsSaving] = useState(false);
   const blobUrlRef = useRef<string | null>(null);
 
-  // Revoke blob URL on unmount
   useEffect(() => {
     return () => {
       if (blobUrlRef.current) {
@@ -41,7 +42,6 @@ export function AddContact({ userId }: AddContactProps) {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Revoke previous blob URL to prevent memory leaks
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current);
       }
@@ -74,31 +74,31 @@ export function AddContact({ userId }: AddContactProps) {
     return (
       <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
         <EasyCallText as="h1" variant="heading">
-          Add Contact
+          {t('addContact.title')}
         </EasyCallText>
         <EasyCallText as="h2" variant="body" className="font-bold">
-          Step 1: Name
+          {t('addContact.step1')}
         </EasyCallText>
         <label htmlFor="contact-name" className="sr-only">
-          Contact Name
+          {t('addContact.contactName')}
         </label>
         <input
           id="contact-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter contact name"
+          placeholder={t('addContact.namePlaceholder')}
           className="input input-bordered w-full text-[length:var(--text-body)] min-h-14"
-          aria-label="Name"
+          aria-label={t('addContact.contactName')}
         />
         <div className="flex gap-3 mt-auto">
           <EasyCallButton
             variant="primary"
             onClick={() => setStep(2)}
             disabled={name.trim() === ''}
-            aria-label="Next"
+            aria-label={t('common.next')}
           >
-            Next
+            {t('common.next')}
           </EasyCallButton>
         </div>
       </div>
@@ -109,15 +109,15 @@ export function AddContact({ userId }: AddContactProps) {
     return (
       <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
         <EasyCallText as="h1" variant="heading">
-          Add Photo
+          {t('addContact.addPhoto')}
         </EasyCallText>
         <EasyCallText variant="body" className="font-bold">
-          Step 2: Photo (optional)
+          {t('addContact.step2')}
         </EasyCallText>
         {photoPreview && (
           <img
             src={photoPreview}
-            alt="Preview"
+            alt={t('addContact.preview')}
             className="w-32 h-32 rounded-full object-cover mx-auto"
           />
         )}
@@ -126,14 +126,22 @@ export function AddContact({ userId }: AddContactProps) {
           accept="image/*"
           onChange={handlePhotoChange}
           className="file-input file-input-bordered w-full min-h-14 min-w-14"
-          aria-label="Choose photo"
+          aria-label={t('addContact.choosePhoto')}
         />
         <div className="flex gap-3 mt-auto">
-          <EasyCallButton variant="secondary" onClick={() => setStep(1)} aria-label="Back">
-            Back
+          <EasyCallButton
+            variant="secondary"
+            onClick={() => setStep(1)}
+            aria-label={t('common.back')}
+          >
+            {t('common.back')}
           </EasyCallButton>
-          <EasyCallButton variant="primary" onClick={() => setStep(3)} aria-label="Next">
-            Next
+          <EasyCallButton
+            variant="primary"
+            onClick={() => setStep(3)}
+            aria-label={t('common.next')}
+          >
+            {t('common.next')}
           </EasyCallButton>
         </div>
       </div>
@@ -144,10 +152,10 @@ export function AddContact({ userId }: AddContactProps) {
   return (
     <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
       <EasyCallText as="h1" variant="heading">
-        Confirm
+        {t('addContact.confirmTitle')}
       </EasyCallText>
       <EasyCallText variant="body" className="font-bold">
-        Step 3: Confirm
+        {t('addContact.step3')}
       </EasyCallText>
       {photoPreview ? (
         <img
@@ -164,8 +172,12 @@ export function AddContact({ userId }: AddContactProps) {
         {name}
       </EasyCallText>
       <div className="flex gap-3 mt-auto">
-        <EasyCallButton variant="secondary" onClick={() => setStep(2)} aria-label="Back">
-          Back
+        <EasyCallButton
+          variant="secondary"
+          onClick={() => setStep(2)}
+          aria-label={t('common.back')}
+        >
+          {t('common.back')}
         </EasyCallButton>
         <EasyCallButton
           variant="primary"
@@ -173,9 +185,9 @@ export function AddContact({ userId }: AddContactProps) {
             void handleSave();
           }}
           disabled={isSaving}
-          aria-label="Save"
+          aria-label={t('common.save')}
         >
-          {isSaving ? 'Saving...' : 'Save'}
+          {isSaving ? t('common.saving') : t('common.save')}
         </EasyCallButton>
       </div>
     </div>

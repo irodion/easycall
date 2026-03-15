@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useContactStore } from '@/stores/contactStore';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
@@ -10,6 +11,7 @@ interface ManageContactsProps {
 }
 
 export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
+  const { t } = useTranslation();
   const contacts = useContactStore((s) => s.contacts);
   const addContact = useContactStore((s) => s.addContact);
   const removeContact = useContactStore((s) => s.removeContact);
@@ -49,7 +51,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
       setNewName('');
       setShowAddForm(false);
     } catch (err) {
-      setError(`Failed to add contact: ${err instanceof Error ? err.message : String(err)}`);
+      setError(t('manageContacts.addFailed', { error: err instanceof Error ? err.message : String(err) }));
     } finally {
       setIsAdding(false);
     }
@@ -63,7 +65,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
       await removeContact(elderlyUserId, confirmDeleteId);
       setConfirmDeleteId(null);
     } catch (err) {
-      setError(`Failed to remove contact: ${err instanceof Error ? err.message : String(err)}`);
+      setError(t('manageContacts.removeFailed', { error: err instanceof Error ? err.message : String(err) }));
     } finally {
       setIsDeleting(false);
     }
@@ -74,15 +76,15 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
   return (
     <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
       <EasyCallText as="h1" variant="heading">
-        Manage Contacts
+        {t('manageContacts.title')}
       </EasyCallText>
 
       <EasyCallButton
         variant="primary"
         onClick={() => setShowAddForm(!showAddForm)}
-        aria-label="Add Contact"
+        aria-label={t('manageContacts.addContact')}
       >
-        + Add Contact
+        {t('manageContacts.addContact')}
       </EasyCallButton>
 
       {error && (
@@ -96,14 +98,14 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
       {showAddForm && (
         <div className="card card-body bg-base-200 gap-3">
           <label htmlFor="new-contact-name" className="sr-only">
-            Contact name
+            {t('manageContacts.contactName')}
           </label>
           <input
             id="new-contact-name"
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Contact name"
+            placeholder={t('manageContacts.namePlaceholder')}
             className="input input-bordered w-full text-[length:var(--text-body)] min-h-14"
           />
           <input
@@ -118,9 +120,9 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
                 void handleAdd();
               }}
               disabled={!newName.trim() || isAdding}
-              aria-label="Save new contact"
+              aria-label={t('manageContacts.saveNewContact')}
             >
-              {isAdding ? 'Saving...' : 'Save'}
+              {isAdding ? t('common.saving') : t('common.save')}
             </EasyCallButton>
             <EasyCallButton
               variant="secondary"
@@ -128,9 +130,9 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
                 setShowAddForm(false);
                 setNewName('');
               }}
-              aria-label="Cancel add"
+              aria-label={t('manageContacts.cancelAdd')}
             >
-              Cancel
+              {t('common.cancel')}
             </EasyCallButton>
           </div>
         </div>
@@ -149,9 +151,9 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
               variant="danger"
               onClick={() => setConfirmDeleteId(contact.id)}
               disabled={isDeleting}
-              aria-label={`Remove ${contact.name}`}
+              aria-label={t('manageContacts.removeContact', { name: contact.name })}
             >
-              Remove
+              {t('manageContacts.remove')}
             </EasyCallButton>
           </div>
         ))}
@@ -159,7 +161,9 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
 
       <ConfirmDialog
         open={confirmDeleteId !== null}
-        message={`Are you sure you want to remove ${contactToDelete?.name ?? 'this contact'}?`}
+        message={t('manageContacts.confirmRemove', {
+          name: contactToDelete?.name ?? t('manageContacts.thisContact'),
+        })}
         onConfirm={() => {
           void handleConfirmDelete();
         }}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
@@ -16,6 +17,7 @@ interface OnboardingFlowProps {
 const TOTAL_STEPS = 4;
 
 export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +37,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
       await updateDoc(ref, { onboardingComplete: true });
       onComplete();
     } catch {
-      setError('Failed to complete setup. Please try again.');
+      setError(t('onboarding.failedSetup'));
     } finally {
       setIsSubmitting(false);
     }
@@ -45,18 +47,18 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
     <div className="min-h-screen flex flex-col items-center justify-center p-[var(--space-md)] gap-[var(--space-lg)]">
       {step === 1 && (
         <div className="flex flex-col items-center gap-[var(--space-md)] text-center max-w-md">
-          <h1 className="text-[length:var(--text-heading)] font-bold">Welcome to EasyCall</h1>
+          <h1 className="text-[length:var(--text-heading)] font-bold">{t('onboarding.welcome')}</h1>
           <p className="text-[length:var(--text-body)]">
             {user.role === 'elderly'
-              ? 'Simple video calling with your family. Just tap a photo to call!'
-              : 'Manage video calling for your family members remotely.'}
+              ? t('onboarding.elderlyDescription')
+              : t('onboarding.caregiverDescription')}
           </p>
           <div className="flex gap-[var(--space-sm)] w-full max-w-xs">
             <EasyCallButton size="large" onClick={nextStep}>
-              Next
+              {t('common.next')}
             </EasyCallButton>
             <EasyCallButton variant="secondary" size="large" onClick={nextStep}>
-              Skip
+              {t('common.skip')}
             </EasyCallButton>
           </div>
         </div>
@@ -64,22 +66,26 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
 
       {step === 2 && (
         <div className="flex flex-col items-center gap-[var(--space-md)] max-w-md">
-          <h2 className="text-[length:var(--text-heading)] font-bold">Camera & Microphone</h2>
+          <h2 className="text-[length:var(--text-heading)] font-bold">
+            {t('onboarding.cameraMic')}
+          </h2>
           <p className="text-[length:var(--text-body)] text-center">
-            EasyCall needs access to your camera and microphone for video calls.
+            {t('onboarding.cameraMicHint')}
           </p>
           <PermissionCheck onReady={nextStep} />
           <EasyCallButton variant="secondary" size="large" onClick={nextStep}>
-            Skip
+            {t('common.skip')}
           </EasyCallButton>
         </div>
       )}
 
       {step === 3 && (
         <div className="flex flex-col items-center gap-[var(--space-md)] max-w-md">
-          <h2 className="text-[length:var(--text-heading)] font-bold">Notification Permission</h2>
+          <h2 className="text-[length:var(--text-heading)] font-bold">
+            {t('onboarding.notifications')}
+          </h2>
           <p className="text-[length:var(--text-body)] text-center">
-            Allow notifications so you know when someone is calling you.
+            {t('onboarding.notificationsHint')}
           </p>
           <EasyCallButton
             size="large"
@@ -92,10 +98,10 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
               nextStep();
             }}
           >
-            Next
+            {t('common.next')}
           </EasyCallButton>
           <EasyCallButton variant="secondary" size="large" onClick={nextStep}>
-            Skip
+            {t('common.skip')}
           </EasyCallButton>
         </div>
       )}
@@ -103,7 +109,9 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
       {step === 4 && (
         <div className="flex flex-col items-center gap-[var(--space-md)] max-w-md">
           <h2 className="text-[length:var(--text-heading)] font-bold">
-            {user.role === 'elderly' ? 'Pair with Caregiver' : 'Link to Elderly User'}
+            {user.role === 'elderly'
+              ? t('onboarding.pairWithCaregiver')
+              : t('onboarding.linkToElderly')}
           </h2>
           {user.role === 'elderly' ? (
             <PairingCodeDisplay userId={user.uid} />
@@ -116,7 +124,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
             </p>
           )}
           <EasyCallButton size="large" disabled={isSubmitting} onClick={() => void handleFinish()}>
-            {isSubmitting ? 'Saving...' : 'Done'}
+            {isSubmitting ? t('common.saving') : t('onboarding.done')}
           </EasyCallButton>
           <EasyCallButton
             variant="secondary"
@@ -124,13 +132,13 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
             disabled={isSubmitting}
             onClick={() => void handleFinish()}
           >
-            Skip
+            {t('common.skip')}
           </EasyCallButton>
         </div>
       )}
 
       <nav
-        aria-label={`Step ${String(step)} of ${String(TOTAL_STEPS)}`}
+        aria-label={t('onboarding.stepOf', { step: String(step), total: String(TOTAL_STEPS) })}
         className="flex gap-[var(--space-xs)]"
       >
         {Array.from({ length: TOTAL_STEPS }, (_, i) => (

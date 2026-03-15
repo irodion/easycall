@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { usePairingCode } from '@/hooks/usePairingCode';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 
@@ -6,15 +7,16 @@ interface PairingCodeDisplayProps {
 }
 
 export function PairingCodeDisplay({ userId }: PairingCodeDisplayProps) {
+  const { t } = useTranslation();
   const { code, formattedCountdown, refresh } = usePairingCode(userId);
 
   return (
     <div className="flex flex-col items-center gap-[var(--space-md)]">
-      <p className="text-[length:var(--text-body)]">Your pairing code:</p>
+      <p className="text-[length:var(--text-body)]">{t('pairingCode.yourCode')}</p>
       {code ? (
         <p
           className="text-[length:var(--text-display)] font-bold tracking-[0.25em]"
-          aria-label={`Pairing code: ${code.split('').join(' ')}`}
+          aria-label={t('pairingCode.pairingCodeLabel', { code: code.split('').join(' ') })}
           aria-live="polite"
         >
           {code}
@@ -23,14 +25,14 @@ export function PairingCodeDisplay({ userId }: PairingCodeDisplayProps) {
         <span
           className="loading loading-spinner loading-lg"
           role="status"
-          aria-label="Generating code"
+          aria-label={t('pairingCode.generatingCode')}
         />
       )}
       <p className="text-[length:var(--text-body)] text-[color:var(--color-text-secondary)]">
-        Expires in {formattedCountdown}
+        {t('pairingCode.expiresIn', { time: formattedCountdown })}
       </p>
       <EasyCallButton variant="secondary" onClick={() => void refresh()}>
-        Get new code
+        {t('pairingCode.getNewCode')}
       </EasyCallButton>
     </div>
   );
