@@ -13,6 +13,7 @@ vi.mock('firebase/firestore', () => ({
   doc: vi.fn().mockReturnValue('doc-ref'),
   getDoc: vi.fn().mockResolvedValue({ exists: () => false, data: () => undefined }),
   setDoc: vi.fn().mockResolvedValue(undefined),
+  onSnapshot: vi.fn().mockReturnValue(() => {}),
   getFirestore: vi.fn(),
 }));
 
@@ -24,6 +25,15 @@ vi.mock('@/services/firebase', () => ({
 
 vi.mock('@/hooks/useActiveCall', () => ({
   useActiveCall: () => ({ activeCall: null, dismiss: vi.fn() }),
+}));
+
+vi.mock('@/hooks/useAppLock', () => ({
+  useAppLock: () => ({
+    isLocked: false,
+    failedAttempts: 0,
+    cooldownRemaining: 0,
+    unlockWithPin: vi.fn().mockResolvedValue(true),
+  }),
 }));
 
 vi.mock('@/services/callHistory', () => ({

@@ -37,7 +37,7 @@ describe('AuthGuard', () => {
     renderWithProviders(
       <AuthGuard requiredRole="elderly">
         <div>Protected Content</div>
-      </AuthGuard>
+      </AuthGuard>,
     );
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
@@ -58,7 +58,7 @@ describe('AuthGuard', () => {
       renderWithProviders(
         <AuthGuard requiredRole="elderly">
           <div>Content</div>
-        </AuthGuard>
+        </AuthGuard>,
       );
     });
     expect(signInAnonymously).toHaveBeenCalled();
@@ -82,7 +82,7 @@ describe('AuthGuard', () => {
       renderWithProviders(
         <AuthGuard requiredRole="elderly">
           <div>Protected</div>
-        </AuthGuard>
+        </AuthGuard>,
       );
     });
     // Should show RoleSelector (which has "Who are you?" heading)
@@ -108,7 +108,7 @@ describe('AuthGuard', () => {
       renderWithProviders(
         <AuthGuard requiredRole="elderly">
           <div>Protected Content</div>
-        </AuthGuard>
+        </AuthGuard>,
       );
     });
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('AuthGuard', () => {
         <AuthGuard requiredRole="elderly">
           <div>Elderly Content</div>
         </AuthGuard>,
-        { routerProps: { initialEntries: ['/elderly'] } }
+        { routerProps: { initialEntries: ['/elderly'] } },
       );
     });
     // Wrong role → Navigate renders, child content is NOT shown
@@ -148,7 +148,7 @@ describe('AuthGuard', () => {
     const { container } = renderWithProviders(
       <AuthGuard requiredRole="elderly">
         <div>Content</div>
-      </AuthGuard>
+      </AuthGuard>,
     );
     expect(await axe(container)).toHaveNoViolations();
   });

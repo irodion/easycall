@@ -22,6 +22,8 @@ export interface UserSettings {
   highContrast: boolean;
   ringtoneVolume: number;
   autoAnswer: boolean;
+  appLockEnabled: boolean;
+  appLockPinHash: string | null;
 }
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
@@ -29,6 +31,8 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   highContrast: false,
   ringtoneVolume: 80,
   autoAnswer: false,
+  appLockEnabled: false,
+  appLockPinHash: null,
 };
 
 export interface Contact {

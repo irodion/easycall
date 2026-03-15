@@ -10,12 +10,14 @@ const defaultSettings: UserSettings = {
   highContrast: false,
   ringtoneVolume: 80,
   autoAnswer: false,
+  appLockEnabled: false,
+  appLockPinHash: null,
 };
 
 describe('SettingsScreen', () => {
   it('renders font size radio group with 2 options', () => {
     renderWithProviders(
-      <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />
+      <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
     );
     expect(screen.getByRole('radiogroup')).toBeInTheDocument();
     // Use exact name to avoid 'Large' matching 'Extra Large'
@@ -25,7 +27,11 @@ describe('SettingsScreen', () => {
 
   it('reflects current fontSize in radio selection', () => {
     renderWithProviders(
-      <SettingsScreen settings={{ ...defaultSettings, fontSize: 'x-large' }} onSettingsChange={vi.fn()} userId="user-1" />
+      <SettingsScreen
+        settings={{ ...defaultSettings, fontSize: 'x-large' }}
+        onSettingsChange={vi.fn()}
+        userId="user-1"
+      />,
     );
     const xlarge = screen.getByRole('radio', { name: 'Extra Large' }) as HTMLInputElement;
     expect(xlarge.checked).toBe(true);
@@ -34,7 +40,11 @@ describe('SettingsScreen', () => {
   it('clicking a radio calls onSettingsChange with updated fontSize', () => {
     const onSettingsChange = vi.fn();
     renderWithProviders(
-      <SettingsScreen settings={defaultSettings} onSettingsChange={onSettingsChange} userId="user-1" />
+      <SettingsScreen
+        settings={defaultSettings}
+        onSettingsChange={onSettingsChange}
+        userId="user-1"
+      />,
     );
     fireEvent.click(screen.getByRole('radio', { name: 'Extra Large' }));
     expect(onSettingsChange).toHaveBeenCalledWith({ ...defaultSettings, fontSize: 'x-large' });
@@ -42,7 +52,7 @@ describe('SettingsScreen', () => {
 
   it('renders pairing code section', () => {
     renderWithProviders(
-      <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />
+      <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
     );
     expect(screen.getByTestId('pairing-code-section')).toBeInTheDocument();
   });
@@ -50,7 +60,7 @@ describe('SettingsScreen', () => {
   it('Add Contact button navigates to /elderly/add-contact', () => {
     renderWithProviders(
       <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
-      { routerProps: { initialEntries: ['/elderly/settings'] } }
+      { routerProps: { initialEntries: ['/elderly/settings'] } },
     );
     const link = screen.getByRole('link', { name: /add contact/i });
     expect(link).toBeInTheDocument();
@@ -60,7 +70,7 @@ describe('SettingsScreen', () => {
   it('Back button/link navigates to /elderly', () => {
     renderWithProviders(
       <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
-      { routerProps: { initialEntries: ['/elderly/settings'] } }
+      { routerProps: { initialEntries: ['/elderly/settings'] } },
     );
     const link = screen.getByRole('link', { name: /back/i });
     expect(link).toBeInTheDocument();
@@ -69,7 +79,7 @@ describe('SettingsScreen', () => {
 
   it('passes vitest-axe accessibility check', async () => {
     const { container } = renderWithProviders(
-      <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />
+      <SettingsScreen settings={defaultSettings} onSettingsChange={vi.fn()} userId="user-1" />,
     );
     expect(await axe(container)).toHaveNoViolations();
   });

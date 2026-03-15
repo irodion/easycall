@@ -7,7 +7,7 @@ export default defineConfig({
   fullyParallel: !useEmulators,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 2 : 0,
-  workers: (process.env['CI'] || useEmulators) ? 1 : undefined,
+  workers: process.env['CI'] || useEmulators ? 1 : undefined,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:5173',
@@ -20,10 +20,7 @@ export default defineConfig({
         ...devices['Pixel 7'],
         permissions: ['camera', 'microphone', 'notifications'],
         launchOptions: {
-          args: [
-            '--use-fake-device-for-media-stream',
-            '--use-fake-ui-for-media-stream',
-          ],
+          args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'],
         },
       },
     },

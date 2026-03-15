@@ -21,7 +21,7 @@ vi.mock('@/stores/contactStore', () => ({
       addContact: mockAddContact,
       removeContact: mockRemoveContact,
       fetchContacts: vi.fn(),
-    })
+    }),
   ),
 }));
 

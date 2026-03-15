@@ -59,8 +59,8 @@ export function Dashboard({ userId }: DashboardProps) {
         const chunks = chunkArray(linkedIds, 30);
         const snapshots = await Promise.all(
           chunks.map((chunk) =>
-            getDocs(query(collection(db, 'users'), where('__name__', 'in', chunk)))
-          )
+            getDocs(query(collection(db, 'users'), where('__name__', 'in', chunk))),
+          ),
         );
 
         if (!cancelled) {
@@ -69,7 +69,7 @@ export function Dashboard({ userId }: DashboardProps) {
               uid: d.id,
               displayName: String(d.data()['displayName'] ?? 'Unknown'),
               lastSeen: d.data()['lastSeen'] as EasyCallUser['lastSeen'],
-            }))
+            })),
           );
           setLinkedUsers(users);
           setLoading(false);
@@ -87,7 +87,9 @@ export function Dashboard({ userId }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
-      <EasyCallText as="h1" variant="heading">Caregiver Dashboard</EasyCallText>
+      <EasyCallText as="h1" variant="heading">
+        Caregiver Dashboard
+      </EasyCallText>
 
       <Link
         to="/caregiver/pair"

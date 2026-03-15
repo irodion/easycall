@@ -29,10 +29,7 @@ async function clearEmulators(): Promise<void> {
       `${FIRESTORE_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/databases/(default)/documents`,
       { method: 'DELETE' },
     ),
-    fetch(
-      `${AUTH_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/accounts`,
-      { method: 'DELETE' },
-    ),
+    fetch(`${AUTH_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/accounts`, { method: 'DELETE' }),
   ]);
   if (!firestoreRes.ok) {
     throw new Error(`clearEmulators: Firestore DELETE failed (${firestoreRes.status})`);
@@ -154,9 +151,9 @@ test.describe('Incoming Call Flow', () => {
     expect(response.ok()).toBe(true);
 
     // 7. Verify the IncomingCallScreen appears
-    await expect(
-      elderlyPage.getByRole('button', { name: /answer/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(elderlyPage.getByRole('button', { name: /answer/i })).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Verify caller name is displayed
     await expect(elderlyPage.getByText('Test Caller')).toBeVisible();
@@ -165,9 +162,9 @@ test.describe('Incoming Call Flow', () => {
     await elderlyPage.getByRole('button', { name: /decline/i }).click();
 
     // Verify the ringing screen is dismissed
-    await expect(
-      elderlyPage.getByRole('button', { name: /answer/i }),
-    ).not.toBeVisible({ timeout: 5_000 });
+    await expect(elderlyPage.getByRole('button', { name: /answer/i })).not.toBeVisible({
+      timeout: 5_000,
+    });
 
     await elderlyCtx.close();
   });

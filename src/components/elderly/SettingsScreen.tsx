@@ -21,7 +21,9 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
         >
           ← Back
         </Link>
-        <EasyCallText as="h1" variant="heading">Settings</EasyCallText>
+        <EasyCallText as="h1" variant="heading">
+          Settings
+        </EasyCallText>
       </div>
 
       <section>
@@ -29,7 +31,10 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
           Text Size
         </EasyCallText>
         <div role="radiogroup" aria-labelledby={labelId} className="flex flex-col gap-3">
-          <label htmlFor="font-large" className="flex items-center gap-3 cursor-pointer min-h-14 min-w-14">
+          <label
+            htmlFor="font-large"
+            className="flex items-center gap-3 cursor-pointer min-h-14 min-w-14"
+          >
             <input
               id="font-large"
               type="radio"
@@ -39,9 +44,14 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
               onChange={() => onSettingsChange({ ...settings, fontSize: 'large' })}
               className="radio radio-primary"
             />
-            <EasyCallText as="span" variant="body">Large</EasyCallText>
+            <EasyCallText as="span" variant="body">
+              Large
+            </EasyCallText>
           </label>
-          <label htmlFor="font-xlarge" className="flex items-center gap-3 cursor-pointer min-h-14 min-w-14">
+          <label
+            htmlFor="font-xlarge"
+            className="flex items-center gap-3 cursor-pointer min-h-14 min-w-14"
+          >
             <input
               id="font-xlarge"
               type="radio"
@@ -51,7 +61,9 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
               onChange={() => onSettingsChange({ ...settings, fontSize: 'x-large' })}
               className="radio radio-primary"
             />
-            <EasyCallText as="span" variant="body">Extra Large</EasyCallText>
+            <EasyCallText as="span" variant="body">
+              Extra Large
+            </EasyCallText>
           </label>
         </div>
       </section>

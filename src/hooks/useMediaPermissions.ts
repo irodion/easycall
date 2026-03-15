@@ -63,7 +63,9 @@ export function useMediaPermissions(): UseMediaPermissionsResult {
     }
 
     void check();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [retryCount]);
 
   const retry = useCallback(() => {

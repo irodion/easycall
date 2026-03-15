@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/services/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '@/services/firebase';
 import { AuthGuard } from '@/components/shared/AuthGuard';
 import { RoleSelector } from '@/components/shared/RoleSelector';
 import { InstallPrompt } from '@/components/shared/InstallPrompt';
+import { AppLock } from '@/components/shared/AppLock';
 import { IncomingCallScreen } from '@/components/elderly/IncomingCallScreen';
 import { useIncomingCall } from '@/hooks/useIncomingCall';
+import { useAppLock } from '@/hooks/useAppLock';
 import { HomeScreen } from '@/components/elderly/HomeScreen';
 import { SettingsScreen } from '@/components/elderly/SettingsScreen';
 import { AddContact } from '@/components/elderly/AddContact';
@@ -50,46 +53,82 @@ function AuthenticatedApp() {
     });
   }, []);
 
+  // Reset settings when userId changes (prop-to-state pattern)
+  const [prevUserId, setPrevUserId] = useState(userId);
+  if (prevUserId !== userId) {
+    setPrevUserId(userId);
+    setSettings(DEFAULT_USER_SETTINGS);
+  }
+
+  // Sync settings from Firestore in real-time
+  useEffect(() => {
+    if (!userId) return;
+    const ref = doc(db, 'users', userId);
+    const unsubscribe = onSnapshot(ref, (snap) => {
+      if (!snap.exists()) {
+        setSettings(DEFAULT_USER_SETTINGS);
+        return;
+      }
+      const data = snap.data();
+      const raw = (data['settings'] as Partial<UserSettings>) ?? {};
+      const incoming = { ...DEFAULT_USER_SETTINGS, ...raw };
+      setSettings((prev) => {
+        if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
+        return incoming;
+      });
+    });
+    return unsubscribe;
+  }, [userId]);
+
   useIncomingCall(userId);
+
+  const lockState = useAppLock({ settings });
 
   return (
     <>
-      <Routes>
-        <Route path="/" element={<RoleSelector />} />
-        <Route element={<AuthGuard requiredRole="elderly" />}>
-          <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
-          <Route
-            path="/elderly/settings"
-            element={
-              userId ? (
-                <SettingsScreen
-                  userId={userId}
-                  settings={settings}
-                  onSettingsChange={(s: UserSettings) => {
-                    setSettings(s);
-                  }}
-                />
-              ) : null
-            }
-          />
-          <Route
-            path="/elderly/add-contact"
-            element={userId ? <AddContact userId={userId} /> : null}
-          />
-          <Route
-            path="/elderly/history"
-            element={userId ? <CallHistory userId={userId} /> : null}
-          />
-          <Route path="/call/:contactId" element={<CallScreen />} />
-        </Route>
-        <Route element={<AuthGuard requiredRole="caregiver" />}>
-          <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />
-          <Route path="/caregiver/manage/:elderlyUserId" element={<ManageContactsPage />} />
-          <Route path="/caregiver/pair" element={<PairElderlyUserPage />} />
-          <Route path="/caregiver/settings/:elderlyUserId" element={<CaregiverSettingsPage />} />
-        </Route>
-      </Routes>
-      <InstallPrompt />
+      <AppLock
+        isLocked={lockState.isLocked}
+        failedAttempts={lockState.failedAttempts}
+        cooldownRemaining={lockState.cooldownRemaining}
+        onPinSubmit={lockState.unlockWithPin}
+      >
+        <Routes>
+          <Route path="/" element={<RoleSelector />} />
+          <Route element={<AuthGuard requiredRole="elderly" />}>
+            <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
+            <Route
+              path="/elderly/settings"
+              element={
+                userId ? (
+                  <SettingsScreen
+                    userId={userId}
+                    settings={settings}
+                    onSettingsChange={(s: UserSettings) => {
+                      setSettings(s);
+                    }}
+                  />
+                ) : null
+              }
+            />
+            <Route
+              path="/elderly/add-contact"
+              element={userId ? <AddContact userId={userId} /> : null}
+            />
+            <Route
+              path="/elderly/history"
+              element={userId ? <CallHistory userId={userId} /> : null}
+            />
+            <Route path="/call/:contactId" element={<CallScreen />} />
+          </Route>
+          <Route element={<AuthGuard requiredRole="caregiver" />}>
+            <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />
+            <Route path="/caregiver/manage/:elderlyUserId" element={<ManageContactsPage />} />
+            <Route path="/caregiver/pair" element={<PairElderlyUserPage />} />
+            <Route path="/caregiver/settings/:elderlyUserId" element={<CaregiverSettingsPage />} />
+          </Route>
+        </Routes>
+        <InstallPrompt />
+      </AppLock>
       <IncomingCallScreen />
     </>
   );

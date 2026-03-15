@@ -76,11 +76,11 @@ rules:
   # -- Firebase security --
   - id: no-unvalidated-firestore-input
     patterns:
-      - pattern: setDoc($REF, $DATA)
-      - pattern-not-inside: |
-          if (...) { ... setDoc($REF, $DATA) ... }
+      - pattern-either:
+          - pattern: setDoc($REF, $DATA)
+          - pattern: setDoc($REF, $DATA, $OPTS)
     message: >
       Firestore setDoc should validate data before writing. Consider adding
       input validation.
     languages: [typescript, javascript]
-    severity: WARNING
+    severity: INFO

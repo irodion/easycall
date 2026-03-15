@@ -55,7 +55,7 @@ export function CallScreen() {
     // so snapshot refreshes (which create new contact objects) don't re-run this effect.
     const currentContact = contacts.find((c) => c.id === contactId);
     if (!currentContact) return;
-    const { jitsiRoomId } = currentContact;
+    const { jitsiRoomId, name: contactName } = currentContact;
 
     let mounted = true;
 
@@ -92,14 +92,14 @@ export function CallScreen() {
 
         apiRef.current = api;
         callStartTimeRef.current = Date.now();
-        contactNameRef.current = currentContact.name;
+        contactNameRef.current = contactName;
 
         // Write activeCall doc so HomeScreen can offer rejoin on disconnect
         const userId = auth.currentUser?.uid;
         if (userId) {
           void setActiveCall(userId, {
             contactId: contactId!,
-            contactName: currentContact.name,
+            contactName: contactName,
             jitsiRoomId,
             startedAt: Timestamp.now(),
           });

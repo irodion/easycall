@@ -16,30 +16,22 @@ describe('EasyCallText', () => {
 
   it('default variant applies body font-size class', () => {
     render(<EasyCallText>Text</EasyCallText>);
-    expect(screen.getByText('Text').className).toMatch(
-      /text-\[length:var\(--text-body\)\]/,
-    );
+    expect(screen.getByText('Text').className).toMatch(/text-\[length:var\(--text-body\)\]/);
   });
 
   it('variant="heading" applies heading font-size class', () => {
     render(<EasyCallText variant="heading">Title</EasyCallText>);
-    expect(screen.getByText('Title').className).toMatch(
-      /text-\[length:var\(--text-heading\)\]/,
-    );
+    expect(screen.getByText('Title').className).toMatch(/text-\[length:var\(--text-heading\)\]/);
   });
 
   it('variant="button" applies button font-size class', () => {
     render(<EasyCallText variant="button">Click</EasyCallText>);
-    expect(screen.getByText('Click').className).toMatch(
-      /text-\[length:var\(--text-button\)\]/,
-    );
+    expect(screen.getByText('Click').className).toMatch(/text-\[length:var\(--text-button\)\]/);
   });
 
   it('variant="display" applies display font-size class', () => {
     render(<EasyCallText variant="display">Big</EasyCallText>);
-    expect(screen.getByText('Big').className).toMatch(
-      /text-\[length:var\(--text-display\)\]/,
-    );
+    expect(screen.getByText('Big').className).toMatch(/text-\[length:var\(--text-display\)\]/);
   });
 
   it('fontSize="x-large" applies text-xl scale-up class', () => {

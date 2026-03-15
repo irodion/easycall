@@ -6,16 +6,22 @@ import type { ActiveCallData } from '@/types/user';
 export function useActiveCall(userId: string | null) {
   const [activeCall, setActiveCall] = useState<ActiveCallData | null>(null);
 
-  useEffect(() => {
+  // Reset activeCall when userId changes via state-derived-from-props pattern
+  const [prevUserId, setPrevUserId] = useState(userId);
+  if (prevUserId !== userId) {
+    setPrevUserId(userId);
     setActiveCall(null);
+  }
 
+  useEffect(() => {
     if (!userId) return;
 
+    const uid = userId;
     let cancelled = false;
 
     async function checkActiveCall() {
       try {
-        const snap = await getDoc(activeCallRef(userId));
+        const snap = await getDoc(activeCallRef(uid));
         if (cancelled) return;
         if (!snap.exists()) return;
         const raw = snap.data();
@@ -26,7 +32,7 @@ export function useActiveCall(userId: string | null) {
           !raw['startedAt'] ||
           typeof (raw['startedAt'] as { toDate?: unknown }).toDate !== 'function'
         ) {
-          await clearActiveCall(userId);
+          await clearActiveCall(uid);
           return;
         }
 
@@ -38,7 +44,7 @@ export function useActiveCall(userId: string | null) {
         if (data.status === 'active' && startedAtMs > fiveMinutesAgo) {
           setActiveCall(data);
         } else {
-          await clearActiveCall(userId);
+          await clearActiveCall(uid);
         }
       } catch {
         // Network/permission errors — silently fail, no rejoin prompt shown

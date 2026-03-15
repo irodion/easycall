@@ -65,9 +65,7 @@ describe('EasyCallCard', () => {
   });
 
   it('accepts className prop', () => {
-    const { container } = render(
-      <EasyCallCard className="extra-class">Content</EasyCallCard>,
-    );
+    const { container } = render(<EasyCallCard className="extra-class">Content</EasyCallCard>);
     expect(container.firstChild).toHaveClass('extra-class');
   });
 });

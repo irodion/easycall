@@ -1,8 +1,4 @@
-import type {
-  JitsiEvent,
-  JitsiCommand,
-  JitsiMeetExternalAPIOptions,
-} from '@/types/jitsi';
+import type { JitsiEvent, JitsiCommand, JitsiMeetExternalAPIOptions } from '@/types/jitsi';
 
 type ListenerFn = (data: unknown) => void;
 
@@ -12,10 +8,7 @@ export class MockJitsiMeetExternalAPI {
   readonly listeners = new Map<string, Set<ListenerFn>>();
   private readonly commands: Array<{ command: string; args: unknown[] }> = [];
 
-  constructor(
-    domain: string,
-    options: Omit<JitsiMeetExternalAPIOptions, 'domain'>,
-  ) {
+  constructor(domain: string, options: Omit<JitsiMeetExternalAPIOptions, 'domain'>) {
     this.domain = domain;
     this.options = options;
   }

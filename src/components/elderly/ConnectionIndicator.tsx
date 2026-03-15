@@ -29,7 +29,8 @@ export function ConnectionIndicator({ api }: ConnectionIndicatorProps) {
   useEffect(() => {
     const handler = (data: unknown) => {
       if (
-        typeof data !== 'object' || data === null ||
+        typeof data !== 'object' ||
+        data === null ||
         typeof (data as Record<string, unknown>).connectionQuality !== 'number'
       ) {
         return;
@@ -61,10 +62,7 @@ export function ConnectionIndicator({ api }: ConnectionIndicatorProps) {
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="flex items-center gap-2">
-        <span
-          className={`w-3 h-3 rounded-full ${config.color}`}
-          aria-hidden="true"
-        />
+        <span className={`w-3 h-3 rounded-full ${config.color}`} aria-hidden="true" />
         <EasyCallText as="span" variant="body">
           {config.label}
         </EasyCallText>

@@ -33,7 +33,9 @@ describe('PermissionCheck', () => {
     const retry = vi.fn();
     vi.mocked(useMediaPermissions).mockReturnValue({ status: 'denied', retry });
     renderWithProviders(<PermissionCheck onReady={vi.fn()} />);
-    expect(screen.getByText(/camera.*blocked|blocked.*camera|permission.*denied|denied/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/camera.*blocked|blocked.*camera|permission.*denied|denied/i),
+    ).toBeInTheDocument();
     const btn = screen.getByRole('button', { name: /try again/i });
     fireEvent.click(btn);
     expect(retry).toHaveBeenCalled();

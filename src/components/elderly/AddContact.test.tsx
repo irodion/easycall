@@ -16,7 +16,7 @@ vi.mock('@/stores/contactStore', () => ({
       removeContact: vi.fn(),
       fetchContacts: vi.fn(),
       subscribeToContacts: vi.fn().mockReturnValue(() => {}),
-    })
+    }),
   ),
 }));
 
@@ -94,7 +94,7 @@ describe('AddContact', () => {
         name: 'Alice',
         photoURL: null,
         jitsiRoomId: expect.stringMatching(/^easycall-alice-[a-z0-9]{6}$/),
-      })
+      }),
     );
   });
 

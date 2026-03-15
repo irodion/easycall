@@ -30,12 +30,9 @@ describe('Firebase MSW handlers', () => {
 
   it('allows per-test handler overrides via server.use()', async () => {
     server.use(
-      http.get(
-        'https://firestore.googleapis.com/v1/projects/*/databases/*/documents/*',
-        () => {
-          return HttpResponse.json({ custom: 'override' });
-        },
-      ),
+      http.get('https://firestore.googleapis.com/v1/projects/*/databases/*/documents/*', () => {
+        return HttpResponse.json({ custom: 'override' });
+      }),
     );
 
     const response = await fetch(`${FIRESTORE_BASE}/users/user-1`);
