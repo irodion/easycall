@@ -55,6 +55,7 @@ export function IncomingCallScreen() {
       ref={dialogRef}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-[var(--space-lg)] bg-base-100 p-[var(--space-md)]"
       role="alertdialog"
+      aria-modal="true"
       aria-label={t('incomingCall.isCalling', { name: incomingCall.callerName })}
     >
       {incomingCall.callerPhotoURL ? (

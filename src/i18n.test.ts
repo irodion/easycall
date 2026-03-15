@@ -1,7 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import i18n, { loadLanguage, RTL_LANGUAGES, SUPPORTED_LANGUAGES } from './i18n';
 
 describe('i18n', () => {
+  afterEach(async () => {
+    await loadLanguage('en');
+  });
+
   it('initializes with English as default language', () => {
     expect(i18n.language).toBe('en');
   });
@@ -33,8 +37,6 @@ describe('i18n', () => {
     await loadLanguage('es');
     expect(i18n.hasResourceBundle('es', 'translation')).toBe(true);
     expect(i18n.language).toBe('es');
-    // Restore
-    await loadLanguage('en');
   });
 
   it('loadLanguage for English does not need lazy load', async () => {
@@ -59,25 +61,21 @@ describe('i18n', () => {
     // Load again — should skip import since bundle already loaded
     await loadLanguage('es');
     expect(i18n.language).toBe('es');
-    await loadLanguage('en');
   });
 
   it('loadLanguage loads Hebrew', async () => {
     await loadLanguage('he');
     expect(i18n.hasResourceBundle('he', 'translation')).toBe(true);
     expect(i18n.language).toBe('he');
-    await loadLanguage('en');
   });
 
   it('loadLanguage loads Russian', async () => {
     await loadLanguage('ru');
     expect(i18n.hasResourceBundle('ru', 'translation')).toBe(true);
-    await loadLanguage('en');
   });
 
   it('loadLanguage loads German', async () => {
     await loadLanguage('de');
     expect(i18n.hasResourceBundle('de', 'translation')).toBe(true);
-    await loadLanguage('en');
   });
 });

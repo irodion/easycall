@@ -8,7 +8,8 @@
     "save": "שמור",
     "saving": "שומר...",
     "loading": "טוען...",
-    "install": "התקן"
+    "install": "התקן",
+    "somethingWentWrong": "משהו השתבש"
   },
   "home": {
     "title": "אנשי הקשר שלך",
@@ -87,6 +88,8 @@
     "confirmRemove": "האם אתה בטוח שברצונך להסיר את {{name}}?",
     "removeContact": "הסר את {{name}}",
     "thisContact": "איש קשר זה",
+    "addFailed": "שגיאה בהוספת איש קשר: {{error}}",
+    "removeFailed": "שגיאה בהסרת איש קשר: {{error}}",
     "saveNewContact": "שמור איש קשר חדש",
     "cancelAdd": "בטל הוספה"
   },
@@ -174,7 +177,8 @@
     "digitsEntered": "{{count}} מתוך 4 ספרות הוזנו",
     "tooManyAttempts": "יותר מדי ניסיונות. נסה שוב בעוד {{seconds}} שניות",
     "wrongPin": "PIN שגוי",
-    "clear": "נקה"
+    "clear": "נקה",
+    "backspace": "מחיקה"
   },
   "connection": {
     "good": "חיבור טוב",

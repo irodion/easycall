@@ -8,7 +8,8 @@
     "save": "Speichern",
     "saving": "Speichern...",
     "loading": "Laden...",
-    "install": "Installieren"
+    "install": "Installieren",
+    "somethingWentWrong": "Etwas ist schiefgelaufen"
   },
   "home": {
     "title": "Ihre Kontakte",
@@ -87,6 +88,8 @@
     "confirmRemove": "Sind Sie sicher, dass Sie {{name}} entfernen möchten?",
     "removeContact": "{{name}} entfernen",
     "thisContact": "diesen Kontakt",
+    "addFailed": "Kontakt konnte nicht hinzugefügt werden: {{error}}",
+    "removeFailed": "Kontakt konnte nicht entfernt werden: {{error}}",
     "saveNewContact": "Neuen Kontakt speichern",
     "cancelAdd": "Hinzufügen abbrechen"
   },
@@ -174,7 +177,8 @@
     "digitsEntered": "{{count}} von 4 Ziffern eingegeben",
     "tooManyAttempts": "Zu viele Versuche. Versuchen Sie es in {{seconds}}s erneut",
     "wrongPin": "Falsche PIN",
-    "clear": "Löschen"
+    "clear": "Löschen",
+    "backspace": "Zurück"
   },
   "connection": {
     "good": "Gute Verbindung",

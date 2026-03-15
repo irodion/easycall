@@ -31,12 +31,20 @@ void i18n.use(initReactI18next).init({
   resources: { en: { translation: en } },
 });
 
+function isSupportedLanguage(lang: string): lang is SupportedLanguage {
+  return SUPPORTED_LANGUAGES.some((l) => l.code === lang);
+}
+
 export async function loadLanguage(lang: string): Promise<void> {
+  if (!isSupportedLanguage(lang)) {
+    await i18n.changeLanguage('en');
+    return;
+  }
   if (lang === 'en' || i18n.hasResourceBundle(lang, 'translation')) {
     await i18n.changeLanguage(lang);
     return;
   }
-  const loader = languageResources[lang as SupportedLanguage];
+  const loader = languageResources[lang];
   if (loader) {
     const mod = await loader();
     i18n.addResourceBundle(lang, 'translation', mod.default);

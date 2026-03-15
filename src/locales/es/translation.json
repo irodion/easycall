@@ -8,7 +8,8 @@
     "save": "Guardar",
     "saving": "Guardando...",
     "loading": "Cargando...",
-    "install": "Instalar"
+    "install": "Instalar",
+    "somethingWentWrong": "Algo salió mal"
   },
   "home": {
     "title": "Sus Contactos",
@@ -87,6 +88,8 @@
     "confirmRemove": "¿Está seguro de que desea eliminar a {{name}}?",
     "removeContact": "Eliminar a {{name}}",
     "thisContact": "este contacto",
+    "addFailed": "Error al agregar contacto: {{error}}",
+    "removeFailed": "Error al eliminar contacto: {{error}}",
     "saveNewContact": "Guardar nuevo contacto",
     "cancelAdd": "Cancelar agregar"
   },
@@ -174,7 +177,8 @@
     "digitsEntered": "{{count}} de 4 dígitos ingresados",
     "tooManyAttempts": "Demasiados intentos. Inténtelo de nuevo en {{seconds}}s",
     "wrongPin": "PIN incorrecto",
-    "clear": "Borrar"
+    "clear": "Borrar",
+    "backspace": "Retroceso"
   },
   "connection": {
     "good": "Buena conexión",

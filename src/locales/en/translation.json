@@ -8,7 +8,8 @@
     "save": "Save",
     "saving": "Saving...",
     "loading": "Loading...",
-    "install": "Install"
+    "install": "Install",
+    "somethingWentWrong": "Something went wrong"
   },
   "home": {
     "title": "Your Contacts",
@@ -87,6 +88,8 @@
     "confirmRemove": "Are you sure you want to remove {{name}}?",
     "removeContact": "Remove {{name}}",
     "thisContact": "this contact",
+    "addFailed": "Failed to add contact: {{error}}",
+    "removeFailed": "Failed to remove contact: {{error}}",
     "saveNewContact": "Save new contact",
     "cancelAdd": "Cancel add"
   },
@@ -174,7 +177,8 @@
     "digitsEntered": "{{count}} of 4 digits entered",
     "tooManyAttempts": "Too many attempts. Try again in {{seconds}}s",
     "wrongPin": "Wrong PIN",
-    "clear": "Clear"
+    "clear": "Clear",
+    "backspace": "Backspace"
   },
   "connection": {
     "good": "Good connection",

@@ -122,7 +122,7 @@ describe('ElderlyUserSettings', () => {
 
     await user.click(screen.getByRole('checkbox', { name: /enable app lock/i }));
 
-    expect(screen.getByLabelText(/^PIN$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/set pin/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm pin/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /save pin/i })).toBeInTheDocument();
     // Should NOT write appLockEnabled until PIN is saved
@@ -152,7 +152,7 @@ describe('ElderlyUserSettings', () => {
 
     // Toggle on (local only), enter PIN, save
     await user.click(screen.getByRole('checkbox', { name: /enable app lock/i }));
-    await user.type(screen.getByLabelText(/^PIN$/i), '1234');
+    await user.type(screen.getByLabelText(/set pin/i), '1234');
     await user.type(screen.getByLabelText(/confirm pin/i), '1234');
     await user.click(screen.getByRole('button', { name: /save pin/i }));
 
@@ -173,7 +173,7 @@ describe('ElderlyUserSettings', () => {
     const user = userEvent.setup();
     renderAndEmit({ ...defaultSettings, appLockEnabled: true });
 
-    await user.type(screen.getByLabelText(/^PIN$/i), '1234');
+    await user.type(screen.getByLabelText(/set pin/i), '1234');
     await user.type(screen.getByLabelText(/confirm pin/i), '5678');
     await user.click(screen.getByRole('button', { name: /save pin/i }));
 
@@ -184,7 +184,7 @@ describe('ElderlyUserSettings', () => {
     const user = userEvent.setup();
     renderAndEmit({ ...defaultSettings, appLockEnabled: true });
 
-    await user.type(screen.getByLabelText(/^PIN$/i), '12');
+    await user.type(screen.getByLabelText(/set pin/i), '12');
     await user.type(screen.getByLabelText(/confirm pin/i), '12');
     await user.click(screen.getByRole('button', { name: /save pin/i }));
 

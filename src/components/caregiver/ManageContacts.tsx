@@ -51,7 +51,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
       setNewName('');
       setShowAddForm(false);
     } catch (err) {
-      setError(`Failed to add contact: ${err instanceof Error ? err.message : String(err)}`);
+      setError(t('manageContacts.addFailed', { error: err instanceof Error ? err.message : String(err) }));
     } finally {
       setIsAdding(false);
     }
@@ -65,7 +65,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
       await removeContact(elderlyUserId, confirmDeleteId);
       setConfirmDeleteId(null);
     } catch (err) {
-      setError(`Failed to remove contact: ${err instanceof Error ? err.message : String(err)}`);
+      setError(t('manageContacts.removeFailed', { error: err instanceof Error ? err.message : String(err) }));
     } finally {
       setIsDeleting(false);
     }

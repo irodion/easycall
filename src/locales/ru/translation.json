@@ -8,7 +8,8 @@
     "save": "Сохранить",
     "saving": "Сохранение...",
     "loading": "Загрузка...",
-    "install": "Установить"
+    "install": "Установить",
+    "somethingWentWrong": "Что-то пошло не так"
   },
   "home": {
     "title": "Ваши контакты",
@@ -87,6 +88,8 @@
     "confirmRemove": "Вы уверены, что хотите удалить {{name}}?",
     "removeContact": "Удалить {{name}}",
     "thisContact": "этот контакт",
+    "addFailed": "Не удалось добавить контакт: {{error}}",
+    "removeFailed": "Не удалось удалить контакт: {{error}}",
     "saveNewContact": "Сохранить новый контакт",
     "cancelAdd": "Отменить добавление"
   },
@@ -174,7 +177,8 @@
     "digitsEntered": "Введено {{count}} из 4 цифр",
     "tooManyAttempts": "Слишком много попыток. Попробуйте снова через {{seconds}}с",
     "wrongPin": "Неверный PIN",
-    "clear": "Очистить"
+    "clear": "Очистить",
+    "backspace": "Удалить"
   },
   "connection": {
     "good": "Хорошее соединение",

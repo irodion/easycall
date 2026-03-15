@@ -22,7 +22,7 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
       setStatus('idle');
       onSuccess(result.elderlyUserId);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Something went wrong';
+      const message = err instanceof Error ? err.message : t('common.somethingWentWrong');
       setErrorMessage(message);
       setStatus('error');
     }

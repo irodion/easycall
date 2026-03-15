@@ -135,7 +135,7 @@ export function AppLock({
           className="btn btn-ghost min-h-14 min-w-14 text-[length:var(--text-body)]"
           onClick={handleBackspace}
           disabled={isCoolingDown || submitting}
-          aria-label="Backspace"
+          aria-label={t('appLock.backspace')}
         >
           ←
         </button>

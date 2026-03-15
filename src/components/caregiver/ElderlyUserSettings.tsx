@@ -24,9 +24,10 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   useEffect(() => {
     const ref = doc(db, 'users', elderlyUserId);
     const unsubscribe = onSnapshot(ref, (snap) => {
-      const incoming = snap.exists()
-        ? ((snap.data()['settings'] as UserSettings) ?? DEFAULT_USER_SETTINGS)
-        : DEFAULT_USER_SETTINGS;
+      const raw = snap.exists()
+        ? ((snap.data()['settings'] as Partial<UserSettings>) ?? {})
+        : {};
+      const incoming: UserSettings = { ...DEFAULT_USER_SETTINGS, ...raw };
       setSettings((prev) => {
         if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
         return incoming;
@@ -143,7 +144,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
               }}
               className="input input-bordered w-full max-w-xs min-h-14"
               placeholder={t('elderlySettings.pinPlaceholder')}
-              aria-label="PIN"
+              aria-label={t('elderlySettings.setPin')}
             />
             <label htmlFor="lock-pin-confirm" className="text-[length:var(--text-body)] font-bold">
               {t('elderlySettings.confirmPin')}
