@@ -131,7 +131,7 @@ export function useAppLock({ settings }: { settings: UserSettings }): UseAppLock
       setFailedAttempts((prev) => {
         const next = prev + 1;
         if (next >= MAX_ATTEMPTS) triggered = true;
-        return next;
+        return triggered ? 0 : next;
       });
       setCooldownRemaining((prev) => (triggered ? COOLDOWN_SECONDS : prev));
       return false;

@@ -116,7 +116,7 @@ describe('ElderlyUserSettings', () => {
     expect(toggle).not.toBeChecked();
   });
 
-  it('toggling lock on shows PIN setup fields', async () => {
+  it('toggling lock on shows PIN setup fields without writing to Firestore', async () => {
     const user = userEvent.setup();
     renderAndEmit();
 
@@ -125,6 +125,8 @@ describe('ElderlyUserSettings', () => {
     expect(screen.getByLabelText(/^PIN$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm pin/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /save pin/i })).toBeInTheDocument();
+    // Should NOT write appLockEnabled until PIN is saved
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
   });
 
   it('toggling lock off calls updateDoc with appLockEnabled: false and null hash', async () => {
@@ -144,10 +146,12 @@ describe('ElderlyUserSettings', () => {
     );
   });
 
-  it('setting PIN: matching 4-digit PINs calls updateDoc with hashed PIN', async () => {
+  it('saving PIN atomically enables lock and persists hash', async () => {
     const user = userEvent.setup();
-    renderAndEmit({ ...defaultSettings, appLockEnabled: true });
+    renderAndEmit();
 
+    // Toggle on (local only), enter PIN, save
+    await user.click(screen.getByRole('checkbox', { name: /enable app lock/i }));
     await user.type(screen.getByLabelText(/^PIN$/i), '1234');
     await user.type(screen.getByLabelText(/confirm pin/i), '1234');
     await user.click(screen.getByRole('button', { name: /save pin/i }));
@@ -157,6 +161,7 @@ describe('ElderlyUserSettings', () => {
         'doc-ref',
         expect.objectContaining({
           settings: expect.objectContaining({
+            appLockEnabled: true,
             appLockPinHash: 'mocked-hash-value',
           }),
         }),

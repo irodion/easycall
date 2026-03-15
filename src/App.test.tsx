@@ -32,7 +32,7 @@ vi.mock('@/hooks/useAppLock', () => ({
     isLocked: false,
     failedAttempts: 0,
     cooldownRemaining: 0,
-    unlockWithPin: vi.fn(),
+    unlockWithPin: vi.fn().mockResolvedValue(true),
   }),
 }));
 

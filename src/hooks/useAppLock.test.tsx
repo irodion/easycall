@@ -68,11 +68,11 @@ describe('useAppLock', () => {
       wrapper: wrapper(),
     });
 
-    let success: boolean;
+    let success = false;
     await act(async () => {
       success = await result.current.unlockWithPin('1234');
     });
-    expect(success!).toBe(true);
+    expect(success).toBe(true);
     expect(result.current.isLocked).toBe(false);
     expect(result.current.failedAttempts).toBe(0);
   });
@@ -101,7 +101,7 @@ describe('useAppLock', () => {
         await result.current.unlockWithPin('0000');
       });
     }
-    expect(result.current.failedAttempts).toBe(3);
+    expect(result.current.failedAttempts).toBe(0);
     expect(result.current.cooldownRemaining).toBe(30);
   });
 

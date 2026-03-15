@@ -28,10 +28,16 @@ export function AppLock({
       setDigits(next);
       if (next.length === 4) {
         setSubmitting(true);
-        void onPinSubmit(next.join('')).then((success) => {
-          if (!success) setDigits([]);
-          setSubmitting(false);
-        });
+        void onPinSubmit(next.join(''))
+          .then((success) => {
+            if (!success) setDigits([]);
+          })
+          .catch(() => {
+            setDigits([]);
+          })
+          .finally(() => {
+            setSubmitting(false);
+          });
       }
     },
     [isCoolingDown, submitting, digits, onPinSubmit],

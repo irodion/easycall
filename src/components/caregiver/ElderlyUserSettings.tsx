@@ -12,6 +12,7 @@ interface ElderlyUserSettingsProps {
 
 export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps) {
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [pendingLockEnabled, setPendingLockEnabled] = useState(false);
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
@@ -96,15 +97,16 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
         <legend className="text-[length:var(--text-heading)] font-bold mb-[var(--space-sm)]">
           App Lock
         </legend>
-        <label className="flex items-center gap-[var(--space-sm)] cursor-pointer">
+        <label className="flex items-center gap-[var(--space-sm)] cursor-pointer min-h-14">
           <input
             type="checkbox"
-            className="toggle toggle-primary"
-            checked={settings.appLockEnabled}
+            className="toggle toggle-primary min-h-14 min-w-14"
+            checked={settings.appLockEnabled || pendingLockEnabled}
             onChange={(e) => {
               if (e.target.checked) {
-                updateSettings({ appLockEnabled: true });
+                setPendingLockEnabled(true);
               } else {
+                setPendingLockEnabled(false);
                 updateSettings({ appLockEnabled: false, appLockPinHash: null });
                 setPin('');
                 setPinConfirm('');
@@ -114,11 +116,11 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
             aria-label="Enable app lock"
           />
           <span className="text-[length:var(--text-body)]">
-            {settings.appLockEnabled ? 'Enabled' : 'Disabled'}
+            {settings.appLockEnabled || pendingLockEnabled ? 'Enabled' : 'Disabled'}
           </span>
         </label>
 
-        {settings.appLockEnabled && (
+        {(settings.appLockEnabled || pendingLockEnabled) && (
           <div className="flex flex-col gap-[var(--space-sm)] mt-[var(--space-sm)]">
             <label htmlFor="lock-pin" className="text-[length:var(--text-body)] font-bold">
               Set PIN
@@ -134,7 +136,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                 setPin(e.target.value.replace(/\D/g, '').slice(0, 4));
                 setPinError(null);
               }}
-              className="input input-bordered w-full max-w-xs"
+              className="input input-bordered w-full max-w-xs min-h-14"
               placeholder="4-digit PIN"
               aria-label="PIN"
             />
@@ -152,7 +154,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                 setPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 4));
                 setPinError(null);
               }}
-              className="input input-bordered w-full max-w-xs"
+              className="input input-bordered w-full max-w-xs min-h-14"
               placeholder="Confirm PIN"
               aria-label="Confirm PIN"
             />
@@ -174,7 +176,8 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                 setPinSaving(true);
                 void hashPin(pin)
                   .then((hash) => {
-                    updateSettings({ appLockPinHash: hash });
+                    updateSettings({ appLockEnabled: true, appLockPinHash: hash });
+                    setPendingLockEnabled(false);
                     setPin('');
                     setPinConfirm('');
                     setPinError(null);

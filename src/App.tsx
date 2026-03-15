@@ -60,7 +60,8 @@ function AuthenticatedApp() {
     const unsubscribe = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
         const data = snap.data();
-        const incoming = (data['settings'] as UserSettings) ?? DEFAULT_USER_SETTINGS;
+        const raw = (data['settings'] as Partial<UserSettings>) ?? {};
+        const incoming = { ...DEFAULT_USER_SETTINGS, ...raw };
         setSettings((prev) => {
           if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
           return incoming;
