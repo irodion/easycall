@@ -37,7 +37,7 @@ export function useAppLock({ settings }: { settings: UserSettings }): UseAppLock
     setIsUnlocked(false);
   }
 
-  const isLocked = lockEnabled && !isUnlocked;
+  const isLocked = lockEnabled && !isUnlocked && !isOnCallRoute;
 
   // Inactivity timer — only when unlocked and lock is enabled
   useEffect(() => {

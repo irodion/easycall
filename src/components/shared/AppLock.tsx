@@ -29,8 +29,8 @@ export function AppLock({
       if (next.length === 4) {
         setSubmitting(true);
         void onPinSubmit(next.join(''))
-          .then((success) => {
-            if (!success) setDigits([]);
+          .then(() => {
+            setDigits([]);
           })
           .catch(() => {
             setDigits([]);

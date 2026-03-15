@@ -53,20 +53,26 @@ function AuthenticatedApp() {
     });
   }, []);
 
+  // Reset settings when userId changes (prop-to-state pattern)
+  const [prevUserId, setPrevUserId] = useState(userId);
+  if (prevUserId !== userId) {
+    setPrevUserId(userId);
+    setSettings(DEFAULT_USER_SETTINGS);
+  }
+
   // Sync settings from Firestore in real-time
   useEffect(() => {
     if (!userId) return;
     const ref = doc(db, 'users', userId);
     const unsubscribe = onSnapshot(ref, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        const raw = (data['settings'] as Partial<UserSettings>) ?? {};
-        const incoming = { ...DEFAULT_USER_SETTINGS, ...raw };
-        setSettings((prev) => {
-          if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
-          return incoming;
-        });
-      }
+      if (!snap.exists()) return;
+      const data = snap.data();
+      const raw = (data['settings'] as Partial<UserSettings>) ?? {};
+      const incoming = { ...DEFAULT_USER_SETTINGS, ...raw };
+      setSettings((prev) => {
+        if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
+        return incoming;
+      });
     });
     return unsubscribe;
   }, [userId]);
