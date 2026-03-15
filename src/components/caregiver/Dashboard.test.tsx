@@ -137,8 +137,11 @@ describe('Dashboard', () => {
     const { Dashboard } = await import('./Dashboard');
     renderWithProviders(<Dashboard userId="caregiver-1" />);
 
-    // Should stop loading despite error
-    await screen.findByRole('link', { name: /link elderly user/i });
+    // Should stop loading despite error — spinner should disappear
+    const { waitFor } = await import('@testing-library/react');
+    await waitFor(() => {
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    });
   });
 
   it('passes vitest-axe', async () => {

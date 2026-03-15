@@ -124,6 +124,11 @@ describe('usePairingCode', () => {
     expect(result.current.code).toBe(codeBefore);
     expect(consoleSpy).toHaveBeenCalledWith('Failed to refresh pairing code:', expect.any(Error));
 
+    // Verify retry was scheduled — advance by AUTO_REFRESH_MS (10 min)
+    mockSetDoc.mockClear();
+    await act(() => vi.advanceTimersByTimeAsync(10 * 60 * 1000));
+    expect(mockSetDoc).toHaveBeenCalled();
+
     consoleSpy.mockRestore();
   });
 });

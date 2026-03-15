@@ -69,15 +69,17 @@ describe('RoleSelector', () => {
     const original = firebase.auth.currentUser;
     Object.defineProperty(firebase.auth, 'currentUser', { value: null, writable: true });
 
-    const { RoleSelector } = await import('./RoleSelector');
-    renderWithProviders(<RoleSelector />);
-    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+    try {
+      const { RoleSelector } = await import('./RoleSelector');
+      renderWithProviders(<RoleSelector />);
+      fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
 
-    await vi.waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-    });
-
-    Object.defineProperty(firebase.auth, 'currentUser', { value: original, writable: true });
+      await vi.waitFor(() => {
+        expect(screen.getByRole('alert')).toBeInTheDocument();
+      });
+    } finally {
+      Object.defineProperty(firebase.auth, 'currentUser', { value: original, writable: true });
+    }
   });
 
   it('shows error when setDoc rejects', async () => {

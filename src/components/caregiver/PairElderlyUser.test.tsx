@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
@@ -77,14 +77,12 @@ describe('PairElderlyUser', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Pairing code has expired.');
   });
 
-  it('does not submit when code is whitespace-only', async () => {
-    const user = userEvent.setup();
+  it('does not submit when code is empty via form submit', () => {
     renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
-    // Can't type whitespace into a numeric-filtered input, but the guard is `!code.trim()`
-    // Button is disabled when code.length !== 6 anyway, so this branch is about the guard
-    expect(screen.getByRole('button', { name: /link account/i })).toBeDisabled();
+    // Directly submit the form to bypass the disabled button and exercise the !code.trim() guard
+    const form = document.querySelector('form')!;
+    fireEvent.submit(form);
     expect(mockValidatePairingCode).not.toHaveBeenCalled();
-    void user; // suppress unused
   });
 
   it('does not double-submit while loading', async () => {
@@ -99,7 +97,11 @@ describe('PairElderlyUser', () => {
     await user.click(screen.getByRole('button', { name: /link account/i }));
 
     // Button should now show "Linking..." and be disabled
-    expect(screen.getByRole('button', { name: /linking/i })).toBeDisabled();
+    const linkingBtn = screen.getByRole('button', { name: /linking/i });
+    expect(linkingBtn).toBeDisabled();
+
+    // Attempt a second click while still loading
+    await user.click(linkingBtn);
     expect(mockValidatePairingCode).toHaveBeenCalledTimes(1);
 
     resolveValidate({ elderlyUserId: 'elderly-1' });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, fireEvent, act } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
@@ -24,6 +24,10 @@ describe('AddContact', () => {
   beforeEach(() => {
     mockAddContact.mockClear();
     mockAddContact.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('Step 1: renders name input', () => {
@@ -120,8 +124,6 @@ describe('AddContact', () => {
     // Photo preview should be shown as img
     const img = screen.getByAltText('Alice');
     expect(img).toHaveAttribute('src', 'blob:photo-url');
-
-    vi.unstubAllGlobals();
   });
 
   it('revokes previous blob URL when selecting a new photo', () => {
@@ -146,8 +148,6 @@ describe('AddContact', () => {
 
     // First blob URL should have been revoked
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:first');
-
-    vi.unstubAllGlobals();
   });
 
   it('shows fallback avatar circle when no photo is selected on Step 3', () => {
