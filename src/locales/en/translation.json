@@ -1,0 +1,186 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "save": "Save",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "install": "Install"
+  },
+  "home": {
+    "title": "Your Contacts",
+    "history": "History",
+    "settings": "Settings",
+    "noContacts": "No contacts yet",
+    "noContactsHint": "A caregiver can add contacts for you",
+    "callContact": "Call {{name}}"
+  },
+  "call": {
+    "contactNotFound": "Contact not found",
+    "connecting": "Connecting to call",
+    "connectingWith": "Connecting to call with {{name}}...",
+    "ended": "Call Ended",
+    "unmuteMic": "Unmute microphone",
+    "muteMic": "Mute microphone",
+    "endCall": "End call",
+    "cameraOn": "Turn on camera",
+    "cameraOff": "Turn off camera",
+    "videoCallArea": "Video call area"
+  },
+  "settings": {
+    "title": "Settings",
+    "textSize": "Text Size",
+    "large": "Large",
+    "extraLarge": "Extra Large",
+    "pairingCode": "Pairing Code",
+    "addContact": "Add Contact",
+    "language": "Language"
+  },
+  "permissions": {
+    "checking": "Checking camera and microphone permissions",
+    "cameraAndMic": "Camera & Microphone",
+    "allowPrompt": "Tap ALLOW when asked to enable your camera and microphone.",
+    "blocked": "Camera Blocked",
+    "blockedHint": "Please allow camera and microphone access in your browser settings, then tap Try Again.",
+    "tryAgain": "Try Again",
+    "noCamera": "No Camera Found",
+    "noCameraHint": "Camera or microphone not found. Please connect a camera and microphone and try again."
+  },
+  "addContact": {
+    "title": "Add Contact",
+    "step1": "Step 1: Name",
+    "contactName": "Contact Name",
+    "namePlaceholder": "Enter contact name",
+    "addPhoto": "Add Photo",
+    "step2": "Step 2: Photo (optional)",
+    "preview": "Preview",
+    "choosePhoto": "Choose photo",
+    "step3": "Step 3: Confirm",
+    "confirmTitle": "Confirm"
+  },
+  "callHistory": {
+    "title": "Call History",
+    "backToContacts": "Back to contacts",
+    "loadingHistory": "Loading call history",
+    "noCalls": "No calls yet",
+    "callContact": "Call {{name}}",
+    "completed": "Completed",
+    "missed": "Missed",
+    "declined": "Declined",
+    "showMore": "Show more"
+  },
+  "dashboard": {
+    "title": "Caregiver Dashboard",
+    "linkUser": "Link Elderly User",
+    "lastSeen": "Last seen: {{time}}",
+    "manageContacts": "Manage Contacts"
+  },
+  "manageContacts": {
+    "title": "Manage Contacts",
+    "addContact": "+ Add Contact",
+    "contactName": "Contact name",
+    "namePlaceholder": "Contact name",
+    "remove": "Remove",
+    "confirmRemove": "Are you sure you want to remove {{name}}?",
+    "removeContact": "Remove {{name}}",
+    "thisContact": "this contact",
+    "saveNewContact": "Save new contact",
+    "cancelAdd": "Cancel add"
+  },
+  "elderlySettings": {
+    "fontSize": "Font Size",
+    "large": "Large",
+    "xLarge": "X-Large",
+    "ringtoneVolume": "Ringtone Volume",
+    "volumePercent": "{{value}}%",
+    "appLock": "App Lock",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "enableAppLock": "Enable app lock",
+    "setPin": "Set PIN",
+    "pinPlaceholder": "4-digit PIN",
+    "confirmPin": "Confirm PIN",
+    "confirmPinPlaceholder": "Confirm PIN",
+    "pinLengthError": "PIN must be exactly 4 digits",
+    "pinMismatchError": "PINs do not match",
+    "pinSaveError": "Failed to save PIN. Please try again.",
+    "savePin": "Save PIN",
+    "language": "Language"
+  },
+  "roleSelector": {
+    "notSignedIn": "Not signed in. Please try again.",
+    "saveFailed": "Failed to save role: {{error}}",
+    "whoAreYou": "Who are you?",
+    "elderlyUser": "I am an elderly user",
+    "caregiver": "I am a family caregiver"
+  },
+  "onboarding": {
+    "welcome": "Welcome to EasyCall",
+    "elderlyDescription": "Simple video calling with your family. Just tap a photo to call!",
+    "caregiverDescription": "Manage video calling for your family members remotely.",
+    "cameraMic": "Camera & Microphone",
+    "cameraMicHint": "EasyCall needs access to your camera and microphone for video calls.",
+    "notifications": "Notification Permission",
+    "notificationsHint": "Allow notifications so you know when someone is calling you.",
+    "pairWithCaregiver": "Pair with Caregiver",
+    "linkToElderly": "Link to Elderly User",
+    "done": "Done",
+    "stepOf": "Step {{step}} of {{total}}",
+    "failedSetup": "Failed to complete setup. Please try again."
+  },
+  "pairingCode": {
+    "yourCode": "Your pairing code:",
+    "generatingCode": "Generating code",
+    "pairingCodeLabel": "Pairing code: {{code}}",
+    "expiresIn": "Expires in {{time}}",
+    "getNewCode": "Get new code"
+  },
+  "pairElderly": {
+    "enterCode": "Enter the 6-digit code shown on the elderly user's screen:",
+    "linking": "Linking...",
+    "linkAccount": "Link Account"
+  },
+  "incomingCall": {
+    "isCalling": "{{name}} is calling",
+    "calling": "is calling...",
+    "answer": "Answer",
+    "answerCall": "Answer call",
+    "decline": "Decline",
+    "declineCall": "Decline call"
+  },
+  "rejoinPrompt": {
+    "returnToCall": "Return to call with {{name}}?",
+    "returnButton": "Return to Call",
+    "returnToCallWith": "Return to call with {{name}}",
+    "dismiss": "Dismiss",
+    "rejoinCall": "Rejoin call"
+  },
+  "confirmDialog": {
+    "ariaLabel": "Confirm action"
+  },
+  "installPrompt": {
+    "title": "Install EasyCall",
+    "description": "Install this app on your device for the best experience.",
+    "install": "Install",
+    "ariaLabel": "Install EasyCall app",
+    "installApp": "Install app"
+  },
+  "appLock": {
+    "title": "App lock screen",
+    "enterPin": "Enter PIN to unlock",
+    "digitsEntered": "{{count}} of 4 digits entered",
+    "tooManyAttempts": "Too many attempts. Try again in {{seconds}}s",
+    "wrongPin": "Wrong PIN",
+    "clear": "Clear"
+  },
+  "connection": {
+    "good": "Good connection",
+    "fair": "Fair connection",
+    "poor": "Poor connection",
+    "weakSignal": "Video quality reduced due to weak signal"
+  },
+  "skipToContent": "Skip to content"
+}

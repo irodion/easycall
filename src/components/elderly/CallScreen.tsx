@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Timestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, auth } from '@/services/firebase';
@@ -11,6 +12,7 @@ import { EasyCallText } from '@/components/shared/EasyCallText';
 import type { JitsiMeetExternalAPI } from '@/types/jitsi';
 
 export function CallScreen() {
+  const { t } = useTranslation();
   const { contactId } = useParams<{ contactId: string }>();
   const navigate = useNavigate();
   const apiRef = useRef<JitsiMeetExternalAPI | null>(null);
@@ -27,10 +29,8 @@ export function CallScreen() {
   const contactNameRef = useRef<string>('');
 
   const contacts = useContactStore((s) => s.contacts);
-  // Derive contact for rendering; effect uses stable contactId to avoid re-running on snapshots
   const contact = contacts.find((c) => c.id === contactId);
 
-  // Shared helper to write a single call history entry (guarded by ref to prevent double-writes)
   function writeHistory() {
     if (historyWrittenRef.current) return;
     historyWrittenRef.current = true;
@@ -51,8 +51,6 @@ export function CallScreen() {
   }
 
   useEffect(() => {
-    // Reference contact by id (stable string) rather than the contact object,
-    // so snapshot refreshes (which create new contact objects) don't re-run this effect.
     const currentContact = contacts.find((c) => c.id === contactId);
     if (!currentContact) return;
     const { jitsiRoomId, name: contactName } = currentContact;
@@ -94,7 +92,6 @@ export function CallScreen() {
         callStartTimeRef.current = Date.now();
         contactNameRef.current = contactName;
 
-        // Write activeCall doc so HomeScreen can offer rejoin on disconnect
         const userId = auth.currentUser?.uid;
         if (userId) {
           void setActiveCall(userId, {
@@ -105,7 +102,6 @@ export function CallScreen() {
           });
         }
 
-        // Warn user before closing tab during active call
         beforeUnloadRef.current = (e: BeforeUnloadEvent) => {
           e.preventDefault();
           e.returnValue = '';
@@ -130,7 +126,6 @@ export function CallScreen() {
         let participantCount = 0;
         api.addListener('participantJoined', () => {
           participantCount += 1;
-          // Cancel any pending auto-navigate in case the participant rejoined
           if (autoNavigateTimerRef.current) {
             clearTimeout(autoNavigateTimerRef.current);
             autoNavigateTimerRef.current = null;
@@ -192,7 +187,7 @@ export function CallScreen() {
   if (!contact) {
     return (
       <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <EasyCallText variant="body">Contact not found</EasyCallText>
+        <EasyCallText variant="body">{t('call.contactNotFound')}</EasyCallText>
       </div>
     );
   }
@@ -201,9 +196,9 @@ export function CallScreen() {
     <div className="min-h-screen bg-black flex flex-col relative">
       {loading && (
         <div className="absolute inset-0 bg-base-100 flex items-center justify-center z-10">
-          <div role="status" aria-label="Connecting to call">
+          <div role="status" aria-label={t('call.connecting')}>
             <span className="loading loading-spinner loading-lg text-primary" aria-hidden="true" />
-            <span className="sr-only">Connecting to call with {contact.name}...</span>
+            <span className="sr-only">{t('call.connectingWith', { name: contact.name })}</span>
           </div>
         </div>
       )}
@@ -211,13 +206,18 @@ export function CallScreen() {
       {callEnded && (
         <div className="absolute inset-0 bg-base-100 flex items-center justify-center z-10">
           <EasyCallText as="h2" variant="heading">
-            Call Ended
+            {t('call.ended')}
           </EasyCallText>
         </div>
       )}
 
       {/* Jitsi iframe container */}
-      <div ref={containerRef} className="flex-1" role="region" aria-label="Video call area" />
+      <div
+        ref={containerRef}
+        className="flex-1"
+        role="region"
+        aria-label={t('call.videoCallArea')}
+      />
 
       {/* Overlay call controls */}
       <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center gap-6">
@@ -225,12 +225,17 @@ export function CallScreen() {
           variant="secondary"
           size="large"
           onClick={handleToggleAudio}
-          aria-label={audioMuted ? 'Unmute microphone' : 'Mute microphone'}
+          aria-label={audioMuted ? t('call.unmuteMic') : t('call.muteMic')}
         >
           {audioMuted ? '🎤✕' : '🎤'}
         </EasyCallButton>
 
-        <EasyCallButton variant="danger" size="call" onClick={handleHangup} aria-label="End call">
+        <EasyCallButton
+          variant="danger"
+          size="call"
+          onClick={handleHangup}
+          aria-label={t('call.endCall')}
+        >
           ✕
         </EasyCallButton>
 
@@ -238,7 +243,7 @@ export function CallScreen() {
           variant="secondary"
           size="large"
           onClick={handleToggleVideo}
-          aria-label={videoMuted ? 'Turn on camera' : 'Turn off camera'}
+          aria-label={videoMuted ? t('call.cameraOn') : t('call.cameraOff')}
         >
           {videoMuted ? '📷✕' : '📷'}
         </EasyCallButton>

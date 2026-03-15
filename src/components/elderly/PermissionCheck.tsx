@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMediaPermissions } from '@/hooks/useMediaPermissions';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
@@ -8,6 +9,7 @@ interface PermissionCheckProps {
 }
 
 export function PermissionCheck({ onReady }: PermissionCheckProps) {
+  const { t } = useTranslation();
   const { status, retry } = useMediaPermissions();
   const firedRef = useRef(false);
 
@@ -21,9 +23,9 @@ export function PermissionCheck({ onReady }: PermissionCheckProps) {
   if (status === 'checking') {
     return (
       <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <div role="status" aria-label="Checking camera and microphone permissions">
+        <div role="status" aria-label={t('permissions.checking')}>
           <span className="loading loading-spinner loading-lg text-primary" />
-          <span className="sr-only">Checking camera and microphone permissions</span>
+          <span className="sr-only">{t('permissions.checking')}</span>
         </div>
       </div>
     );
@@ -33,10 +35,10 @@ export function PermissionCheck({ onReady }: PermissionCheckProps) {
     return (
       <div className="min-h-screen bg-base-100 flex flex-col items-center justify-center gap-6 p-8">
         <EasyCallText as="h1" variant="heading" className="text-center">
-          Camera & Microphone
+          {t('permissions.cameraAndMic')}
         </EasyCallText>
         <EasyCallText as="p" variant="body" className="text-center text-[length:var(--text-body)]">
-          Tap ALLOW when asked to enable your camera and microphone.
+          {t('permissions.allowPrompt')}
         </EasyCallText>
       </div>
     );
@@ -46,13 +48,13 @@ export function PermissionCheck({ onReady }: PermissionCheckProps) {
     return (
       <div className="min-h-screen bg-base-100 flex flex-col items-center justify-center gap-6 p-8">
         <EasyCallText as="h1" variant="heading" className="text-center">
-          Camera Blocked
+          {t('permissions.blocked')}
         </EasyCallText>
         <EasyCallText as="p" variant="body" className="text-center">
-          Please allow camera and microphone access in your browser settings, then tap Try Again.
+          {t('permissions.blockedHint')}
         </EasyCallText>
-        <EasyCallButton onClick={retry} aria-label="Try again">
-          Try Again
+        <EasyCallButton onClick={retry} aria-label={t('permissions.tryAgain')}>
+          {t('permissions.tryAgain')}
         </EasyCallButton>
       </div>
     );
@@ -62,15 +64,14 @@ export function PermissionCheck({ onReady }: PermissionCheckProps) {
     return (
       <div className="min-h-screen bg-base-100 flex flex-col items-center justify-center gap-6 p-8">
         <EasyCallText as="h1" variant="heading" className="text-center">
-          No Camera Found
+          {t('permissions.noCamera')}
         </EasyCallText>
         <EasyCallText as="p" variant="body" className="text-center">
-          Camera or microphone not found. Please connect a camera and microphone and try again.
+          {t('permissions.noCameraHint')}
         </EasyCallText>
       </div>
     );
   }
 
-  // granted — onReady already called, render empty (parent will navigate)
   return null;
 }

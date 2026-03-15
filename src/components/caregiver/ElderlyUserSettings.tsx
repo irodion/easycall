@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 import { db } from '@/services/firebase';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { DEFAULT_USER_SETTINGS } from '@/types/user';
 import { hashPin } from '@/utils/pinHash';
+import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import type { UserSettings } from '@/types/user';
 
 interface ElderlyUserSettingsProps {
@@ -11,6 +13,7 @@ interface ElderlyUserSettingsProps {
 }
 
 export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps) {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [pendingLockEnabled, setPendingLockEnabled] = useState(false);
   const [pin, setPin] = useState('');
@@ -37,7 +40,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
       <div
         className="flex justify-center p-[var(--space-md)]"
         role="status"
-        aria-label="Loading settings"
+        aria-label={t('common.loading')}
       >
         <span className="loading loading-spinner loading-lg" aria-hidden="true" />
       </div>
@@ -58,7 +61,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
     <div className="flex flex-col gap-[var(--space-lg)] p-[var(--space-md)]">
       <fieldset>
         <legend className="text-[length:var(--text-heading)] font-bold mb-[var(--space-sm)]">
-          Font Size
+          {t('elderlySettings.fontSize')}
         </legend>
         <div className="flex gap-[var(--space-sm)]">
           {(['large', 'x-large'] as const).map((size) => (
@@ -67,7 +70,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
               variant={settings.fontSize === size ? 'primary' : 'secondary'}
               onClick={() => updateSettings({ fontSize: size })}
             >
-              {size === 'large' ? 'Large' : 'X-Large'}
+              {size === 'large' ? t('elderlySettings.large') : t('elderlySettings.xLarge')}
             </EasyCallButton>
           ))}
         </div>
@@ -75,7 +78,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
 
       <div className="flex flex-col gap-[var(--space-sm)]">
         <label htmlFor="ringtone-volume" className="text-[length:var(--text-heading)] font-bold">
-          Ringtone Volume
+          {t('elderlySettings.ringtoneVolume')}
         </label>
         <input
           id="ringtone-volume"
@@ -86,16 +89,16 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
           value={settings.ringtoneVolume}
           onChange={(e) => updateSettings({ ringtoneVolume: Number(e.target.value) })}
           className="range range-primary touch-target-min"
-          aria-label="Ringtone volume"
+          aria-label={t('elderlySettings.ringtoneVolume')}
         />
         <span className="text-[length:var(--text-body)] text-center">
-          {settings.ringtoneVolume}%
+          {t('elderlySettings.volumePercent', { value: settings.ringtoneVolume })}
         </span>
       </div>
 
       <fieldset>
         <legend className="text-[length:var(--text-heading)] font-bold mb-[var(--space-sm)]">
-          App Lock
+          {t('elderlySettings.appLock')}
         </legend>
         <label className="flex items-center gap-[var(--space-sm)] cursor-pointer min-h-14">
           <input
@@ -113,17 +116,19 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                 setPinError(null);
               }
             }}
-            aria-label="Enable app lock"
+            aria-label={t('elderlySettings.enableAppLock')}
           />
           <span className="text-[length:var(--text-body)]">
-            {settings.appLockEnabled || pendingLockEnabled ? 'Enabled' : 'Disabled'}
+            {settings.appLockEnabled || pendingLockEnabled
+              ? t('elderlySettings.enabled')
+              : t('elderlySettings.disabled')}
           </span>
         </label>
 
         {(settings.appLockEnabled || pendingLockEnabled) && (
           <div className="flex flex-col gap-[var(--space-sm)] mt-[var(--space-sm)]">
             <label htmlFor="lock-pin" className="text-[length:var(--text-body)] font-bold">
-              Set PIN
+              {t('elderlySettings.setPin')}
             </label>
             <input
               id="lock-pin"
@@ -137,11 +142,11 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                 setPinError(null);
               }}
               className="input input-bordered w-full max-w-xs min-h-14"
-              placeholder="4-digit PIN"
+              placeholder={t('elderlySettings.pinPlaceholder')}
               aria-label="PIN"
             />
             <label htmlFor="lock-pin-confirm" className="text-[length:var(--text-body)] font-bold">
-              Confirm PIN
+              {t('elderlySettings.confirmPin')}
             </label>
             <input
               id="lock-pin-confirm"
@@ -155,8 +160,8 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                 setPinError(null);
               }}
               className="input input-bordered w-full max-w-xs min-h-14"
-              placeholder="Confirm PIN"
-              aria-label="Confirm PIN"
+              placeholder={t('elderlySettings.confirmPinPlaceholder')}
+              aria-label={t('elderlySettings.confirmPin')}
             />
             {pinError && (
               <p className="text-error text-[length:var(--text-body)]" role="alert">
@@ -166,11 +171,11 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
             <EasyCallButton
               onClick={() => {
                 if (pin.length !== 4) {
-                  setPinError('PIN must be exactly 4 digits');
+                  setPinError(t('elderlySettings.pinLengthError'));
                   return;
                 }
                 if (pin !== pinConfirm) {
-                  setPinError('PINs do not match');
+                  setPinError(t('elderlySettings.pinMismatchError'));
                   return;
                 }
                 setPinSaving(true);
@@ -183,7 +188,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                     setPinError(null);
                   })
                   .catch(() => {
-                    setPinError('Failed to save PIN. Please try again.');
+                    setPinError(t('elderlySettings.pinSaveError'));
                   })
                   .finally(() => {
                     setPinSaving(false);
@@ -191,11 +196,17 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
               }}
               disabled={pinSaving}
             >
-              Save PIN
+              {t('elderlySettings.savePin')}
             </EasyCallButton>
           </div>
         )}
       </fieldset>
+
+      <LanguageSelector
+        value={settings.language}
+        onChange={(language) => updateSettings({ language })}
+        name="elderly-language"
+      />
     </div>
   );
 }

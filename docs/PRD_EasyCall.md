@@ -2132,14 +2132,14 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Run existing vitest-axe tests as baseline. Add Lighthouse CI to GitHub Actions with score threshold of 95. Manual testing is documented as a checklist.",
     "estimated_hours": 8,
     "dependencies": ["All Phase 1 and 2 tasks"],
-    "done": false
+    "done": true
   },
   {
     "id": "3.5.1",
     "phase": 3,
     "feature": "i18n",
     "title": "Multi-Language Support",
-    "description": "Integrate react-i18next. Extract all user-facing strings to translation JSON files. Create initial translations for: English (default), Spanish, Hebrew, Russian (common languages for elderly populations). The caregiver can set the language from the settings panel. The elderly user sees the app in their configured language.",
+    "description": "Integrate react-i18next. Extract all user-facing strings to translation JSON files. Create initial translations for: English (default), Spanish, Hebrew, German, Russian (common languages for elderly populations). The caregiver can set the language from the settings panel. The elderly user sees the app in their configured language.",
     "acceptance_criteria": [
       "All user-facing strings use t('key') from react-i18next",
       "Language files exist for en, es, he, ru",
@@ -2151,6 +2151,22 @@ The following JSON represents the complete task backlog. Each task has:
     "test_first": "Write tests: component renders correct text for each language, RTL class applied for Hebrew, language switch updates rendered text.",
     "estimated_hours": 6,
     "dependencies": ["2.3.1"],
+    "done": true
+  },
+  {
+    "id": "3.5.2",
+    "phase": 3,
+    "feature": "testing",
+    "title": "Fix Branch Coverage to Meet 75% Threshold",
+    "description": "Global branch coverage is at 73.48%, below the 75% threshold configured in vite.config.ts. The shortfall comes from pre-existing low-coverage files: App.tsx (28.57% branches — AuthenticatedApp routing/Firestore sync), CallScreen.tsx (46.15% — Jitsi callback branches), ManageContacts.tsx (45.45% — add/delete error paths), and firebase.ts (60% — config validation). Add targeted tests for untested branches in these files to bring global coverage above 75%. Must pass before deploy.",
+    "acceptance_criteria": [
+      "pnpm test:coverage exits with code 0 (all thresholds met)",
+      "Global branch coverage ≥75%",
+      "No reduction in line/function/statement coverage"
+    ],
+    "test_first": "Run pnpm test:coverage to confirm current failure, then add tests until it passes.",
+    "estimated_hours": 3,
+    "dependencies": ["3.5.1"],
     "done": false
   },
   {

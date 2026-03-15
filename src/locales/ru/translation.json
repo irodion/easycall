@@ -1,0 +1,186 @@
+{
+  "common": {
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "back": "Назад",
+    "next": "Далее",
+    "skip": "Пропустить",
+    "save": "Сохранить",
+    "saving": "Сохранение...",
+    "loading": "Загрузка...",
+    "install": "Установить"
+  },
+  "home": {
+    "title": "Ваши контакты",
+    "history": "История",
+    "settings": "Настройки",
+    "noContacts": "Контактов пока нет",
+    "noContactsHint": "Помощник может добавить контакты для вас",
+    "callContact": "Позвонить {{name}}"
+  },
+  "call": {
+    "contactNotFound": "Контакт не найден",
+    "connecting": "Подключение к звонку",
+    "connectingWith": "Подключение к звонку с {{name}}...",
+    "ended": "Звонок завершён",
+    "unmuteMic": "Включить микрофон",
+    "muteMic": "Выключить микрофон",
+    "endCall": "Завершить звонок",
+    "cameraOn": "Включить камеру",
+    "cameraOff": "Выключить камеру",
+    "videoCallArea": "Область видеозвонка"
+  },
+  "settings": {
+    "title": "Настройки",
+    "textSize": "Размер текста",
+    "large": "Крупный",
+    "extraLarge": "Очень крупный",
+    "pairingCode": "Код сопряжения",
+    "addContact": "Добавить контакт",
+    "language": "Язык"
+  },
+  "permissions": {
+    "checking": "Проверка разрешений камеры и микрофона",
+    "cameraAndMic": "Камера и микрофон",
+    "allowPrompt": "Нажмите РАЗРЕШИТЬ, когда появится запрос на включение камеры и микрофона.",
+    "blocked": "Камера заблокирована",
+    "blockedHint": "Пожалуйста, разрешите доступ к камере и микрофону в настройках браузера, затем нажмите Попробовать снова.",
+    "tryAgain": "Попробовать снова",
+    "noCamera": "Камера не найдена",
+    "noCameraHint": "Камера или микрофон не найдены. Пожалуйста, подключите камеру и микрофон и попробуйте снова."
+  },
+  "addContact": {
+    "title": "Добавить контакт",
+    "step1": "Шаг 1: Имя",
+    "contactName": "Имя контакта",
+    "namePlaceholder": "Введите имя контакта",
+    "addPhoto": "Добавить фото",
+    "step2": "Шаг 2: Фото (необязательно)",
+    "preview": "Предпросмотр",
+    "choosePhoto": "Выбрать фото",
+    "step3": "Шаг 3: Подтверждение",
+    "confirmTitle": "Подтвердить"
+  },
+  "callHistory": {
+    "title": "История звонков",
+    "backToContacts": "Назад к контактам",
+    "loadingHistory": "Загрузка истории звонков",
+    "noCalls": "Звонков пока нет",
+    "callContact": "Позвонить {{name}}",
+    "completed": "Завершён",
+    "missed": "Пропущен",
+    "declined": "Отклонён",
+    "showMore": "Показать ещё"
+  },
+  "dashboard": {
+    "title": "Панель помощника",
+    "linkUser": "Привязать пользователя",
+    "lastSeen": "Последний раз: {{time}}",
+    "manageContacts": "Управление контактами"
+  },
+  "manageContacts": {
+    "title": "Управление контактами",
+    "addContact": "+ Добавить контакт",
+    "contactName": "Имя контакта",
+    "namePlaceholder": "Имя контакта",
+    "remove": "Удалить",
+    "confirmRemove": "Вы уверены, что хотите удалить {{name}}?",
+    "removeContact": "Удалить {{name}}",
+    "thisContact": "этот контакт",
+    "saveNewContact": "Сохранить новый контакт",
+    "cancelAdd": "Отменить добавление"
+  },
+  "elderlySettings": {
+    "fontSize": "Размер шрифта",
+    "large": "Крупный",
+    "xLarge": "Очень крупный",
+    "ringtoneVolume": "Громкость звонка",
+    "volumePercent": "{{value}}%",
+    "appLock": "Блокировка приложения",
+    "enabled": "Включено",
+    "disabled": "Выключено",
+    "enableAppLock": "Включить блокировку приложения",
+    "setPin": "Установить PIN",
+    "pinPlaceholder": "4-значный PIN",
+    "confirmPin": "Подтвердить PIN",
+    "confirmPinPlaceholder": "Подтвердить PIN",
+    "pinLengthError": "PIN должен состоять ровно из 4 цифр",
+    "pinMismatchError": "PIN-коды не совпадают",
+    "pinSaveError": "Не удалось сохранить PIN. Пожалуйста, попробуйте снова.",
+    "savePin": "Сохранить PIN",
+    "language": "Язык"
+  },
+  "roleSelector": {
+    "notSignedIn": "Вы не вошли в систему. Пожалуйста, попробуйте снова.",
+    "saveFailed": "Не удалось сохранить роль: {{error}}",
+    "whoAreYou": "Кто вы?",
+    "elderlyUser": "Я пожилой пользователь",
+    "caregiver": "Я семейный помощник"
+  },
+  "onboarding": {
+    "welcome": "Добро пожаловать в EasyCall",
+    "elderlyDescription": "Простые видеозвонки с вашей семьёй. Просто нажмите на фото, чтобы позвонить!",
+    "caregiverDescription": "Управляйте видеозвонками для ваших пожилых родственников удалённо.",
+    "cameraMic": "Камера и микрофон",
+    "cameraMicHint": "EasyCall нужен доступ к вашей камере и микрофону для видеозвонков.",
+    "notifications": "Разрешение на уведомления",
+    "notificationsHint": "Разрешите уведомления, чтобы знать, когда вам звонят.",
+    "pairWithCaregiver": "Сопряжение с помощником",
+    "linkToElderly": "Привязать пользователя",
+    "done": "Готово",
+    "stepOf": "Шаг {{step}} из {{total}}",
+    "failedSetup": "Не удалось завершить настройку. Пожалуйста, попробуйте снова."
+  },
+  "pairingCode": {
+    "yourCode": "Ваш код сопряжения:",
+    "generatingCode": "Генерация кода",
+    "pairingCodeLabel": "Код сопряжения: {{code}}",
+    "expiresIn": "Истекает через {{time}}",
+    "getNewCode": "Получить новый код"
+  },
+  "pairElderly": {
+    "enterCode": "Введите 6-значный код, показанный на экране пожилого пользователя:",
+    "linking": "Привязка...",
+    "linkAccount": "Привязать аккаунт"
+  },
+  "incomingCall": {
+    "isCalling": "{{name}} звонит",
+    "calling": "звонит...",
+    "answer": "Ответить",
+    "answerCall": "Ответить на звонок",
+    "decline": "Отклонить",
+    "declineCall": "Отклонить звонок"
+  },
+  "rejoinPrompt": {
+    "returnToCall": "Вернуться к звонку с {{name}}?",
+    "returnButton": "Вернуться к звонку",
+    "returnToCallWith": "Вернуться к звонку с {{name}}",
+    "dismiss": "Закрыть",
+    "rejoinCall": "Вернуться к звонку"
+  },
+  "confirmDialog": {
+    "ariaLabel": "Подтвердить действие"
+  },
+  "installPrompt": {
+    "title": "Установить EasyCall",
+    "description": "Установите приложение на ваше устройство для лучшего опыта.",
+    "install": "Установить",
+    "ariaLabel": "Установить приложение EasyCall",
+    "installApp": "Установить приложение"
+  },
+  "appLock": {
+    "title": "Экран блокировки",
+    "enterPin": "Введите PIN для разблокировки",
+    "digitsEntered": "Введено {{count}} из 4 цифр",
+    "tooManyAttempts": "Слишком много попыток. Попробуйте снова через {{seconds}}с",
+    "wrongPin": "Неверный PIN",
+    "clear": "Очистить"
+  },
+  "connection": {
+    "good": "Хорошее соединение",
+    "fair": "Среднее соединение",
+    "poor": "Плохое соединение",
+    "weakSignal": "Качество видео снижено из-за слабого сигнала"
+  },
+  "skipToContent": "Перейти к содержимому"
+}

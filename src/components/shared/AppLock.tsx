@@ -1,4 +1,6 @@
-import { useState, useCallback, type ReactNode } from 'react';
+import { useState, useCallback, useRef, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface AppLockProps {
   isLocked: boolean;
@@ -15,8 +17,11 @@ export function AppLock({
   onPinSubmit,
   children,
 }: AppLockProps) {
+  const { t } = useTranslation();
   const [digits, setDigits] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, isLocked);
 
   const isCoolingDown = cooldownRemaining > 0;
 
@@ -55,19 +60,20 @@ export function AppLock({
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-[var(--space-lg)] bg-base-100 p-[var(--space-md)]"
       role="dialog"
-      aria-label="App lock screen"
+      aria-label={t('appLock.title')}
     >
       <h1 className="text-[length:var(--text-heading)] font-bold text-center">
-        Enter PIN to unlock
+        {t('appLock.enterPin')}
       </h1>
 
       {/* PIN dots */}
       <div
         className="flex gap-[var(--space-md)]"
         role="group"
-        aria-label={`${digits.length} of 4 digits entered`}
+        aria-label={t('appLock.digitsEntered', { count: digits.length })}
       >
         {Array.from({ length: 4 }, (_, i) => (
           <div
@@ -84,11 +90,11 @@ export function AppLock({
       <div aria-live="polite" className="min-h-[2rem] text-center">
         {isCoolingDown && (
           <p className="text-[length:var(--text-body)] text-error font-bold">
-            Too many attempts. Try again in {cooldownRemaining}s
+            {t('appLock.tooManyAttempts', { seconds: cooldownRemaining })}
           </p>
         )}
         {!isCoolingDown && failedAttempts > 0 && (
-          <p className="text-[length:var(--text-body)] text-error">Wrong PIN</p>
+          <p className="text-[length:var(--text-body)] text-error">{t('appLock.wrongPin')}</p>
         )}
       </div>
 
@@ -111,9 +117,9 @@ export function AppLock({
           className="btn btn-ghost min-h-14 min-w-14 text-[length:var(--text-body)]"
           onClick={handleClear}
           disabled={isCoolingDown || submitting}
-          aria-label="Clear"
+          aria-label={t('appLock.clear')}
         >
-          Clear
+          {t('appLock.clear')}
         </button>
         <button
           type="button"

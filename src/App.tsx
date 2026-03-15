@@ -21,6 +21,8 @@ import { PairElderlyUser } from '@/components/caregiver/PairElderlyUser';
 import { ElderlyUserSettings } from '@/components/caregiver/ElderlyUserSettings';
 import { DEFAULT_USER_SETTINGS } from '@/types/user';
 import type { UserSettings } from '@/types/user';
+import { SkipToContent } from '@/components/shared/SkipToContent';
+import { loadLanguage, RTL_LANGUAGES } from '@/i18n';
 
 function ManageContactsPage() {
   const { elderlyUserId } = useParams<{ elderlyUserId: string }>();
@@ -80,53 +82,65 @@ function AuthenticatedApp() {
     return unsubscribe;
   }, [userId]);
 
+  useEffect(() => {
+    void loadLanguage(settings.language);
+    document.documentElement.lang = settings.language;
+    document.documentElement.dir = RTL_LANGUAGES.includes(settings.language) ? 'rtl' : 'ltr';
+  }, [settings.language]);
+
   useIncomingCall(userId);
 
   const lockState = useAppLock({ settings });
 
   return (
     <>
+      <SkipToContent />
       <AppLock
         isLocked={lockState.isLocked}
         failedAttempts={lockState.failedAttempts}
         cooldownRemaining={lockState.cooldownRemaining}
         onPinSubmit={lockState.unlockWithPin}
       >
-        <Routes>
-          <Route path="/" element={<RoleSelector />} />
-          <Route element={<AuthGuard requiredRole="elderly" />}>
-            <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
-            <Route
-              path="/elderly/settings"
-              element={
-                userId ? (
-                  <SettingsScreen
-                    userId={userId}
-                    settings={settings}
-                    onSettingsChange={(s: UserSettings) => {
-                      setSettings(s);
-                    }}
-                  />
-                ) : null
-              }
-            />
-            <Route
-              path="/elderly/add-contact"
-              element={userId ? <AddContact userId={userId} /> : null}
-            />
-            <Route
-              path="/elderly/history"
-              element={userId ? <CallHistory userId={userId} /> : null}
-            />
-            <Route path="/call/:contactId" element={<CallScreen />} />
-          </Route>
-          <Route element={<AuthGuard requiredRole="caregiver" />}>
-            <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />
-            <Route path="/caregiver/manage/:elderlyUserId" element={<ManageContactsPage />} />
-            <Route path="/caregiver/pair" element={<PairElderlyUserPage />} />
-            <Route path="/caregiver/settings/:elderlyUserId" element={<CaregiverSettingsPage />} />
-          </Route>
-        </Routes>
+        <main id="main-content">
+          <Routes>
+            <Route path="/" element={<RoleSelector />} />
+            <Route element={<AuthGuard requiredRole="elderly" />}>
+              <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
+              <Route
+                path="/elderly/settings"
+                element={
+                  userId ? (
+                    <SettingsScreen
+                      userId={userId}
+                      settings={settings}
+                      onSettingsChange={(s: UserSettings) => {
+                        setSettings(s);
+                      }}
+                    />
+                  ) : null
+                }
+              />
+              <Route
+                path="/elderly/add-contact"
+                element={userId ? <AddContact userId={userId} /> : null}
+              />
+              <Route
+                path="/elderly/history"
+                element={userId ? <CallHistory userId={userId} /> : null}
+              />
+              <Route path="/call/:contactId" element={<CallScreen />} />
+            </Route>
+            <Route element={<AuthGuard requiredRole="caregiver" />}>
+              <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />
+              <Route path="/caregiver/manage/:elderlyUserId" element={<ManageContactsPage />} />
+              <Route path="/caregiver/pair" element={<PairElderlyUserPage />} />
+              <Route
+                path="/caregiver/settings/:elderlyUserId"
+                element={<CaregiverSettingsPage />}
+              />
+            </Route>
+          </Routes>
+        </main>
         <InstallPrompt />
       </AppLock>
       <IncomingCallScreen />

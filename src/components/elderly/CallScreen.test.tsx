@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent, act, render } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { MemoryRouter, Routes, Route } from 'react-router';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '@/i18n';
 import { createMockContact } from '@/test/helpers/factories';
 import { MockJitsiMeetExternalAPI } from '@/test/mocks/jitsi';
 
@@ -87,11 +89,13 @@ describe('CallScreen', () => {
     let result: ReturnType<typeof render>;
     await act(async () => {
       result = render(
-        <MemoryRouter initialEntries={['/call/contact-1']}>
-          <Routes>
-            <Route path="/call/:contactId" element={<CallScreen />} />
-          </Routes>
-        </MemoryRouter>,
+        <I18nextProvider i18n={i18n}>
+          <MemoryRouter initialEntries={['/call/contact-1']}>
+            <Routes>
+              <Route path="/call/:contactId" element={<CallScreen />} />
+            </Routes>
+          </MemoryRouter>
+        </I18nextProvider>,
       );
       // Wait for async operations to settle
       await new Promise((r) => setTimeout(r, 50));

@@ -1,0 +1,186 @@
+{
+  "common": {
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "save": "Speichern",
+    "saving": "Speichern...",
+    "loading": "Laden...",
+    "install": "Installieren"
+  },
+  "home": {
+    "title": "Ihre Kontakte",
+    "history": "Verlauf",
+    "settings": "Einstellungen",
+    "noContacts": "Noch keine Kontakte",
+    "noContactsHint": "Ein Betreuer kann Kontakte für Sie hinzufügen",
+    "callContact": "{{name}} anrufen"
+  },
+  "call": {
+    "contactNotFound": "Kontakt nicht gefunden",
+    "connecting": "Verbindung zum Anruf",
+    "connectingWith": "Verbindung zum Anruf mit {{name}}...",
+    "ended": "Anruf beendet",
+    "unmuteMic": "Mikrofon einschalten",
+    "muteMic": "Mikrofon stummschalten",
+    "endCall": "Anruf beenden",
+    "cameraOn": "Kamera einschalten",
+    "cameraOff": "Kamera ausschalten",
+    "videoCallArea": "Videoanruf-Bereich"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "textSize": "Textgröße",
+    "large": "Groß",
+    "extraLarge": "Sehr groß",
+    "pairingCode": "Kopplungscode",
+    "addContact": "Kontakt hinzufügen",
+    "language": "Sprache"
+  },
+  "permissions": {
+    "checking": "Kamera- und Mikrofonberechtigungen werden überprüft",
+    "cameraAndMic": "Kamera & Mikrofon",
+    "allowPrompt": "Tippen Sie auf ERLAUBEN, wenn Sie aufgefordert werden, Kamera und Mikrofon zu aktivieren.",
+    "blocked": "Kamera blockiert",
+    "blockedHint": "Bitte erlauben Sie den Zugriff auf Kamera und Mikrofon in Ihren Browsereinstellungen und tippen Sie dann auf Erneut versuchen.",
+    "tryAgain": "Erneut versuchen",
+    "noCamera": "Keine Kamera gefunden",
+    "noCameraHint": "Kamera oder Mikrofon nicht gefunden. Bitte schließen Sie eine Kamera und ein Mikrofon an und versuchen Sie es erneut."
+  },
+  "addContact": {
+    "title": "Kontakt hinzufügen",
+    "step1": "Schritt 1: Name",
+    "contactName": "Kontaktname",
+    "namePlaceholder": "Kontaktname eingeben",
+    "addPhoto": "Foto hinzufügen",
+    "step2": "Schritt 2: Foto (optional)",
+    "preview": "Vorschau",
+    "choosePhoto": "Foto auswählen",
+    "step3": "Schritt 3: Bestätigen",
+    "confirmTitle": "Bestätigen"
+  },
+  "callHistory": {
+    "title": "Anrufverlauf",
+    "backToContacts": "Zurück zu Kontakten",
+    "loadingHistory": "Anrufverlauf wird geladen",
+    "noCalls": "Noch keine Anrufe",
+    "callContact": "{{name}} anrufen",
+    "completed": "Abgeschlossen",
+    "missed": "Verpasst",
+    "declined": "Abgelehnt",
+    "showMore": "Mehr anzeigen"
+  },
+  "dashboard": {
+    "title": "Betreuer-Dashboard",
+    "linkUser": "Älteren Benutzer verknüpfen",
+    "lastSeen": "Zuletzt gesehen: {{time}}",
+    "manageContacts": "Kontakte verwalten"
+  },
+  "manageContacts": {
+    "title": "Kontakte verwalten",
+    "addContact": "+ Kontakt hinzufügen",
+    "contactName": "Kontaktname",
+    "namePlaceholder": "Kontaktname",
+    "remove": "Entfernen",
+    "confirmRemove": "Sind Sie sicher, dass Sie {{name}} entfernen möchten?",
+    "removeContact": "{{name}} entfernen",
+    "thisContact": "diesen Kontakt",
+    "saveNewContact": "Neuen Kontakt speichern",
+    "cancelAdd": "Hinzufügen abbrechen"
+  },
+  "elderlySettings": {
+    "fontSize": "Schriftgröße",
+    "large": "Groß",
+    "xLarge": "Sehr groß",
+    "ringtoneVolume": "Klingeltonlautstärke",
+    "volumePercent": "{{value}}%",
+    "appLock": "App-Sperre",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
+    "enableAppLock": "App-Sperre aktivieren",
+    "setPin": "PIN festlegen",
+    "pinPlaceholder": "4-stellige PIN",
+    "confirmPin": "PIN bestätigen",
+    "confirmPinPlaceholder": "PIN bestätigen",
+    "pinLengthError": "PIN muss genau 4 Ziffern haben",
+    "pinMismatchError": "PINs stimmen nicht überein",
+    "pinSaveError": "PIN konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "savePin": "PIN speichern",
+    "language": "Sprache"
+  },
+  "roleSelector": {
+    "notSignedIn": "Nicht angemeldet. Bitte versuchen Sie es erneut.",
+    "saveFailed": "Rolle konnte nicht gespeichert werden: {{error}}",
+    "whoAreYou": "Wer sind Sie?",
+    "elderlyUser": "Ich bin ein älterer Benutzer",
+    "caregiver": "Ich bin ein Familienbetreuer"
+  },
+  "onboarding": {
+    "welcome": "Willkommen bei EasyCall",
+    "elderlyDescription": "Einfache Videoanrufe mit Ihrer Familie. Tippen Sie einfach auf ein Foto, um anzurufen!",
+    "caregiverDescription": "Verwalten Sie Videoanrufe für Ihre älteren Familienmitglieder aus der Ferne.",
+    "cameraMic": "Kamera & Mikrofon",
+    "cameraMicHint": "EasyCall benötigt Zugriff auf Ihre Kamera und Ihr Mikrofon für Videoanrufe.",
+    "notifications": "Benachrichtigungserlaubnis",
+    "notificationsHint": "Erlauben Sie Benachrichtigungen, damit Sie wissen, wenn jemand Sie anruft.",
+    "pairWithCaregiver": "Mit Betreuer koppeln",
+    "linkToElderly": "Mit älterem Benutzer verknüpfen",
+    "done": "Fertig",
+    "stepOf": "Schritt {{step}} von {{total}}",
+    "failedSetup": "Einrichtung fehlgeschlagen. Bitte versuchen Sie es erneut."
+  },
+  "pairingCode": {
+    "yourCode": "Ihr Kopplungscode:",
+    "generatingCode": "Code wird generiert",
+    "pairingCodeLabel": "Kopplungscode: {{code}}",
+    "expiresIn": "Läuft ab in {{time}}",
+    "getNewCode": "Neuen Code erhalten"
+  },
+  "pairElderly": {
+    "enterCode": "Geben Sie den 6-stelligen Code ein, der auf dem Bildschirm des älteren Benutzers angezeigt wird:",
+    "linking": "Verknüpfung...",
+    "linkAccount": "Konto verknüpfen"
+  },
+  "incomingCall": {
+    "isCalling": "{{name}} ruft an",
+    "calling": "ruft an...",
+    "answer": "Annehmen",
+    "answerCall": "Anruf annehmen",
+    "decline": "Ablehnen",
+    "declineCall": "Anruf ablehnen"
+  },
+  "rejoinPrompt": {
+    "returnToCall": "Zum Anruf mit {{name}} zurückkehren?",
+    "returnButton": "Zum Anruf zurückkehren",
+    "returnToCallWith": "Zum Anruf mit {{name}} zurückkehren",
+    "dismiss": "Schließen",
+    "rejoinCall": "Zum Anruf zurückkehren"
+  },
+  "confirmDialog": {
+    "ariaLabel": "Aktion bestätigen"
+  },
+  "installPrompt": {
+    "title": "EasyCall installieren",
+    "description": "Installieren Sie diese App auf Ihrem Gerät für die beste Erfahrung.",
+    "install": "Installieren",
+    "ariaLabel": "EasyCall-App installieren",
+    "installApp": "App installieren"
+  },
+  "appLock": {
+    "title": "Sperrbildschirm",
+    "enterPin": "PIN zum Entsperren eingeben",
+    "digitsEntered": "{{count}} von 4 Ziffern eingegeben",
+    "tooManyAttempts": "Zu viele Versuche. Versuchen Sie es in {{seconds}}s erneut",
+    "wrongPin": "Falsche PIN",
+    "clear": "Löschen"
+  },
+  "connection": {
+    "good": "Gute Verbindung",
+    "fair": "Mittlere Verbindung",
+    "poor": "Schlechte Verbindung",
+    "weakSignal": "Videoqualität aufgrund schwachen Signals reduziert"
+  },
+  "skipToContent": "Zum Inhalt springen"
+}

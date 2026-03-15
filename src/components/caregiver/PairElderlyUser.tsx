@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { validatePairingCode } from '@/services/callSignaling';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 
@@ -7,6 +8,7 @@ interface PairElderlyUserProps {
 }
 
 export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
+  const { t } = useTranslation();
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -29,7 +31,7 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-[var(--space-md)]">
       <label htmlFor="pairing-code" className="text-[length:var(--text-body)] font-bold">
-        Enter the 6-digit code shown on the elderly user's screen:
+        {t('pairElderly.enterCode')}
       </label>
       <input
         id="pairing-code"
@@ -48,7 +50,7 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
         </p>
       )}
       <EasyCallButton type="submit" disabled={code.length !== 6 || status === 'loading'}>
-        {status === 'loading' ? 'Linking...' : 'Link Account'}
+        {status === 'loading' ? t('pairElderly.linking') : t('pairElderly.linkAccount')}
       </EasyCallButton>
     </form>
   );

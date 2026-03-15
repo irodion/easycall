@@ -1,0 +1,186 @@
+{
+  "common": {
+    "cancel": "ביטול",
+    "confirm": "אישור",
+    "back": "חזרה",
+    "next": "הבא",
+    "skip": "דלג",
+    "save": "שמור",
+    "saving": "שומר...",
+    "loading": "טוען...",
+    "install": "התקן"
+  },
+  "home": {
+    "title": "אנשי הקשר שלך",
+    "history": "היסטוריה",
+    "settings": "הגדרות",
+    "noContacts": "אין אנשי קשר עדיין",
+    "noContactsHint": "מטפל יכול להוסיף אנשי קשר עבורך",
+    "callContact": "התקשר ל{{name}}"
+  },
+  "call": {
+    "contactNotFound": "איש קשר לא נמצא",
+    "connecting": "מתחבר לשיחה",
+    "connectingWith": "מתחבר לשיחה עם {{name}}...",
+    "ended": "השיחה הסתיימה",
+    "unmuteMic": "הפעל מיקרופון",
+    "muteMic": "השתק מיקרופון",
+    "endCall": "סיים שיחה",
+    "cameraOn": "הפעל מצלמה",
+    "cameraOff": "כבה מצלמה",
+    "videoCallArea": "אזור שיחת וידאו"
+  },
+  "settings": {
+    "title": "הגדרות",
+    "textSize": "גודל טקסט",
+    "large": "גדול",
+    "extraLarge": "גדול מאוד",
+    "pairingCode": "קוד צימוד",
+    "addContact": "הוסף איש קשר",
+    "language": "שפה"
+  },
+  "permissions": {
+    "checking": "בודק הרשאות מצלמה ומיקרופון",
+    "cameraAndMic": "מצלמה ומיקרופון",
+    "allowPrompt": "הקש אפשר כאשר תתבקש להפעיל את המצלמה והמיקרופון.",
+    "blocked": "המצלמה חסומה",
+    "blockedHint": "אנא אפשר גישה למצלמה ולמיקרופון בהגדרות הדפדפן שלך, ואז הקש נסה שוב.",
+    "tryAgain": "נסה שוב",
+    "noCamera": "לא נמצאה מצלמה",
+    "noCameraHint": "לא נמצאו מצלמה או מיקרופון. אנא חבר מצלמה ומיקרופון ונסה שוב."
+  },
+  "addContact": {
+    "title": "הוסף איש קשר",
+    "step1": "שלב 1: שם",
+    "contactName": "שם איש הקשר",
+    "namePlaceholder": "הזן שם איש קשר",
+    "addPhoto": "הוסף תמונה",
+    "step2": "שלב 2: תמונה (אופציונלי)",
+    "preview": "תצוגה מקדימה",
+    "choosePhoto": "בחר תמונה",
+    "step3": "שלב 3: אישור",
+    "confirmTitle": "אישור"
+  },
+  "callHistory": {
+    "title": "היסטוריית שיחות",
+    "backToContacts": "חזרה לאנשי קשר",
+    "loadingHistory": "טוען היסטוריית שיחות",
+    "noCalls": "אין שיחות עדיין",
+    "callContact": "התקשר ל{{name}}",
+    "completed": "הושלמה",
+    "missed": "לא נענתה",
+    "declined": "נדחתה",
+    "showMore": "הצג עוד"
+  },
+  "dashboard": {
+    "title": "לוח בקרה למטפל",
+    "linkUser": "קשר משתמש מבוגר",
+    "lastSeen": "נראה לאחרונה: {{time}}",
+    "manageContacts": "ניהול אנשי קשר"
+  },
+  "manageContacts": {
+    "title": "ניהול אנשי קשר",
+    "addContact": "+ הוסף איש קשר",
+    "contactName": "שם איש קשר",
+    "namePlaceholder": "שם איש קשר",
+    "remove": "הסר",
+    "confirmRemove": "האם אתה בטוח שברצונך להסיר את {{name}}?",
+    "removeContact": "הסר את {{name}}",
+    "thisContact": "איש קשר זה",
+    "saveNewContact": "שמור איש קשר חדש",
+    "cancelAdd": "בטל הוספה"
+  },
+  "elderlySettings": {
+    "fontSize": "גודל גופן",
+    "large": "גדול",
+    "xLarge": "גדול מאוד",
+    "ringtoneVolume": "עוצמת צלצול",
+    "volumePercent": "{{value}}%",
+    "appLock": "נעילת אפליקציה",
+    "enabled": "מופעל",
+    "disabled": "מושבת",
+    "enableAppLock": "הפעל נעילת אפליקציה",
+    "setPin": "הגדר PIN",
+    "pinPlaceholder": "PIN בן 4 ספרות",
+    "confirmPin": "אשר PIN",
+    "confirmPinPlaceholder": "אשר PIN",
+    "pinLengthError": "ה-PIN חייב להיות בן 4 ספרות בדיוק",
+    "pinMismatchError": "קודי ה-PIN אינם תואמים",
+    "pinSaveError": "שמירת ה-PIN נכשלה. אנא נסה שוב.",
+    "savePin": "שמור PIN",
+    "language": "שפה"
+  },
+  "roleSelector": {
+    "notSignedIn": "לא מחובר. אנא נסה שוב.",
+    "saveFailed": "שמירת התפקיד נכשלה: {{error}}",
+    "whoAreYou": "מי אתה?",
+    "elderlyUser": "אני משתמש מבוגר",
+    "caregiver": "אני מטפל משפחתי"
+  },
+  "onboarding": {
+    "welcome": "ברוכים הבאים ל-EasyCall",
+    "elderlyDescription": "שיחות וידאו פשוטות עם המשפחה שלך. פשוט הקש על תמונה כדי להתקשר!",
+    "caregiverDescription": "נהל שיחות וידאו עבור בני המשפחה המבוגרים שלך מרחוק.",
+    "cameraMic": "מצלמה ומיקרופון",
+    "cameraMicHint": "EasyCall צריך גישה למצלמה ולמיקרופון שלך עבור שיחות וידאו.",
+    "notifications": "הרשאת התראות",
+    "notificationsHint": "אפשר התראות כדי לדעת מתי מישהו מתקשר אליך.",
+    "pairWithCaregiver": "צימוד עם מטפל",
+    "linkToElderly": "קישור למשתמש מבוגר",
+    "done": "סיום",
+    "stepOf": "שלב {{step}} מתוך {{total}}",
+    "failedSetup": "ההגדרה נכשלה. אנא נסה שוב."
+  },
+  "pairingCode": {
+    "yourCode": "קוד הצימוד שלך:",
+    "generatingCode": "יוצר קוד",
+    "pairingCodeLabel": "קוד צימוד: {{code}}",
+    "expiresIn": "פג תוקף בעוד {{time}}",
+    "getNewCode": "קבל קוד חדש"
+  },
+  "pairElderly": {
+    "enterCode": "הזן את הקוד בן 6 הספרות המוצג על מסך המשתמש המבוגר:",
+    "linking": "מקשר...",
+    "linkAccount": "קשר חשבון"
+  },
+  "incomingCall": {
+    "isCalling": "{{name}} מתקשר",
+    "calling": "מתקשר...",
+    "answer": "ענה",
+    "answerCall": "ענה לשיחה",
+    "decline": "דחה",
+    "declineCall": "דחה שיחה"
+  },
+  "rejoinPrompt": {
+    "returnToCall": "לחזור לשיחה עם {{name}}?",
+    "returnButton": "חזור לשיחה",
+    "returnToCallWith": "חזור לשיחה עם {{name}}",
+    "dismiss": "סגור",
+    "rejoinCall": "חזור לשיחה"
+  },
+  "confirmDialog": {
+    "ariaLabel": "אשר פעולה"
+  },
+  "installPrompt": {
+    "title": "התקן EasyCall",
+    "description": "התקן את האפליקציה במכשיר שלך לחוויה הטובה ביותר.",
+    "install": "התקן",
+    "ariaLabel": "התקן אפליקציית EasyCall",
+    "installApp": "התקן אפליקציה"
+  },
+  "appLock": {
+    "title": "מסך נעילה",
+    "enterPin": "הזן PIN לשחרור נעילה",
+    "digitsEntered": "{{count}} מתוך 4 ספרות הוזנו",
+    "tooManyAttempts": "יותר מדי ניסיונות. נסה שוב בעוד {{seconds}} שניות",
+    "wrongPin": "PIN שגוי",
+    "clear": "נקה"
+  },
+  "connection": {
+    "good": "חיבור טוב",
+    "fair": "חיבור סביר",
+    "poor": "חיבור חלש",
+    "weakSignal": "איכות הווידאו הופחתה עקב אות חלש"
+  },
+  "skipToContent": "דלג לתוכן"
+}
