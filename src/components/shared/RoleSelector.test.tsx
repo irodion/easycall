@@ -64,6 +64,35 @@ describe('RoleSelector', () => {
     });
   });
 
+  it('shows error when auth.currentUser is null', async () => {
+    const firebase = await import('@/services/firebase');
+    const original = firebase.auth.currentUser;
+    Object.defineProperty(firebase.auth, 'currentUser', { value: null, writable: true });
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+
+    await vi.waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
+
+    Object.defineProperty(firebase.auth, 'currentUser', { value: original, writable: true });
+  });
+
+  it('shows error when setDoc rejects', async () => {
+    const { setDoc } = await import('firebase/firestore');
+    vi.mocked(setDoc).mockRejectedValueOnce(new Error('Firestore write failed'));
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+
+    await vi.waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
+  });
+
   it('passes vitest-axe', async () => {
     const { RoleSelector } = await import('./RoleSelector');
     const { container } = renderWithProviders(<RoleSelector />);

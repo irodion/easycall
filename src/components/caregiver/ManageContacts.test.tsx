@@ -87,6 +87,43 @@ describe('ManageContacts', () => {
     expect(mockRemoveContact).toHaveBeenCalledWith('elderly-1', 'contact-1');
   });
 
+  it('shows error when addContact throws', async () => {
+    mockAddContact.mockRejectedValueOnce(new Error('Firestore error'));
+    const { ManageContacts } = await import('./ManageContacts');
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /add contact/i }));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Charlie' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    });
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('save button is disabled when name is whitespace-only', async () => {
+    const { ManageContacts } = await import('./ManageContacts');
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /add contact/i }));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: '   ' } });
+
+    expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
+  });
+
+  it('shows error when removeContact throws', async () => {
+    mockRemoveContact.mockRejectedValueOnce(new Error('Delete failed'));
+    const { ManageContacts } = await import('./ManageContacts');
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+
+    fireEvent.click(screen.getAllByRole('button', { name: /remove/i })[0]!);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
+    });
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
   it('passes vitest-axe', async () => {
     const { ManageContacts } = await import('./ManageContacts');
     const { container } = renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);

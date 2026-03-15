@@ -94,6 +94,67 @@ describe('compressImage', () => {
     await expect(compressImage(file)).rejects.toThrow('Failed to compress image');
   });
 
+  it('resizes landscape image wider than MAX_DIMENSION', async () => {
+    // Override Image to be wider than 512
+    vi.stubGlobal(
+      'Image',
+      class {
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        width = 1024;
+        height = 768;
+        _src = '';
+        set src(value: string) {
+          this._src = value;
+          setTimeout(() => this.onload?.(), 0);
+        }
+        get src() {
+          return this._src;
+        }
+      },
+    );
+
+    const mockBlob = new Blob(['data'], { type: 'image/jpeg' });
+    mockCanvas.toBlob.mockImplementation((cb: (b: Blob) => void) => cb(mockBlob));
+
+    const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' });
+    const result = await compressImage(file);
+
+    expect(result).toBeInstanceOf(Blob);
+    // drawImage should be called with scaled dimensions (width > height path)
+    expect(mockContext.drawImage).toHaveBeenCalledWith(expect.anything(), 0, 0, 512, 384);
+  });
+
+  it('resizes portrait image taller than MAX_DIMENSION', async () => {
+    vi.stubGlobal(
+      'Image',
+      class {
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        width = 768;
+        height = 1024;
+        _src = '';
+        set src(value: string) {
+          this._src = value;
+          setTimeout(() => this.onload?.(), 0);
+        }
+        get src() {
+          return this._src;
+        }
+      },
+    );
+
+    const mockBlob = new Blob(['data'], { type: 'image/jpeg' });
+    mockCanvas.toBlob.mockImplementation((cb: (b: Blob) => void) => cb(mockBlob));
+
+    const file = new File(['data'], 'photo.jpg', { type: 'image/jpeg' });
+    const result = await compressImage(file);
+
+    expect(result).toBeInstanceOf(Blob);
+    // drawImage should be called with scaled dimensions (height > width path)
+    expect(mockContext.drawImage).toHaveBeenCalledWith(expect.anything(), 0, 0, 384, 512);
+  });
+
   it('rejects when image fails to load', async () => {
     // Override the Image stub to trigger onerror instead of onload
     vi.stubGlobal(

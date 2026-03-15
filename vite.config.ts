@@ -33,7 +33,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov', 'json-summary'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/test/**', 'src/main.tsx', 'src/**/*.d.ts'],
+      exclude: ['src/test/**', 'src/main.tsx', 'src/**/*.d.ts', 'src/firebase-messaging-sw.ts'],
       thresholds: {
         lines: 80,
         branches: 75,

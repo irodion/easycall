@@ -33,4 +33,16 @@ describe('callStore', () => {
     expect(state.isRinging).toBe(false);
     expect(state.incomingCall).toBeNull();
   });
+
+  it('setIncomingCall: ignores duplicate call with same roomId', () => {
+    useCallStore.getState().setIncomingCall(mockCall);
+    const stateAfterFirst = useCallStore.getState();
+
+    // Call again with same roomId — state should be identical (same reference)
+    useCallStore.getState().setIncomingCall({ ...mockCall, callerName: 'Different' });
+    const stateAfterSecond = useCallStore.getState();
+
+    expect(stateAfterSecond.incomingCall).toBe(stateAfterFirst.incomingCall);
+    expect(stateAfterSecond.incomingCall?.callerName).toBe('Alex');
+  });
 });

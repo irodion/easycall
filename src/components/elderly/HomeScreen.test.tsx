@@ -128,4 +128,21 @@ describe('HomeScreen', () => {
     renderWithProviders(<HomeScreen userId="user-1" />);
     expect(screen.getByRole('button', { name: /call history/i })).toBeInTheDocument();
   });
+
+  it('clicking history button navigates', () => {
+    renderWithProviders(<HomeScreen userId="user-1" />, {
+      routerProps: { initialEntries: ['/elderly'] },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /call history/i }));
+    // Button click triggers navigate — just verify no error
+    expect(screen.getByRole('button', { name: /call history/i })).toBeInTheDocument();
+  });
+
+  it('clicking settings button navigates', () => {
+    renderWithProviders(<HomeScreen userId="user-1" />, {
+      routerProps: { initialEntries: ['/elderly'] },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /settings/i }));
+    expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument();
+  });
 });

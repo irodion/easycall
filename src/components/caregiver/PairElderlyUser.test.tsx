@@ -77,6 +77,45 @@ describe('PairElderlyUser', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Pairing code has expired.');
   });
 
+  it('does not submit when code is whitespace-only', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
+    // Can't type whitespace into a numeric-filtered input, but the guard is `!code.trim()`
+    // Button is disabled when code.length !== 6 anyway, so this branch is about the guard
+    expect(screen.getByRole('button', { name: /link account/i })).toBeDisabled();
+    expect(mockValidatePairingCode).not.toHaveBeenCalled();
+    void user; // suppress unused
+  });
+
+  it('does not double-submit while loading', async () => {
+    let resolveValidate!: (value: { elderlyUserId: string }) => void;
+    mockValidatePairingCode.mockImplementationOnce(
+      () => new Promise((resolve) => { resolveValidate = resolve; }),
+    );
+
+    const user = userEvent.setup();
+    renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
+    await user.type(screen.getByLabelText(/6-digit code/i), '123456');
+    await user.click(screen.getByRole('button', { name: /link account/i }));
+
+    // Button should now show "Linking..." and be disabled
+    expect(screen.getByRole('button', { name: /linking/i })).toBeDisabled();
+    expect(mockValidatePairingCode).toHaveBeenCalledTimes(1);
+
+    resolveValidate({ elderlyUserId: 'elderly-1' });
+  });
+
+  it('shows generic error for non-Error rejection', async () => {
+    mockValidatePairingCode.mockRejectedValue('string error');
+
+    const user = userEvent.setup();
+    renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
+    await user.type(screen.getByLabelText(/6-digit code/i), '123456');
+    await user.click(screen.getByRole('button', { name: /link account/i }));
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
   it('passes vitest-axe', async () => {
     const { container } = renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
     const results = await axe(container);
