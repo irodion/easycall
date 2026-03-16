@@ -105,7 +105,7 @@ function AuthenticatedApp() {
         cooldownRemaining={lockState.cooldownRemaining}
         onPinSubmit={lockState.unlockWithPin}
       >
-        <main id="main-content" className="pb-48">
+        <main id="main-content">
           <Routes>
             <Route path="/" element={<RoleSelector />} />
             <Route element={<AuthGuard requiredRole="elderly" />}>

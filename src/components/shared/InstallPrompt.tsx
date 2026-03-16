@@ -35,6 +35,7 @@ export function InstallPrompt() {
 
   return (
     <div
+      id="install-prompt"
       role="dialog"
       aria-label={t('installPrompt.ariaLabel')}
       className="fixed bottom-0 left-0 right-0 p-6 bg-base-100 border-t border-base-300 shadow-xl z-50 flex flex-col items-center gap-4"
