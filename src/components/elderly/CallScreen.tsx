@@ -108,7 +108,7 @@ export function CallScreen() {
 
         if (user.uid) {
           void setActiveCall(user.uid, {
-            contactId: contact.id,
+            contactId: contact!.id,
             contactName: contactName,
             jitsiRoomId,
             startedAt: Timestamp.now(),

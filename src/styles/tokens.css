@@ -40,6 +40,11 @@
   --radius-round: 9999px;
 }
 
+/* Add bottom padding to main when install prompt is visible */
+:has(> #install-prompt) > #main-content {
+  padding-bottom: 12rem; /* pb-48 equivalent */
+}
+
 /* Extra-large font size overrides */
 [data-font-size='x-large'] {
   --text-body: clamp(22px, 5vw, 28px);
