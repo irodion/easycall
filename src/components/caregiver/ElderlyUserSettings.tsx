@@ -16,6 +16,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   const { t } = useTranslation();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryToken, setRetryToken] = useState(0);
   const [pendingLockEnabled, setPendingLockEnabled] = useState(false);
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
@@ -34,6 +35,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
           ? ((snap.data()['settings'] as Partial<UserSettings>) ?? {})
           : {};
         const incoming: UserSettings = { ...DEFAULT_USER_SETTINGS, ...raw };
+        setLoadError(null);
         setSettings((prev) => {
           if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
           return incoming;
@@ -55,7 +57,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
       unsubscribe();
       clearTimeout(timeout);
     };
-  }, [elderlyUserId, t]);
+  }, [elderlyUserId, t, retryToken]);
 
   if (loadError) {
     return (
@@ -63,7 +65,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
         <p role="alert" className="text-error text-[length:var(--text-body)]">
           {loadError}
         </p>
-        <EasyCallButton onClick={() => window.location.reload()}>
+        <EasyCallButton onClick={() => setRetryToken((n) => n + 1)}>
           {t('common.retry')}
         </EasyCallButton>
       </div>

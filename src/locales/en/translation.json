@@ -150,7 +150,8 @@
     "linking": "Linking...",
     "linkAccount": "Link Account",
     "invalidCode": "Invalid or expired code. Please check and try again.",
-    "codeExpired": "This code has expired. Please generate a new one."
+    "codeExpired": "This code has expired. Please generate a new one.",
+    "codeAlreadyUsed": "This code has already been used."
   },
   "incomingCall": {
     "isCalling": "{{name}} is calling",

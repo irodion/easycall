@@ -66,18 +66,32 @@ describe('PairElderlyUser', () => {
     expect(onSuccess).toHaveBeenCalledWith('elderly-1');
   });
 
-  it('error: renders friendly error for Firebase "internal" error', async () => {
-    mockValidatePairingCode.mockRejectedValue(new Error('internal'));
+  it('error: renders friendly error for Firebase "internal" error code', async () => {
+    const functionsError = Object.assign(new Error('internal'), { code: 'functions/internal' });
+    mockValidatePairingCode.mockRejectedValue(functionsError);
 
     const user = userEvent.setup();
     renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
     await user.type(screen.getByLabelText(/6-digit code/i), '123456');
     await user.click(screen.getByRole('button', { name: /link account/i }));
 
-    const alert = screen.getByRole('alert');
-    expect(alert).toBeInTheDocument();
-    // Should show friendly message, not raw "internal"
-    expect(alert.textContent).not.toContain('internal');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Invalid or expired code. Please check and try again.',
+    );
+  });
+
+  it('error: renders friendly error for "already-exists" error code', async () => {
+    const functionsError = Object.assign(new Error('already-exists'), {
+      code: 'functions/already-exists',
+    });
+    mockValidatePairingCode.mockRejectedValue(functionsError);
+
+    const user = userEvent.setup();
+    renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
+    await user.type(screen.getByLabelText(/6-digit code/i), '123456');
+    await user.click(screen.getByRole('button', { name: /link account/i }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('This code has already been used.');
   });
 
   it('does not submit when code is empty via form submit', () => {

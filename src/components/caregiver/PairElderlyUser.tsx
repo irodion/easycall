@@ -22,12 +22,14 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
       setStatus('idle');
       onSuccess(result.elderlyUserId);
     } catch (err) {
-      const raw = err instanceof Error ? err.message : '';
+      const code = (err as { code?: string })?.code ?? '';
       let message: string;
-      if (raw.includes('internal') || raw.includes('not-found')) {
+      if (code.includes('not-found') || code.includes('internal')) {
         message = t('pairElderly.invalidCode');
-      } else if (raw.includes('deadline')) {
+      } else if (code.includes('deadline-exceeded')) {
         message = t('pairElderly.codeExpired');
+      } else if (code.includes('already-exists')) {
+        message = t('pairElderly.codeAlreadyUsed');
       } else {
         message = t('common.somethingWentWrong');
       }
