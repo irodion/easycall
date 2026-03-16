@@ -88,6 +88,10 @@ function AuthenticatedApp() {
     document.documentElement.dir = RTL_LANGUAGES.includes(settings.language) ? 'rtl' : 'ltr';
   }, [settings.language]);
 
+  useEffect(() => {
+    document.documentElement.dataset.fontSize = settings.fontSize;
+  }, [settings.fontSize]);
+
   useIncomingCall(userId);
 
   const lockState = useAppLock({ settings });
@@ -109,15 +113,7 @@ function AuthenticatedApp() {
               <Route
                 path="/elderly/settings"
                 element={
-                  userId ? (
-                    <SettingsScreen
-                      userId={userId}
-                      settings={settings}
-                      onSettingsChange={(s: UserSettings) => {
-                        setSettings(s);
-                      }}
-                    />
-                  ) : null
+                  userId ? <SettingsScreen userId={userId} settings={settings} /> : null
                 }
               />
               <Route
