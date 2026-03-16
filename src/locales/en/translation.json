@@ -60,7 +60,8 @@
     "preview": "Preview",
     "choosePhoto": "Choose photo",
     "step3": "Step 3: Confirm",
-    "confirmTitle": "Confirm"
+    "confirmTitle": "Confirm",
+    "photoError": "Failed to process photo. Please try again or skip."
   },
   "callHistory": {
     "title": "Call History",

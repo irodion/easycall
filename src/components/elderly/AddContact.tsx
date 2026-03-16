@@ -23,6 +23,7 @@ export function AddContact({ userId }: AddContactProps) {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -49,11 +50,18 @@ export function AddContact({ userId }: AddContactProps) {
   const handleSave = async () => {
     if (isSaving) return;
     setIsSaving(true);
+    setError(null);
     try {
       let photoURL: string | null = null;
       if (photoFile) {
-        const compressed = await compressImage(photoFile);
-        photoURL = await blobToDataUrl(compressed);
+        try {
+          const compressed = await compressImage(photoFile);
+          photoURL = await blobToDataUrl(compressed);
+        } catch {
+          setError(t('addContact.photoError'));
+          setIsSaving(false);
+          return;
+        }
       }
       const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
       const displayOrder = maxOrder + 1;
@@ -166,6 +174,11 @@ export function AddContact({ userId }: AddContactProps) {
       ) : (
         <div className="w-32 h-32 rounded-full bg-primary flex items-center justify-center text-4xl font-bold text-primary-content mx-auto">
           {name[0] ?? '?'}
+        </div>
+      )}
+      {error && (
+        <div role="alert" className="alert alert-error">
+          <EasyCallText as="span" variant="body">{error}</EasyCallText>
         </div>
       )}
       <EasyCallText as="p" variant="heading" className="text-center font-bold">
