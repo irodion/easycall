@@ -17,8 +17,11 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   const fontLabelId = 'font-size-label';
 
   const saveSettings = (partial: Partial<UserSettings>) => {
-    const updated = { ...settings, ...partial };
-    void updateDoc(doc(db, 'users', userId), { settings: updated });
+    const payload: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(partial)) {
+      payload[`settings.${key}`] = value;
+    }
+    void updateDoc(doc(db, 'users', userId), payload);
   };
 
   return (

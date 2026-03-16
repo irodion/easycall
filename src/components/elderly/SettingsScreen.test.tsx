@@ -55,7 +55,7 @@ describe('SettingsScreen', () => {
     renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
     fireEvent.click(screen.getByRole('radio', { name: 'Extra Large' }));
     expect(updateDoc).toHaveBeenCalledWith('doc-ref', {
-      settings: { ...defaultSettings, fontSize: 'x-large' },
+      'settings.fontSize': 'x-large',
     });
   });
 
@@ -65,7 +65,7 @@ describe('SettingsScreen', () => {
     renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
     fireEvent.click(screen.getByText('Español'));
     expect(updateDoc).toHaveBeenCalledWith('doc-ref', {
-      settings: { ...defaultSettings, language: 'es' },
+      'settings.language': 'es',
     });
   });
 
