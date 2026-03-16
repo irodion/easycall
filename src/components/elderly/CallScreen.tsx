@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Timestamp } from 'firebase/firestore';
@@ -49,7 +49,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
     return subscribeToContacts(uid);
   }, [subscribeToContacts]);
 
-  function writeHistory() {
+  const writeHistory = useCallback(() => {
     if (historyWrittenRef.current) return;
     historyWrittenRef.current = true;
     const uid = auth.currentUser?.uid;
@@ -66,7 +66,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
       startedAt: Timestamp.fromMillis(startMs),
       endedAt: Timestamp.fromMillis(endMs),
     });
-  }
+  }, [contact?.id, contactId]);
 
   useEffect(() => {
     if (!contact) return;
@@ -185,7 +185,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         apiRef.current = null;
       }
     };
-  }, [contact, navigate, setInCall]);
+  }, [contact, navigate, setInCall, writeHistory]);
 
   const handleHangup = () => {
     writeHistory();
