@@ -1,18 +1,25 @@
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/services/firebase';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
+import { PairingCodeDisplay } from '@/components/shared/PairingCodeDisplay';
 import type { UserSettings } from '@/types/user';
 
 interface SettingsScreenProps {
   settings: UserSettings;
-  onSettingsChange: (settings: UserSettings) => void;
   userId: string;
 }
 
-export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenProps) {
+export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   const { t } = useTranslation();
   const fontLabelId = 'font-size-label';
+
+  const saveSettings = (partial: Partial<UserSettings>) => {
+    const updated = { ...settings, ...partial };
+    void updateDoc(doc(db, 'users', userId), { settings: updated });
+  };
 
   return (
     <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
@@ -44,7 +51,7 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
               name="fontSize"
               value="large"
               checked={settings.fontSize === 'large'}
-              onChange={() => onSettingsChange({ ...settings, fontSize: 'large' })}
+              onChange={() => saveSettings({ fontSize: 'large' })}
               className="radio radio-primary"
             />
             <EasyCallText as="span" variant="body">
@@ -61,7 +68,7 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
               name="fontSize"
               value="x-large"
               checked={settings.fontSize === 'x-large'}
-              onChange={() => onSettingsChange({ ...settings, fontSize: 'x-large' })}
+              onChange={() => saveSettings({ fontSize: 'x-large' })}
               className="radio radio-primary"
             />
             <EasyCallText as="span" variant="body">
@@ -73,16 +80,14 @@ export function SettingsScreen({ settings, onSettingsChange }: SettingsScreenPro
 
       <LanguageSelector
         value={settings.language}
-        onChange={(language) => onSettingsChange({ ...settings, language })}
+        onChange={(language) => saveSettings({ language })}
       />
 
       <section data-testid="pairing-code-section">
         <EasyCallText as="h2" variant="button" className="font-bold mb-2">
           {t('settings.pairingCode')}
         </EasyCallText>
-        <EasyCallText variant="body" className="text-base-content/60">
-          {t('common.loading')}
-        </EasyCallText>
+        <PairingCodeDisplay userId={userId} />
       </section>
 
       <div className="mt-auto">
