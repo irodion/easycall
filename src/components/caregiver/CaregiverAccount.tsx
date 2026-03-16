@@ -112,6 +112,14 @@ export function CaregiverAccount() {
           </div>
         )}
 
+        {resetState === 'error' && (
+          <div role="alert" className="alert alert-error w-full max-w-sm">
+            <EasyCallText as="span" variant="body">
+              {t('caregiverAccount.genericError')}
+            </EasyCallText>
+          </div>
+        )}
+
         <div className="flex flex-col gap-3 w-full max-w-sm">
           <EasyCallButton
             size="default"
@@ -223,7 +231,7 @@ export function CaregiverAccount() {
 
       <Link
         to="/caregiver"
-        className="link link-secondary text-[length:var(--text-body)]"
+        className="link link-secondary text-[length:var(--text-body)] min-h-14 min-w-14 flex items-center justify-center"
       >
         {t('caregiverAccount.backToDashboard')}
       </Link>

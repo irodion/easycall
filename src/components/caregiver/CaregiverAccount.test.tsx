@@ -180,6 +180,19 @@ describe('CaregiverAccount', () => {
       });
     });
 
+    it('shows error when password reset fails', async () => {
+      mockSendReset.mockRejectedValueOnce(new Error('network'));
+
+      const { CaregiverAccount } = await import('./CaregiverAccount');
+      renderWithProviders(<CaregiverAccount />);
+
+      fireEvent.click(screen.getByRole('button', { name: /reset password/i }));
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toHaveTextContent(/failed/i);
+      });
+    });
+
     it('has back to dashboard link', async () => {
       const { CaregiverAccount } = await import('./CaregiverAccount');
       renderWithProviders(<CaregiverAccount />);

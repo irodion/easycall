@@ -33,13 +33,13 @@ export function AccountBanner() {
       <div className="flex gap-2">
         <Link
           to="/caregiver/account"
-          className="btn btn-primary btn-sm min-h-10 font-bold text-[length:var(--text-body)]"
+          className="btn btn-primary min-h-14 min-w-14 font-bold text-[length:var(--text-body)]"
         >
           {t('accountBanner.setupEmail')}
         </Link>
         <button
           type="button"
-          className="btn btn-ghost btn-sm min-h-10"
+          className="btn btn-ghost min-h-14 min-w-14"
           onClick={handleDismiss}
           aria-label={t('accountBanner.dismiss')}
         >
