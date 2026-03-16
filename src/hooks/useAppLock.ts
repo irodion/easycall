@@ -126,7 +126,12 @@ export function useAppLock({
 
       if (!settings.appLockPinHash) return false;
 
-      const valid = await verifyPin(pin, settings.appLockPinHash, userId ?? undefined);
+      let valid: boolean;
+      try {
+        valid = await verifyPin(pin, settings.appLockPinHash, userId ?? undefined);
+      } catch {
+        return false;
+      }
       if (valid) {
         setIsUnlocked(true);
         setFailedAttempts(0);

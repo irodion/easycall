@@ -35,12 +35,7 @@ export function usePairingCode(userId: string | null) {
       const newCode = await saveCode(userId!);
       if (cancelled) return;
       setCode(newCode);
-      setSecondsRemaining(600);
-      // Clear existing countdown and start fresh
-      clearInterval(countdownRef.current);
-      countdownRef.current = setInterval(() => {
-        setSecondsRemaining((s) => (s <= 1 ? 0 : s - 1));
-      }, 1000);
+      restartCountdown();
       refreshRef.current = setTimeout(() => void generateAndSchedule(), AUTO_REFRESH_MS);
     }
 
@@ -53,13 +48,21 @@ export function usePairingCode(userId: string | null) {
     };
   }, [userId]);
 
+  function restartCountdown() {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    setSecondsRemaining(600);
+    countdownRef.current = setInterval(() => {
+      setSecondsRemaining((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+  }
+
   const refresh = async () => {
     if (!userId) return;
     clearTimeout(refreshRef.current);
     try {
       const newCode = await saveCode(userId);
       setCode(newCode);
-      setSecondsRemaining(600);
+      restartCountdown();
       refreshRef.current = setTimeout(() => void refresh(), AUTO_REFRESH_MS);
     } catch (err) {
       // nosemgrep: no-console-log-sensitive — logs error object, not the code itself
