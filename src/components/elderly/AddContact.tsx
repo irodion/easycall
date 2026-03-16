@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useContactStore } from '@/stores/contactStore';
+import { compressImage, blobToDataUrl } from '@/utils/compressImage';
+import { generateRoomId } from '@/utils/generateRoomId';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 
@@ -11,15 +13,6 @@ interface AddContactProps {
 
 type Step = 1 | 2 | 3;
 
-function generateRoomId(name: string): string {
-  const sanitized = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-    .slice(0, 8);
-  const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
-  return `easycall-${sanitized}-${suffix}`;
-}
-
 export function AddContact({ userId }: AddContactProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -28,7 +21,9 @@ export function AddContact({ userId }: AddContactProps) {
   const [step, setStep] = useState<Step>(1);
   const [name, setName] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -48,18 +43,31 @@ export function AddContact({ userId }: AddContactProps) {
       const url = URL.createObjectURL(file);
       blobUrlRef.current = url;
       setPhotoPreview(url);
+      setPhotoFile(file);
     }
   };
 
   const handleSave = async () => {
     if (isSaving) return;
     setIsSaving(true);
+    setError(null);
     try {
+      let photoURL: string | null = null;
+      if (photoFile) {
+        try {
+          const compressed = await compressImage(photoFile);
+          photoURL = await blobToDataUrl(compressed);
+        } catch {
+          setError(t('addContact.photoError'));
+          setIsSaving(false);
+          return;
+        }
+      }
       const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
       const displayOrder = maxOrder + 1;
       await addContact(userId, {
         name,
-        photoURL: null,
+        photoURL,
         jitsiRoomId: generateRoomId(name),
         contactUserId: '',
         displayOrder,
@@ -166,6 +174,11 @@ export function AddContact({ userId }: AddContactProps) {
       ) : (
         <div className="w-32 h-32 rounded-full bg-primary flex items-center justify-center text-4xl font-bold text-primary-content mx-auto">
           {name[0] ?? '?'}
+        </div>
+      )}
+      {error && (
+        <div role="alert" className="alert alert-error">
+          <EasyCallText as="span" variant="body">{error}</EasyCallText>
         </div>
       )}
       <EasyCallText as="p" variant="heading" className="text-center font-bold">

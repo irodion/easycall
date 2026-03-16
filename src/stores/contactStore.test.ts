@@ -34,6 +34,9 @@ describe('useContactStore', () => {
       orderBy,
       doc,
       serverTimestamp,
+      Timestamp: {
+        now: () => ({ seconds: Math.floor(Date.now() / 1000), nanoseconds: 0, toDate: () => new Date() }),
+      },
     }));
     vi.doMock('@/services/firebase', () => ({ db: {} }));
   });

@@ -97,7 +97,7 @@ describe('AddContact', () => {
       expect.objectContaining({
         name: 'Alice',
         photoURL: null,
-        jitsiRoomId: expect.stringMatching(/^easycall-alice-[a-z0-9]{6}$/),
+        jitsiRoomId: expect.stringMatching(/^easycall-alice-[a-z0-9]{12}$/),
       }),
     );
   });
