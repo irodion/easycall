@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useContactStore } from '@/stores/contactStore';
+import { compressImage, blobToDataUrl } from '@/utils/compressImage';
+import { generateRoomId } from '@/utils/generateRoomId';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 
@@ -11,15 +13,6 @@ interface AddContactProps {
 
 type Step = 1 | 2 | 3;
 
-function generateRoomId(name: string): string {
-  const sanitized = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-    .slice(0, 8);
-  const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
-  return `easycall-${sanitized}-${suffix}`;
-}
-
 export function AddContact({ userId }: AddContactProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -28,6 +21,7 @@ export function AddContact({ userId }: AddContactProps) {
   const [step, setStep] = useState<Step>(1);
   const [name, setName] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const blobUrlRef = useRef<string | null>(null);
 
@@ -48,6 +42,7 @@ export function AddContact({ userId }: AddContactProps) {
       const url = URL.createObjectURL(file);
       blobUrlRef.current = url;
       setPhotoPreview(url);
+      setPhotoFile(file);
     }
   };
 
@@ -55,11 +50,16 @@ export function AddContact({ userId }: AddContactProps) {
     if (isSaving) return;
     setIsSaving(true);
     try {
+      let photoURL: string | null = null;
+      if (photoFile) {
+        const compressed = await compressImage(photoFile);
+        photoURL = await blobToDataUrl(compressed);
+      }
       const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
       const displayOrder = maxOrder + 1;
       await addContact(userId, {
         name,
-        photoURL: null,
+        photoURL,
         jitsiRoomId: generateRoomId(name),
         contactUserId: '',
         displayOrder,

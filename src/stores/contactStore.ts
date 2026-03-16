@@ -9,6 +9,7 @@ import {
   query,
   orderBy,
   serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import type { Contact } from '@/types/user';
@@ -48,7 +49,7 @@ export const useContactStore = create<ContactStore>((set) => ({
     const newContact: Contact = {
       id: ref.id,
       ...data,
-      createdAt: { seconds: 0, nanoseconds: 0, toDate: () => new Date() },
+      createdAt: Timestamp.now(),
     };
     set((state) => ({ contacts: [...state.contacts, newContact] }));
   },

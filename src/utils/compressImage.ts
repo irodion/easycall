@@ -52,3 +52,12 @@ export async function compressImage(file: File): Promise<Blob> {
     img.src = objectUrl;
   });
 }
+
+export function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}

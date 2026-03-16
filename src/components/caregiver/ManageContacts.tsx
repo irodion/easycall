@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContactStore } from '@/stores/contactStore';
+import { generateRoomId } from '@/utils/generateRoomId';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
@@ -35,12 +36,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
     try {
       const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
       const displayOrder = maxOrder + 1;
-      const sanitized = newName
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '')
-        .slice(0, 8);
-      const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 6);
-      const jitsiRoomId = `easycall-${sanitized}-${suffix}`;
+      const jitsiRoomId = generateRoomId(newName);
       await addContact(elderlyUserId, {
         name: newName.trim(),
         photoURL: null,
