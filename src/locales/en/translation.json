@@ -10,7 +10,8 @@
     "loading": "Loading...",
     "install": "Install",
     "somethingWentWrong": "Something went wrong",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "retry": "Retry"
   },
   "home": {
     "title": "Your Contacts",
@@ -113,7 +114,8 @@
     "pinMismatchError": "PINs do not match",
     "pinSaveError": "Failed to save PIN. Please try again.",
     "savePin": "Save PIN",
-    "language": "Language"
+    "language": "Language",
+    "loadError": "Unable to load settings. Check permissions and try again."
   },
   "roleSelector": {
     "notSignedIn": "Not signed in. Please try again.",
@@ -146,7 +148,10 @@
   "pairElderly": {
     "enterCode": "Enter the 6-digit code shown on the elderly user's screen:",
     "linking": "Linking...",
-    "linkAccount": "Link Account"
+    "linkAccount": "Link Account",
+    "invalidCode": "Invalid or expired code. Please check and try again.",
+    "codeExpired": "This code has expired. Please generate a new one.",
+    "codeAlreadyUsed": "This code has already been used."
   },
   "incomingCall": {
     "isCalling": "{{name}} is calling",

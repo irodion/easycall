@@ -22,7 +22,17 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
       setStatus('idle');
       onSuccess(result.elderlyUserId);
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('common.somethingWentWrong');
+      const code = (err as { code?: string })?.code ?? '';
+      let message: string;
+      if (code.includes('not-found') || code.includes('internal')) {
+        message = t('pairElderly.invalidCode');
+      } else if (code.includes('deadline-exceeded')) {
+        message = t('pairElderly.codeExpired');
+      } else if (code.includes('already-exists')) {
+        message = t('pairElderly.codeAlreadyUsed');
+      } else {
+        message = t('common.somethingWentWrong');
+      }
       setErrorMessage(message);
       setStatus('error');
     }

@@ -15,6 +15,8 @@ interface ElderlyUserSettingsProps {
 export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps) {
   const { t } = useTranslation();
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryToken, setRetryToken] = useState(0);
   const [pendingLockEnabled, setPendingLockEnabled] = useState(false);
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
@@ -22,19 +24,53 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   const [pinSaving, setPinSaving] = useState(false);
 
   useEffect(() => {
+    setLoadError(null);
+    setSettings(null);
+
     const ref = doc(db, 'users', elderlyUserId);
-    const unsubscribe = onSnapshot(ref, (snap) => {
-      const raw = snap.exists()
-        ? ((snap.data()['settings'] as Partial<UserSettings>) ?? {})
-        : {};
-      const incoming: UserSettings = { ...DEFAULT_USER_SETTINGS, ...raw };
+    const unsubscribe = onSnapshot(
+      ref,
+      (snap) => {
+        const raw = snap.exists()
+          ? ((snap.data()['settings'] as Partial<UserSettings>) ?? {})
+          : {};
+        const incoming: UserSettings = { ...DEFAULT_USER_SETTINGS, ...raw };
+        setLoadError(null);
+        setSettings((prev) => {
+          if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
+          return incoming;
+        });
+      },
+      () => {
+        setLoadError(t('elderlySettings.loadError'));
+      },
+    );
+
+    const timeout = setTimeout(() => {
       setSettings((prev) => {
-        if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
-        return incoming;
+        if (prev === null) setLoadError(t('elderlySettings.loadError'));
+        return prev;
       });
-    });
-    return unsubscribe;
-  }, [elderlyUserId]);
+    }, 10_000);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeout);
+    };
+  }, [elderlyUserId, t, retryToken]);
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center gap-[var(--space-md)] p-[var(--space-md)]">
+        <p role="alert" className="text-error text-[length:var(--text-body)]">
+          {loadError}
+        </p>
+        <EasyCallButton onClick={() => setRetryToken((n) => n + 1)}>
+          {t('common.retry')}
+        </EasyCallButton>
+      </div>
+    );
+  }
 
   if (!settings) {
     return (
