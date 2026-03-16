@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Outlet, Navigate } from 'react-router';
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
 import { RoleSelector } from './RoleSelector';
 
@@ -16,7 +16,13 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
   const [authState, setAuthState] = useState<AuthState>('loading');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubDoc: (() => void) | undefined;
+
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
+      // Clean up previous Firestore listener when auth state changes
+      unsubDoc?.();
+      unsubDoc = undefined;
+
       if (!user) {
         try {
           await signInAnonymously(auth);
@@ -27,24 +33,30 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
         return;
       }
 
-      try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        const data = userDoc.exists() ? userDoc.data() : undefined;
-        const role = data?.['role'] as string | undefined;
-
-        if (!role) {
+      // Listen reactively so role changes (e.g. from RoleSelector) are picked up
+      unsubDoc = onSnapshot(
+        doc(db, 'users', user.uid),
+        (snap) => {
+          const role = snap.data()?.['role'];
+          // Only accept known roles; malformed values fall through to no-role
+          if (role !== 'elderly' && role !== 'caregiver') {
+            setAuthState('no-role');
+          } else if (role === requiredRole) {
+            setAuthState('correct-role');
+          } else {
+            setAuthState('wrong-role');
+          }
+        },
+        () => {
           setAuthState('no-role');
-        } else if (role === requiredRole) {
-          setAuthState('correct-role');
-        } else {
-          setAuthState('wrong-role');
-        }
-      } catch {
-        setAuthState('no-role');
-      }
+        },
+      );
     });
 
-    return unsubscribe;
+    return () => {
+      unsubAuth();
+      unsubDoc?.();
+    };
   }, [requiredRole]);
 
   if (authState === 'loading') {

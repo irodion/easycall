@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Timestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app, auth } from '@/services/firebase';
+import { app, auth, ensureAuthenticated } from '@/services/firebase';
 import { loadJitsiApi } from '@/services/jitsi';
 import { setActiveCall, clearActiveCall, writeCallHistoryEntry } from '@/services/callHistory';
 import { useContactStore } from '@/stores/contactStore';
@@ -59,6 +59,7 @@ export function CallScreen() {
 
     async function startCall() {
       try {
+        const user = await ensureAuthenticated();
         await loadJitsiApi();
 
         const functions = getFunctions(app);
@@ -67,7 +68,7 @@ export function CallScreen() {
           { token: string }
         >(functions, 'generateJitsiJwt');
 
-        const displayName = auth.currentUser?.displayName ?? 'User';
+        const displayName = user.displayName ?? 'User';
         const { data } = await generateJwt({
           roomName: jitsiRoomId,
           displayName,
@@ -92,9 +93,8 @@ export function CallScreen() {
         callStartTimeRef.current = Date.now();
         contactNameRef.current = contactName;
 
-        const userId = auth.currentUser?.uid;
-        if (userId) {
-          void setActiveCall(userId, {
+        if (user.uid) {
+          void setActiveCall(user.uid, {
             contactId: contactId!,
             contactName: contactName,
             jitsiRoomId,

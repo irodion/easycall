@@ -10,9 +10,9 @@ vi.mock('firebase/firestore', () => ({
 }));
 
 vi.mock('@/services/firebase', () => ({
-  auth: { currentUser: { uid: 'user-1' } },
   db: {},
   app: {},
+  ensureAuthenticated: vi.fn().mockResolvedValue({ uid: 'user-1' }),
 }));
 
 describe('RoleSelector', () => {
@@ -64,22 +64,35 @@ describe('RoleSelector', () => {
     });
   });
 
-  it('shows error when auth.currentUser is null', async () => {
-    const firebase = await import('@/services/firebase');
-    const original = firebase.auth.currentUser;
-    Object.defineProperty(firebase.auth, 'currentUser', { value: null, writable: true });
+  it('calls ensureAuthenticated before saving role', async () => {
+    const { ensureAuthenticated } = await import('@/services/firebase');
+    const { setDoc } = await import('firebase/firestore');
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+    await vi.waitFor(() => {
+      expect(ensureAuthenticated).toHaveBeenCalled();
+      expect(setDoc).toHaveBeenCalled();
+    });
+  });
 
-    try {
-      const { RoleSelector } = await import('./RoleSelector');
-      renderWithProviders(<RoleSelector />);
-      fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+  it('shows friendly error when ensureAuthenticated fails and does not write to Firestore', async () => {
+    const { ensureAuthenticated } = await import('@/services/firebase');
+    const { setDoc } = await import('firebase/firestore');
+    vi.mocked(ensureAuthenticated).mockRejectedValueOnce(new Error('auth/network-error'));
 
-      await vi.waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
-      });
-    } finally {
-      Object.defineProperty(firebase.auth, 'currentUser', { value: original, writable: true });
-    }
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+
+    await vi.waitFor(() => {
+      const alert = screen.getByRole('alert');
+      expect(alert).toBeInTheDocument();
+      // Should NOT expose raw Firebase error message
+      expect(alert.textContent).not.toContain('auth/network-error');
+    });
+    // Auth failure should short-circuit before any database write
+    expect(setDoc).not.toHaveBeenCalled();
   });
 
   it('shows error when setDoc rejects', async () => {
