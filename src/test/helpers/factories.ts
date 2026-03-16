@@ -36,6 +36,7 @@ export function createMockUser(overrides: Partial<EasyCallUser> = {}): EasyCallU
     },
     pushTokens: [],
     onboardingComplete: false,
+    presenceState: 'offline',
     lastSeen: mockTimestamp(),
     createdAt: mockTimestamp(),
     ...overrides,

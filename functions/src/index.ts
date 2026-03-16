@@ -1,6 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
-import { getFirestore, FieldValue, type Firestore } from 'firebase-admin/firestore';
+import { onValueWritten } from 'firebase-functions/v2/database';
+import { getFirestore, FieldValue, Timestamp, type Firestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { initializeApp } from 'firebase-admin/app';
 import jwt from 'jsonwebtoken';
@@ -326,3 +327,113 @@ export const onCallStatusChange = onDocumentWritten(
     await writeCallHistoryForMissedOrDeclined(db, elderlyUserId, before, after);
   },
 );
+
+// ---------------------------------------------------------------------------
+// handleStatusChange (exported for testing)
+//
+// Core logic for the onUserStatusChanged trigger. Syncs RTDB presence state
+// to Firestore and sends missed call notifications on offline → online.
+// ---------------------------------------------------------------------------
+
+const VALID_PRESENCE_STATES = ['online', 'in-call', 'offline'] as const;
+type PresenceState = (typeof VALID_PRESENCE_STATES)[number];
+
+export function isValidPresenceState(s: string): s is PresenceState {
+  return (VALID_PRESENCE_STATES as readonly string[]).includes(s);
+}
+
+export async function handleStatusChange(
+  db: Firestore,
+  uid: string,
+  beforeState: string | null,
+  afterState: string,
+  lastChanged: number | null,
+): Promise<void> {
+  // Read user doc first — needed for missed call notifications and avoids
+  // a redundant second read in sendMissedCallNotifications
+  const userSnap = await db.doc(`users/${uid}`).get();
+
+  const updateData: Record<string, unknown> = { presenceState: afterState };
+
+  if (afterState === 'offline' && lastChanged) {
+    updateData['lastSeen'] = Timestamp.fromMillis(lastChanged);
+  }
+
+  await db.doc(`users/${uid}`).set(updateData, { merge: true });
+
+  // Missed call notification on offline → online transition
+  if (afterState === 'online' && (beforeState === 'offline' || beforeState === null)) {
+    await sendMissedCallNotifications(db, uid, userSnap);
+  }
+}
+
+async function sendMissedCallNotifications(
+  db: Firestore,
+  uid: string,
+  userSnap: FirebaseFirestore.DocumentSnapshot,
+): Promise<void> {
+  if (!userSnap.exists) return;
+
+  const userData = userSnap.data()!;
+  const lastSeen = userData['lastSeen'] as FirebaseFirestore.Timestamp | undefined;
+  const pushTokens: string[] = Array.isArray(userData['pushTokens'])
+    ? (userData['pushTokens'] as string[])
+    : [];
+
+  if (pushTokens.length === 0) return;
+
+  let missedQuery = db
+    .collection('users')
+    .doc(uid)
+    .collection('callHistory')
+    .where('outcome', 'in', ['missed', 'declined'])
+    .orderBy('startedAt', 'desc')
+    .limit(10);
+
+  if (lastSeen) {
+    missedQuery = missedQuery.where('startedAt', '>', lastSeen);
+  }
+
+  const missedSnap = await missedQuery.get();
+  if (missedSnap.empty) return;
+
+  const missedCount = missedSnap.size;
+  const callerNames = [
+    ...new Set(missedSnap.docs.map((d) => String(d.data()['contactName'] ?? 'Unknown'))),
+  ];
+  const summary =
+    callerNames.length === 1
+      ? `Missed call from ${callerNames[0]}`
+      : `${missedCount} missed calls from ${callerNames.join(', ')}`;
+
+  await getMessaging().sendEachForMulticast({
+    tokens: pushTokens,
+    notification: {
+      title: 'Missed Call',
+      body: summary,
+    },
+    data: { type: 'missed_calls' },
+    android: { priority: 'normal' as const },
+    webpush: { headers: { Urgency: 'normal' } },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// onUserStatusChanged
+//
+// Triggers when RTDB /status/{uid} is written. Mirrors presence state to
+// Firestore and sends missed call notifications when users come back online.
+// ---------------------------------------------------------------------------
+export const onUserStatusChanged = onValueWritten('/status/{uid}', async (event) => {
+  const uid = event.params.uid;
+  const before = event.data.before.val() as { state?: string } | null;
+  const after = event.data.after.val() as { state?: string; lastChanged?: number } | null;
+  if (!after || typeof after !== 'object') return;
+
+  const afterState = after.state as string;
+  if (!isValidPresenceState(afterState)) return;
+
+  const beforeState = before && typeof before === 'object' ? (before.state as string) : null;
+
+  await handleStatusChange(getFirestore(), uid, beforeState, afterState, after.lastChanged ?? null);
+});

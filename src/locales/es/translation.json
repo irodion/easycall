@@ -113,6 +113,12 @@
     "savePin": "Guardar PIN",
     "language": "Idioma"
   },
+  "presence": {
+    "online": "En línea",
+    "inCall": "En llamada",
+    "offline": "Desconectado",
+    "lastSeen": "Última vez {{time}}"
+  },
   "roleSelector": {
     "notSignedIn": "No ha iniciado sesión. Por favor inténtelo de nuevo.",
     "saveFailed": "Error al guardar el rol: {{error}}",

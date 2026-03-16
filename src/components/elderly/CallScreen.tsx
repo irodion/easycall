@@ -11,7 +11,11 @@ import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import type { JitsiMeetExternalAPI } from '@/types/jitsi';
 
-export function CallScreen() {
+interface CallScreenProps {
+  setInCall?: (inCall: boolean) => void;
+}
+
+export function CallScreen({ setInCall }: CallScreenProps) {
   const { t } = useTranslation();
   const { contactId, roomId } = useParams<{ contactId?: string; roomId?: string }>();
   const navigate = useNavigate();
@@ -165,8 +169,11 @@ export function CallScreen() {
 
     void startCall();
 
+    setInCall?.(true);
+
     return () => {
       mounted = false;
+      setInCall?.(false);
       if (beforeUnloadRef.current) {
         window.removeEventListener('beforeunload', beforeUnloadRef.current);
       }

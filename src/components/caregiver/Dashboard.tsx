@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import { formatRelativeTime } from '@/utils/formatTime';
 import { EasyCallText } from '@/components/shared/EasyCallText';
+import { StatusIndicator } from '@/components/shared/StatusIndicator';
+import { presenceTextStyles, presenceI18nKeys } from '@/components/shared/presenceStyles';
+import { useContactsPresence } from '@/hooks/useContactsPresence';
 import { AccountBanner } from './AccountBanner';
 import type { EasyCallUser } from '@/types/user';
 
@@ -26,6 +29,8 @@ export function Dashboard({ userId }: DashboardProps) {
   const { t } = useTranslation();
   const [linkedUsers, setLinkedUsers] = useState<LinkedUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const linkedUserIds = useMemo(() => linkedUsers.map((u) => u.uid), [linkedUsers]);
+  const presenceMap = useContactsPresence(linkedUserIds);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,27 +112,37 @@ export function Dashboard({ userId }: DashboardProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {linkedUsers.map((user) => (
-            <div key={user.uid} className="card card-body bg-base-200 gap-3">
-              <EasyCallText as="h2" variant="button" className="font-bold">
-                {user.displayName}
-              </EasyCallText>
-              {user.lastSeen && (
-                <EasyCallText variant="body" className="text-base-content/60">
-                  {t('dashboard.lastSeen', { time: formatRelativeTime(user.lastSeen) })}
-                </EasyCallText>
-              )}
-              <div className="flex gap-3">
-                <Link
-                  to={`/caregiver/manage/${user.uid}`}
-                  className="btn btn-primary touch-target-min min-h-14 font-bold text-[length:var(--text-button)]"
-                  aria-label={t('dashboard.manageContacts')}
-                >
-                  {t('dashboard.manageContacts')}
-                </Link>
+          {linkedUsers.map((user) => {
+            const presence = presenceMap.get(user.uid);
+            return (
+              <div key={user.uid} className="card card-body bg-base-200 gap-3">
+                <div className="flex items-center gap-2">
+                  {presence && <StatusIndicator state={presence.state} size="md" />}
+                  <EasyCallText as="h2" variant="button" className="font-bold">
+                    {user.displayName}
+                  </EasyCallText>
+                </div>
+                {presence && presence.state !== 'offline' ? (
+                  <EasyCallText variant="body" className={presenceTextStyles[presence.state]}>
+                    {t(presenceI18nKeys[presence.state])}
+                  </EasyCallText>
+                ) : user.lastSeen ? (
+                  <EasyCallText variant="body" className="text-base-content/60">
+                    {t('presence.lastSeen', { time: formatRelativeTime(user.lastSeen) })}
+                  </EasyCallText>
+                ) : null}
+                <div className="flex gap-3">
+                  <Link
+                    to={`/caregiver/manage/${user.uid}`}
+                    className="btn btn-primary touch-target-min min-h-14 font-bold text-[length:var(--text-button)]"
+                    aria-label={t('dashboard.manageContacts')}
+                  >
+                    {t('dashboard.manageContacts')}
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

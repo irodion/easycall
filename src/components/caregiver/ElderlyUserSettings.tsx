@@ -23,17 +23,20 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   const [pinError, setPinError] = useState<string | null>(null);
   const [pinSaving, setPinSaving] = useState(false);
 
-  useEffect(() => {
+  // Reset state when elderlyUserId changes (prop-to-state pattern)
+  const [prevElderlyUserId, setPrevElderlyUserId] = useState(elderlyUserId);
+  if (prevElderlyUserId !== elderlyUserId) {
+    setPrevElderlyUserId(elderlyUserId);
     setLoadError(null);
     setSettings(null);
+  }
 
+  useEffect(() => {
     const ref = doc(db, 'users', elderlyUserId);
     const unsubscribe = onSnapshot(
       ref,
       (snap) => {
-        const raw = snap.exists()
-          ? ((snap.data()['settings'] as Partial<UserSettings>) ?? {})
-          : {};
+        const raw = snap.exists() ? ((snap.data()['settings'] as Partial<UserSettings>) ?? {}) : {};
         const incoming: UserSettings = { ...DEFAULT_USER_SETTINGS, ...raw };
         setLoadError(null);
         setSettings((prev) => {

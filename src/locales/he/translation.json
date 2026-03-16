@@ -113,6 +113,12 @@
     "savePin": "שמור PIN",
     "language": "שפה"
   },
+  "presence": {
+    "online": "מחובר",
+    "inCall": "בשיחה",
+    "offline": "לא מחובר",
+    "lastSeen": "נראה לאחרונה {{time}}"
+  },
   "roleSelector": {
     "notSignedIn": "לא מחובר. אנא נסה שוב.",
     "saveFailed": "שמירת התפקיד נכשלה: {{error}}",

@@ -17,7 +17,7 @@ The Firebase Emulator Suite requires Java 21+. Older JDK versions will fail sile
 pnpm exec playwright install chromium
 
 # Verify emulators can start (Ctrl-C to stop after confirming output)
-firebase emulators:start --only auth,firestore
+firebase emulators:start --only auth,firestore,database
 ```
 
 Expected output:
@@ -29,6 +29,7 @@ Expected output:
 ├───────────┼──────────────────┤
 │ Auth      │ 127.0.0.1:9099   │
 │ Firestore │ 127.0.0.1:8080   │
+│ Database  │ 127.0.0.1:9000   │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -37,7 +38,7 @@ Expected output:
 ### Step 1 — Start emulators in one terminal
 
 ```bash
-firebase emulators:start --only auth,firestore
+firebase emulators:start --only auth,firestore,database
 ```
 
 Leave this running. The Playwright script does **not** manage the emulator process.
@@ -57,7 +58,7 @@ USE_EMULATORS=true npx playwright test --project=chromium
 The `USE_EMULATORS=true` flag causes:
 
 1. Playwright to start the Vite dev server with `VITE_USE_EMULATORS=true`
-2. The app to call `connectAuthEmulator` + `connectFirestoreEmulator` at startup
+2. The app to call `connectAuthEmulator` + `connectFirestoreEmulator` + `connectDatabaseEmulator` at startup
 
 ## How it works
 
@@ -93,6 +94,7 @@ Each test calls `clearEmulators()` in `beforeEach`, which deletes all Firestore 
 ```text
 DELETE 127.0.0.1:8080/emulator/v1/projects/easycall-dev/databases/(default)/documents
 DELETE 127.0.0.1:9099/emulator/v1/projects/easycall-dev/accounts
+DELETE 127.0.0.1:9000/.json?ns=easycall-dev-default-rtdb  (with Authorization: Bearer owner)
 ```
 
 All emulator suites use `test.describe.configure({ mode: 'serial' })` to prevent parallel workers from calling `clearEmulators()` concurrently and wiping each other's seeded data mid-test.
@@ -161,28 +163,41 @@ Verifies end-to-end that call history entries are written to Firestore:
 
 - Completing a call writes an entry with outcome 'completed' and direction 'outgoing'
 
+### `Online Presence Indicators` — 5 tests
+
+Pre-seeded with two elderly users where one is a contact of the other. Verifies:
+
+- Green status dot appears when a contact is online (RTDB state: `online`)
+- Status dot updates to amber when contact enters a call (RTDB state: `in-call`)
+- Status dot turns gray when contact goes offline (RTDB state: `offline`)
+- No status dot (or offline) for contacts without RTDB presence data
+- User's own presence is written to RTDB as `online` on page load
+
+Uses the RTDB emulator REST API (`PUT /status/{uid}.json`) to simulate presence state changes from external users.
+
 ### `Smoke tests` — 2 tests
 
 These run without emulators and do not require `USE_EMULATORS=true`.
 
 ## Ports used
 
-| Service            | Port | Purpose                             |
-| ------------------ | ---- | ----------------------------------- |
-| Auth emulator      | 9099 | `signInAnonymously`, token issuance |
-| Firestore emulator | 8080 | Document reads/writes, `onSnapshot` |
-| Vite dev server    | 5173 | App under test                      |
-| Emulator UI        | 4000 | Optional — view data in browser     |
+| Service            | Port | Purpose                                     |
+| ------------------ | ---- | ------------------------------------------- |
+| Auth emulator      | 9099 | `signInAnonymously`, token issuance         |
+| Firestore emulator | 8080 | Document reads/writes, `onSnapshot`         |
+| RTDB emulator      | 9000 | Presence state (`/status/{uid}`), `onValue` |
+| Vite dev server    | 5173 | App under test                              |
+| Emulator UI        | 4000 | Optional — view data in browser             |
 
 ## Troubleshooting
 
 ### "Process from config.webServer was not able to start"
 
-The Playwright webServer config does **not** start the Firebase emulators. Start them manually first with `firebase emulators:start --only auth,firestore`.
+The Playwright webServer config does **not** start the Firebase emulators. Start them manually first with `firebase emulators:start --only auth,firestore,database`.
 
 ### "Firestore emulator not reachable"
 
-The `beforeAll` health check in `e2e/elderly-call.spec.ts` will throw this error if port 8080 is not responding. Confirm emulators are running: `curl http://127.0.0.1:8080`.
+The `beforeAll` health check will throw this error if the required emulator port is not responding. Confirm emulators are running: `curl http://127.0.0.1:8080` (Firestore), `curl http://127.0.0.1:9000` (RTDB).
 
 ### "Failed to seed user: 403 PERMISSION_DENIED"
 

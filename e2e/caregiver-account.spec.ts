@@ -213,9 +213,7 @@ test.describe('Login page (emulators)', () => {
     await page.goto('/');
 
     await expect(page.getByRole('link', { name: /sign in/i })).toBeVisible({ timeout: 10000 });
-    expect(
-      await page.getByRole('link', { name: /sign in/i }).getAttribute('href'),
-    ).toBe('/login');
+    expect(await page.getByRole('link', { name: /sign in/i }).getAttribute('href')).toBe('/login');
   });
 
   test('login page renders email and password fields', async ({ page }) => {

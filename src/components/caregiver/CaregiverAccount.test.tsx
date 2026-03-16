@@ -151,9 +151,7 @@ describe('CaregiverAccount', () => {
 
   describe('already linked', () => {
     beforeEach(() => {
-      mockAuth.currentUser.providerData = [
-        { providerId: 'password', email: 'linked@example.com' },
-      ];
+      mockAuth.currentUser.providerData = [{ providerId: 'password', email: 'linked@example.com' }];
     });
 
     it('shows linked email', async () => {

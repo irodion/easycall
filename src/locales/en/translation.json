@@ -243,6 +243,12 @@
     "setupEmail": "Set Up Email",
     "dismiss": "Dismiss"
   },
+  "presence": {
+    "online": "Online",
+    "inCall": "In a call",
+    "offline": "Offline",
+    "lastSeen": "Last seen {{time}}"
+  },
   "roleSelector": {
     "notSignedIn": "Not signed in. Please try again.",
     "saveFailed": "Failed to save role: {{error}}",

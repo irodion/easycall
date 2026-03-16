@@ -25,6 +25,14 @@ export function usePairingCode(userId: string | null) {
   const refreshRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const countdownRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
+  function restartCountdown() {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    setSecondsRemaining(600);
+    countdownRef.current = setInterval(() => {
+      setSecondsRemaining((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+  }
+
   useEffect(() => {
     if (!userId) return;
 
@@ -47,14 +55,6 @@ export function usePairingCode(userId: string | null) {
       clearInterval(countdownRef.current);
     };
   }, [userId]);
-
-  function restartCountdown() {
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    setSecondsRemaining(600);
-    countdownRef.current = setInterval(() => {
-      setSecondsRemaining((s) => (s <= 1 ? 0 : s - 1));
-    }, 1000);
-  }
 
   const refresh = async () => {
     if (!userId) return;

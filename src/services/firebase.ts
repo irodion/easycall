@@ -2,9 +2,10 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, signInAnonymously } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getDatabase, connectDatabaseEmulator } from 'firebase/database';
 import type { Messaging } from 'firebase/messaging';
 
-const firebaseConfig = {
+const firebaseConfig: Record<string, string | undefined> = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -12,6 +13,12 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
+
+// databaseURL is optional — getDatabase() derives it from projectId when unset
+const databaseURL = import.meta.env.VITE_FIREBASE_DATABASE_URL;
+if (databaseURL) {
+  firebaseConfig.databaseURL = databaseURL;
+}
 
 if (import.meta.env.MODE !== 'test') {
   const missing = Object.entries(firebaseConfig)
@@ -27,10 +34,12 @@ if (import.meta.env.MODE !== 'test') {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const rtdb = getDatabase(app);
 
 if (import.meta.env.VITE_USE_EMULATORS === 'true') {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
+  connectDatabaseEmulator(rtdb, '127.0.0.1', 9000);
 }
 
 /**

@@ -178,7 +178,9 @@ export function AddContact({ userId }: AddContactProps) {
       )}
       {error && (
         <div role="alert" className="alert alert-error">
-          <EasyCallText as="span" variant="body">{error}</EasyCallText>
+          <EasyCallText as="span" variant="body">
+            {error}
+          </EasyCallText>
         </div>
       )}
       <EasyCallText as="p" variant="heading" className="text-center font-bold">

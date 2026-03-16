@@ -3,6 +3,12 @@ import { screen } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 
+const mockPresenceMap = new Map<string, { state: string; lastChanged: number | null }>();
+
+vi.mock('@/hooks/useContactsPresence', () => ({
+  useContactsPresence: () => mockPresenceMap,
+}));
+
 describe('Dashboard', () => {
   let getDocs: ReturnType<typeof vi.fn>;
   let getDoc: ReturnType<typeof vi.fn>;
@@ -14,6 +20,7 @@ describe('Dashboard', () => {
     getDoc = vi.fn();
     collection = vi.fn().mockReturnValue('collection-ref');
     doc = vi.fn().mockReturnValue('doc-ref');
+    mockPresenceMap.clear();
 
     vi.resetModules();
     vi.doMock('firebase/firestore', () => ({
@@ -157,5 +164,60 @@ describe('Dashboard', () => {
     const { container } = renderWithProviders(<Dashboard userId="caregiver-1" />);
     await screen.findByRole('link', { name: /link elderly user/i });
     expect(await axe(container)).toHaveNoViolations();
+  });
+
+  function setupLinkedUserMocks() {
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ linkedElderlyUsers: ['elderly-1'] }),
+    });
+    getDocs.mockResolvedValue({
+      docs: [
+        {
+          id: 'elderly-1',
+          data: () => ({
+            displayName: 'Grandma',
+            lastSeen: {
+              seconds: Date.now() / 1000 - 300,
+              nanoseconds: 0,
+              toDate: () => new Date(Date.now() - 300_000),
+            },
+          }),
+        },
+      ],
+    });
+  }
+
+  it('shows "Online" status indicator for online users', async () => {
+    setupLinkedUserMocks();
+    mockPresenceMap.set('elderly-1', { state: 'online', lastChanged: Date.now() });
+
+    const { Dashboard } = await import('./Dashboard');
+    renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+    await screen.findByText('Grandma');
+    expect(screen.getByText('Online')).toBeInTheDocument();
+  });
+
+  it('shows "In a call" status indicator for in-call users', async () => {
+    setupLinkedUserMocks();
+    mockPresenceMap.set('elderly-1', { state: 'in-call', lastChanged: Date.now() });
+
+    const { Dashboard } = await import('./Dashboard');
+    renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+    await screen.findByText('Grandma');
+    expect(screen.getByText('In a call')).toBeInTheDocument();
+  });
+
+  it('shows "Last seen" for offline users', async () => {
+    setupLinkedUserMocks();
+    // No presence data → shows lastSeen
+
+    const { Dashboard } = await import('./Dashboard');
+    renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+    await screen.findByText('Grandma');
+    expect(screen.getByText(/Last seen/)).toBeInTheDocument();
   });
 });
