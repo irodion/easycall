@@ -9,7 +9,8 @@
     "saving": "Saving...",
     "loading": "Loading...",
     "install": "Install",
-    "somethingWentWrong": "Something went wrong"
+    "somethingWentWrong": "Something went wrong",
+    "dismiss": "Dismiss"
   },
   "home": {
     "title": "Your Contacts",
