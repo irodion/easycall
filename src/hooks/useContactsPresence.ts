@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { ref, onValue, off } from 'firebase/database';
+import { useState, useEffect } from 'react';
+import { ref, onValue } from 'firebase/database';
 import { rtdb } from '@/services/firebase';
 import type { PresenceState } from '@/types/user';
 
@@ -12,7 +12,6 @@ const EMPTY_MAP = new Map<string, PresenceInfo>();
 
 export function useContactsPresence(contactUserIds: string[]): Map<string, PresenceInfo> {
   const [presenceMap, setPresenceMap] = useState<Map<string, PresenceInfo>>(EMPTY_MAP);
-  const prevKeyRef = useRef('');
 
   // Derive a stable key from the IDs to detect real changes
   const stableKey = contactUserIds
@@ -21,22 +20,18 @@ export function useContactsPresence(contactUserIds: string[]): Map<string, Prese
     .join(',');
 
   useEffect(() => {
-    if (stableKey === prevKeyRef.current) return;
-    prevKeyRef.current = stableKey;
-
     const filteredIds = stableKey ? stableKey.split(',') : [];
 
     if (filteredIds.length === 0) {
       return;
     }
 
-    const refs: Array<ReturnType<typeof ref>> = [];
+    const unsubscribes: Array<() => void> = [];
 
     for (const uid of filteredIds) {
       const dbRef = ref(rtdb, `/status/${uid}`);
-      refs.push(dbRef);
 
-      onValue(dbRef, (snap) => {
+      const unsubscribe = onValue(dbRef, (snap) => {
         const val = snap.val() as { state?: string; lastChanged?: number } | null;
         const state: PresenceState =
           val?.state === 'online' || val?.state === 'in-call' ? val.state : 'offline';
@@ -52,18 +47,37 @@ export function useContactsPresence(contactUserIds: string[]): Map<string, Prese
           return next;
         });
       });
+
+      unsubscribes.push(unsubscribe);
     }
 
     return () => {
-      for (const dbRef of refs) {
-        off(dbRef);
+      for (const unsub of unsubscribes) {
+        unsub();
       }
     };
   }, [stableKey]);
 
-  // When there are no IDs to track, return empty map without triggering state update
+  // No IDs to track — return constant empty map
   if (!stableKey) {
     return EMPTY_MAP;
+  }
+
+  // Prune entries for contacts no longer tracked (derived during render, no state mutation)
+  const trackedIds = new Set(stableKey.split(','));
+  let hasStale = false;
+  for (const key of presenceMap.keys()) {
+    if (!trackedIds.has(key)) {
+      hasStale = true;
+      break;
+    }
+  }
+  if (hasStale) {
+    const pruned = new Map<string, PresenceInfo>();
+    for (const [uid, info] of presenceMap) {
+      if (trackedIds.has(uid)) pruned.set(uid, info);
+    }
+    return pruned;
   }
 
   return presenceMap;

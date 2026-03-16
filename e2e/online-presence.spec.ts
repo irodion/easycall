@@ -32,7 +32,7 @@ interface EmulatorUser {
 }
 
 async function clearEmulators(): Promise<void> {
-  const [firestoreRes, authRes] = await Promise.all([
+  const [firestoreRes, authRes, rtdbRes] = await Promise.all([
     fetch(
       `${FIRESTORE_EMULATOR}/emulator/v1/projects/${PROJECT_ID}/databases/(default)/documents`,
       { method: 'DELETE' },
@@ -48,6 +48,9 @@ async function clearEmulators(): Promise<void> {
   }
   if (!authRes.ok) {
     throw new Error(`clearEmulators: Auth DELETE failed (${authRes.status})`);
+  }
+  if (!rtdbRes.ok) {
+    throw new Error(`clearEmulators: RTDB DELETE failed (${rtdbRes.status})`);
   }
 }
 

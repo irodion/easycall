@@ -15,7 +15,7 @@ export interface EasyCallUser {
   settings: UserSettings;
   pushTokens: string[];
   onboardingComplete: boolean;
-  presenceState: PresenceState;
+  presenceState?: PresenceState;
   lastSeen: FirestoreTimestamp;
   createdAt: FirestoreTimestamp;
 }

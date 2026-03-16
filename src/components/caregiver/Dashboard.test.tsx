@@ -3,7 +3,9 @@ import { screen } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 
-const mockPresenceMap = new Map<string, { state: string; lastChanged: number | null }>();
+import type { PresenceInfo } from '@/hooks/useContactsPresence';
+
+const mockPresenceMap = new Map<string, PresenceInfo>();
 
 vi.mock('@/hooks/useContactsPresence', () => ({
   useContactsPresence: () => mockPresenceMap,

@@ -1,19 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
-const mockOff = vi.fn();
 const mockRef = vi.fn().mockImplementation((_db, path) => ({ path }));
 
 const onValueCallbacks = new Map<string, (snap: { val: () => unknown }) => void>();
+const mockUnsubscribes: Array<ReturnType<typeof vi.fn>> = [];
 const mockOnValue = vi.fn().mockImplementation((dbRef: { path: string }, callback) => {
   onValueCallbacks.set(dbRef.path, callback);
-  return callback;
+  const unsub = vi.fn();
+  mockUnsubscribes.push(unsub);
+  return unsub;
 });
 
 vi.mock('firebase/database', () => ({
   ref: (...args: unknown[]) => mockRef(...args),
   onValue: (...args: unknown[]) => mockOnValue(...args),
-  off: (...args: unknown[]) => mockOff(...args),
 }));
 
 vi.mock('@/services/firebase', () => ({
@@ -24,6 +25,7 @@ describe('useContactsPresence', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     onValueCallbacks.clear();
+    mockUnsubscribes.length = 0;
   });
 
   async function importAndRender(ids: string[]) {
@@ -89,26 +91,31 @@ describe('useContactsPresence', () => {
 
   it('filters out empty string contactUserIds', async () => {
     await importAndRender(['user-1', '', 'user-2']);
-    // Should only subscribe to 2 refs (user-1, user-2), not 3
     expect(mockOnValue).toHaveBeenCalledTimes(2);
   });
 
   it('cleans up listeners on unmount', async () => {
     const { unmount } = await importAndRender(['user-1', 'user-2']);
     unmount();
-    expect(mockOff).toHaveBeenCalledTimes(2);
+    // Each onValue returned an unsubscribe function that should be called
+    expect(mockUnsubscribes).toHaveLength(2);
+    for (const unsub of mockUnsubscribes) {
+      expect(unsub).toHaveBeenCalled();
+    }
   });
 
   it('re-subscribes when contactUserIds change', async () => {
     const { rerender } = await importAndRender(['user-1']);
 
     const initialOnValueCalls = mockOnValue.mock.calls.length;
-    const initialOffCalls = mockOff.mock.calls.length;
+    const initialUnsubs = [...mockUnsubscribes];
 
     rerender({ contactUserIds: ['user-2', 'user-3'] });
 
     // Old listeners cleaned up
-    expect(mockOff.mock.calls.length).toBeGreaterThan(initialOffCalls);
+    for (const unsub of initialUnsubs) {
+      expect(unsub).toHaveBeenCalled();
+    }
     // New listeners created
     expect(mockOnValue.mock.calls.length).toBeGreaterThan(initialOnValueCalls);
   });

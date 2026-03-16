@@ -109,6 +109,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         apiRef.current = api;
         callStartTimeRef.current = Date.now();
         contactNameRef.current = contactName;
+        setInCall?.(true);
 
         if (user.uid) {
           void setActiveCall(user.uid, {
@@ -168,8 +169,6 @@ export function CallScreen({ setInCall }: CallScreenProps) {
     }
 
     void startCall();
-
-    setInCall?.(true);
 
     return () => {
       mounted = false;

@@ -126,6 +126,16 @@ export function Dashboard({ userId }: DashboardProps) {
                   <EasyCallText variant="body" className={presenceTextStyles[presence.state]}>
                     {t(presenceI18nKeys[presence.state])}
                   </EasyCallText>
+                ) : presence?.lastChanged ? (
+                  <EasyCallText variant="body" className="text-base-content/60">
+                    {t('presence.lastSeen', {
+                      time: formatRelativeTime({
+                        seconds: Math.floor(presence.lastChanged / 1000),
+                        nanoseconds: 0,
+                        toDate: () => new Date(presence.lastChanged!),
+                      }),
+                    })}
+                  </EasyCallText>
                 ) : user.lastSeen ? (
                   <EasyCallText variant="body" className="text-base-content/60">
                     {t('presence.lastSeen', { time: formatRelativeTime(user.lastSeen) })}

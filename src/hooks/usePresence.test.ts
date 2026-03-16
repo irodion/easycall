@@ -8,14 +8,14 @@ const mockOnDisconnect = vi.fn().mockReturnValue({
   set: mockOnDisconnectSet,
   cancel: mockOnDisconnectCancel,
 });
-const mockOff = vi.fn();
 const mockServerTimestamp = vi.fn().mockReturnValue('server-timestamp');
 const mockRef = vi.fn().mockImplementation((_db, path) => ({ path }));
 
 let onValueCallback: ((snap: { val: () => unknown }) => void) | null = null;
+const mockUnsubscribe = vi.fn();
 const mockOnValue = vi.fn().mockImplementation((_ref, callback) => {
   onValueCallback = callback;
-  return callback;
+  return mockUnsubscribe;
 });
 
 vi.mock('firebase/database', () => ({
@@ -24,7 +24,6 @@ vi.mock('firebase/database', () => ({
   onDisconnect: (...args: unknown[]) => mockOnDisconnect(...args),
   set: (...args: unknown[]) => mockSet(...args),
   serverTimestamp: () => mockServerTimestamp(),
-  off: (...args: unknown[]) => mockOff(...args),
 }));
 
 vi.mock('@/services/firebase', () => ({
@@ -55,12 +54,14 @@ describe('usePresence', () => {
     expect(mockOnValue).toHaveBeenCalled();
   });
 
-  it('writes online state when connected', async () => {
+  it('registers onDisconnect and writes online state when connected', async () => {
     await importAndRender('user-1');
     expect(onValueCallback).not.toBeNull();
 
     await act(async () => {
       onValueCallback!({ val: () => true });
+      // Flush the .then() chain
+      await Promise.resolve();
     });
 
     expect(mockOnDisconnect).toHaveBeenCalled();
@@ -68,16 +69,11 @@ describe('usePresence', () => {
       state: 'offline',
       lastChanged: 'server-timestamp',
     });
-  });
-
-  it('registers onDisconnect with offline state', async () => {
-    await importAndRender('user-1');
-
-    await act(async () => {
-      onValueCallback!({ val: () => true });
+    // Should also write online state after onDisconnect is registered
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ path: '/status/user-1' }), {
+      state: 'online',
+      lastChanged: 'server-timestamp',
     });
-
-    expect(mockOnDisconnectSet).toHaveBeenCalledWith(expect.objectContaining({ state: 'offline' }));
   });
 
   it('does not write online state when disconnected', async () => {
@@ -93,11 +89,8 @@ describe('usePresence', () => {
   it('cleans up listener and writes offline on unmount', async () => {
     const { unmount } = await importAndRender('user-1');
     unmount();
-    expect(mockOff).toHaveBeenCalledWith(
-      expect.objectContaining({ path: '.info/connected' }),
-      'value',
-      expect.any(Function),
-    );
+    // Should call the unsubscribe function returned by onValue
+    expect(mockUnsubscribe).toHaveBeenCalled();
     // Should write offline state explicitly on cleanup
     expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ path: '/status/user-1' }), {
       state: 'offline',
@@ -109,13 +102,37 @@ describe('usePresence', () => {
 
   it('cleans up and re-subscribes when userId changes', async () => {
     const { rerender } = await importAndRender('user-1');
-    const initialOffCalls = mockOff.mock.calls.length;
+    const initialUnsubCalls = mockUnsubscribe.mock.calls.length;
 
     rerender({ uid: 'user-2' });
 
-    expect(mockOff.mock.calls.length).toBeGreaterThan(initialOffCalls);
-    // Should have created a new ref for user-2
+    expect(mockUnsubscribe.mock.calls.length).toBeGreaterThan(initialUnsubCalls);
     expect(mockRef).toHaveBeenCalledWith({ type: 'database' }, '/status/user-2');
+  });
+
+  it('does not overwrite in-call state on reconnect', async () => {
+    const { result } = await importAndRender('user-1');
+
+    // Set in-call first
+    act(() => {
+      result.current.setInCall(true);
+    });
+    mockSet.mockClear();
+
+    // Simulate reconnect
+    await act(async () => {
+      onValueCallback!({ val: () => true });
+      await Promise.resolve();
+    });
+
+    // Should NOT have written 'online' — in-call should be preserved
+    const onlineCalls = mockSet.mock.calls.filter(
+      (call) =>
+        call[1] &&
+        typeof call[1] === 'object' &&
+        (call[1] as Record<string, unknown>).state === 'online',
+    );
+    expect(onlineCalls).toHaveLength(0);
   });
 
   it('setInCall(true) writes state: in-call to RTDB', async () => {

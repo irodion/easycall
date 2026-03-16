@@ -402,8 +402,8 @@ async function sendMissedCallNotifications(
     ...new Set(missedSnap.docs.map((d) => String(d.data()['contactName'] ?? 'Unknown'))),
   ];
   const summary =
-    callerNames.length === 1
-      ? `Missed call from ${callerNames[0]}`
+    missedCount === 1
+      ? `Missed call from ${String(missedSnap.docs[0]!.data()['contactName'] ?? 'Unknown')}`
       : `${missedCount} missed calls from ${callerNames.join(', ')}`;
 
   await getMessaging().sendEachForMulticast({

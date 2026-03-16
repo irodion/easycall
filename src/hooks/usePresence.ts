@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { ref, onValue, onDisconnect, set, serverTimestamp, off } from 'firebase/database';
+import { ref, onValue, onDisconnect, set, serverTimestamp } from 'firebase/database';
 import type { DatabaseReference } from 'firebase/database';
 import { rtdb } from '@/services/firebase';
 import type { PresenceState } from '@/types/user';
@@ -15,6 +15,7 @@ function presencePayload(state: PresenceState): RtdbPresencePayload {
 
 export function usePresence(userId: string | null): { setInCall: (inCall: boolean) => void } {
   const statusRefRef = useRef<DatabaseReference | null>(null);
+  const inCallRef = useRef(false);
 
   useEffect(() => {
     if (!userId) {
@@ -26,27 +27,30 @@ export function usePresence(userId: string | null): { setInCall: (inCall: boolea
     statusRefRef.current = statusRef;
     const connectedRef = ref(rtdb, '.info/connected');
 
-    const onConnectedChange = onValue(connectedRef, (snap) => {
+    const unsubscribe = onValue(connectedRef, (snap) => {
       if (snap.val() !== true) return;
 
       void onDisconnect(statusRef)
         .set(presencePayload('offline'))
         .then(() => {
-          void set(statusRef, presencePayload('online'));
+          // Don't overwrite 'in-call' on reconnect
+          if (!inCallRef.current) {
+            void set(statusRef, presencePayload('online'));
+          }
         });
     });
 
     return () => {
-      off(connectedRef, 'value', onConnectedChange);
-      // Write offline explicitly — onDisconnect only fires on socket close,
-      // not on React unmount (e.g. logout while socket stays connected)
+      unsubscribe();
       void set(statusRef, presencePayload('offline'));
       void onDisconnect(statusRef).cancel();
       statusRefRef.current = null;
+      inCallRef.current = false;
     };
   }, [userId]);
 
   const setInCall = useCallback((inCall: boolean) => {
+    inCallRef.current = inCall;
     const statusRef = statusRefRef.current;
     if (!statusRef) return;
     void set(statusRef, presencePayload(inCall ? 'in-call' : 'online'));
