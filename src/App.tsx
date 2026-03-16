@@ -94,7 +94,7 @@ function AuthenticatedApp() {
 
   useIncomingCall(userId);
 
-  const lockState = useAppLock({ settings });
+  const lockState = useAppLock({ settings, userId });
 
   return (
     <>

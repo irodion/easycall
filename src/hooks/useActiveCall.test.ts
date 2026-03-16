@@ -44,7 +44,7 @@ describe('useActiveCall', () => {
     expect(mockGetDoc).not.toHaveBeenCalled();
   });
 
-  it('returns activeCall when call is active and within 5 minutes', async () => {
+  it('returns activeCall when call is active and within 2 minutes', async () => {
     const data = makeActiveCallData(new Date());
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => data });
 
@@ -56,9 +56,9 @@ describe('useActiveCall', () => {
     expect(result.current.activeCall).toEqual(data);
   });
 
-  it('returns null and clears when call is older than 5 minutes', async () => {
-    const sixMinAgo = new Date(Date.now() - 6 * 60 * 1000);
-    const data = makeActiveCallData(sixMinAgo);
+  it('returns null and clears when call is older than 2 minutes', async () => {
+    const overTwoMinAgo = new Date(Date.now() - 2 * 60 * 1000 - 5000);
+    const data = makeActiveCallData(overTwoMinAgo);
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => data });
 
     const { result } = renderHook(() => useActiveCall('user-1'));

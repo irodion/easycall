@@ -3,6 +3,19 @@ import { getDoc } from 'firebase/firestore';
 import { activeCallRef, clearActiveCall } from '@/services/callHistory';
 import type { ActiveCallData } from '@/types/user';
 
+const REJOIN_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
+
+function isValidActiveCallData(raw: Record<string, unknown>): boolean {
+  return (
+    typeof raw['status'] === 'string' &&
+    typeof raw['contactId'] === 'string' &&
+    typeof raw['contactName'] === 'string' &&
+    typeof raw['jitsiRoomId'] === 'string' &&
+    raw['startedAt'] != null &&
+    typeof (raw['startedAt'] as { toDate?: unknown }).toDate === 'function'
+  );
+}
+
 export function useActiveCall(userId: string | null) {
   const [activeCall, setActiveCall] = useState<ActiveCallData | null>(null);
 
@@ -26,22 +39,14 @@ export function useActiveCall(userId: string | null) {
         if (!snap.exists()) return;
         const raw = snap.data();
 
-        // Validate shape before trusting the data
-        if (
-          typeof raw?.['status'] !== 'string' ||
-          !raw['startedAt'] ||
-          typeof (raw['startedAt'] as { toDate?: unknown }).toDate !== 'function'
-        ) {
+        if (!isValidActiveCallData(raw)) {
           await clearActiveCall(uid);
           return;
         }
 
         const data = raw as ActiveCallData;
-
-        // Only show rejoin if call is active and started within 5 minutes
-        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
         const startedAtMs = data.startedAt.toDate().getTime();
-        if (data.status === 'active' && startedAtMs > fiveMinutesAgo) {
+        if (data.status === 'active' && startedAtMs > Date.now() - REJOIN_TIMEOUT_MS) {
           setActiveCall(data);
         } else {
           await clearActiveCall(uid);

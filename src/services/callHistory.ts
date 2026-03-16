@@ -12,6 +12,7 @@ import {
   addDoc,
   Timestamp,
   type QueryConstraint,
+  type QueryDocumentSnapshot,
 } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import type { CallHistoryEntry, ActiveCallData } from '@/types/user';
@@ -34,8 +35,8 @@ export async function clearActiveCall(userId: string): Promise<void> {
 export async function fetchCallHistory(
   userId: string,
   pageSize: number = 20,
-  lastDocSnapshot?: unknown,
-): Promise<{ entries: CallHistoryEntry[]; lastDoc: unknown | null; hasMore: boolean }> {
+  lastDocSnapshot?: QueryDocumentSnapshot | null,
+): Promise<{ entries: CallHistoryEntry[]; lastDoc: QueryDocumentSnapshot | null; hasMore: boolean }> {
   const thirtyDaysAgo = Timestamp.fromDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   const constraints: QueryConstraint[] = [
     orderBy('startedAt', 'desc'),
@@ -47,7 +48,8 @@ export async function fetchCallHistory(
   const q = query(collection(db, 'users', userId, 'callHistory'), ...constraints);
   const snap = await getDocs(q);
   const entries = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as CallHistoryEntry);
-  const newLastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+  const newLastDoc: QueryDocumentSnapshot | null =
+    snap.docs.length > 0 ? snap.docs[snap.docs.length - 1]! : null;
 
   return { entries, lastDoc: newLastDoc, hasMore: snap.docs.length === pageSize };
 }
