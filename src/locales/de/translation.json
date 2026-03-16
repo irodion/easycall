@@ -118,7 +118,8 @@
     "saveFailed": "Rolle konnte nicht gespeichert werden: {{error}}",
     "whoAreYou": "Wer sind Sie?",
     "elderlyUser": "Ich bin ein älterer Benutzer",
-    "caregiver": "Ich bin ein Familienbetreuer"
+    "caregiver": "Ich bin ein Familienbetreuer",
+    "alreadyHaveAccount": "Bereits ein Konto? Anmelden"
   },
   "onboarding": {
     "welcome": "Willkommen bei EasyCall",
@@ -186,5 +187,61 @@
     "poor": "Schlechte Verbindung",
     "weakSignal": "Videoqualität aufgrund schwachen Signals reduziert"
   },
-  "skipToContent": "Zum Inhalt springen"
+  "skipToContent": "Zum Inhalt springen",
+  "login": {
+    "title": "Anmelden",
+    "email": "E-Mail",
+    "emailPlaceholder": "E-Mail-Adresse eingeben",
+    "password": "Passwort",
+    "passwordPlaceholder": "Passwort eingeben",
+    "signIn": "Anmelden",
+    "signingIn": "Anmeldung läuft...",
+    "forgotPassword": "Passwort vergessen?",
+    "continueAsNew": "Als neuer Benutzer fortfahren",
+    "wrongPassword": "Falsches Passwort. Bitte versuchen Sie es erneut.",
+    "userNotFound": "Kein Konto mit dieser E-Mail-Adresse gefunden.",
+    "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "genericError": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut."
+  },
+  "forgotPassword": {
+    "title": "Passwort zurücksetzen",
+    "email": "E-Mail",
+    "emailPlaceholder": "E-Mail-Adresse eingeben",
+    "sendReset": "Link zum Zurücksetzen senden",
+    "sending": "Wird gesendet...",
+    "success": "Überprüfen Sie Ihre E-Mails für einen Link zum Zurücksetzen des Passworts.",
+    "backToLogin": "Zurück zur Anmeldung",
+    "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "userNotFound": "Kein Konto mit dieser E-Mail-Adresse gefunden.",
+    "genericError": "E-Mail zum Zurücksetzen konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+  },
+  "caregiverAccount": {
+    "title": "Kontoeinstellungen",
+    "linkTitle": "Konto sichern",
+    "linkDescription": "Verknüpfen Sie eine E-Mail-Adresse und ein Passwort, um von jedem Gerät auf Ihr Konto zuzugreifen.",
+    "email": "E-Mail",
+    "emailPlaceholder": "E-Mail-Adresse eingeben",
+    "password": "Passwort",
+    "passwordPlaceholder": "Passwort erstellen (mind. 6 Zeichen)",
+    "confirmPassword": "Passwort bestätigen",
+    "confirmPasswordPlaceholder": "Passwort erneut eingeben",
+    "linkAccount": "E-Mail & Passwort verknüpfen",
+    "linking": "Wird verknüpft...",
+    "linkSuccess": "Konto erfolgreich verknüpft! Sie können sich jetzt mit Ihrer E-Mail anmelden.",
+    "emailAlreadyInUse": "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet.",
+    "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+    "passwordMismatch": "Passwörter stimmen nicht überein.",
+    "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    "genericError": "Verknüpfung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "linkedTitle": "Konto verknüpft",
+    "linkedEmail": "E-Mail: {{email}}",
+    "resetPassword": "Passwort zurücksetzen",
+    "resetSent": "E-Mail zum Zurücksetzen des Passworts gesendet.",
+    "backToDashboard": "Zurück zum Dashboard"
+  },
+  "accountBanner": {
+    "message": "Sichern Sie Ihr Konto, damit Sie sich auf jedem Gerät anmelden können.",
+    "setupEmail": "E-Mail einrichten",
+    "dismiss": "Schließen"
+  }
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, ensureAuthenticated } from '@/services/firebase';
@@ -66,6 +66,9 @@ export function RoleSelector() {
           {t('roleSelector.caregiver')}
         </EasyCallButton>
       </div>
+      <Link to="/login" className="link link-primary text-[length:var(--text-body)]">
+        {t('roleSelector.alreadyHaveAccount')}
+      </Link>
     </div>
   );
 }

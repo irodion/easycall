@@ -5,6 +5,7 @@ import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firesto
 import { db } from '@/services/firebase';
 import { formatRelativeTime } from '@/utils/formatTime';
 import { EasyCallText } from '@/components/shared/EasyCallText';
+import { AccountBanner } from './AccountBanner';
 import type { EasyCallUser } from '@/types/user';
 
 interface DashboardProps {
@@ -89,6 +90,8 @@ export function Dashboard({ userId }: DashboardProps) {
       <EasyCallText as="h1" variant="heading">
         {t('dashboard.title')}
       </EasyCallText>
+
+      <AccountBanner />
 
       <Link
         to="/caregiver/pair"

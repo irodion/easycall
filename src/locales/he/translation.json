@@ -118,7 +118,8 @@
     "saveFailed": "שמירת התפקיד נכשלה: {{error}}",
     "whoAreYou": "מי אתה?",
     "elderlyUser": "אני משתמש מבוגר",
-    "caregiver": "אני מטפל משפחתי"
+    "caregiver": "אני מטפל משפחתי",
+    "alreadyHaveAccount": "כבר יש לך חשבון? התחבר"
   },
   "onboarding": {
     "welcome": "ברוכים הבאים ל-EasyCall",
@@ -186,5 +187,61 @@
     "poor": "חיבור חלש",
     "weakSignal": "איכות הווידאו הופחתה עקב אות חלש"
   },
-  "skipToContent": "דלג לתוכן"
+  "skipToContent": "דלג לתוכן",
+  "login": {
+    "title": "התחברות",
+    "email": "אימייל",
+    "emailPlaceholder": "הזן את כתובת האימייל",
+    "password": "סיסמה",
+    "passwordPlaceholder": "הזן את הסיסמה",
+    "signIn": "התחבר",
+    "signingIn": "מתחבר...",
+    "forgotPassword": "שכחת סיסמה?",
+    "continueAsNew": "המשך כמשתמש חדש",
+    "wrongPassword": "סיסמה שגויה. אנא נסה שוב.",
+    "userNotFound": "לא נמצא חשבון עם אימייל זה.",
+    "invalidEmail": "אנא הזן כתובת אימייל תקינה.",
+    "genericError": "ההתחברות נכשלה. אנא נסה שוב."
+  },
+  "forgotPassword": {
+    "title": "איפוס סיסמה",
+    "email": "אימייל",
+    "emailPlaceholder": "הזן את כתובת האימייל",
+    "sendReset": "שלח קישור לאיפוס",
+    "sending": "שולח...",
+    "success": "בדוק את האימייל שלך לקישור לאיפוס סיסמה.",
+    "backToLogin": "חזרה להתחברות",
+    "invalidEmail": "אנא הזן כתובת אימייל תקינה.",
+    "userNotFound": "לא נמצא חשבון עם אימייל זה.",
+    "genericError": "שליחת אימייל האיפוס נכשלה. אנא נסה שוב."
+  },
+  "caregiverAccount": {
+    "title": "הגדרות חשבון",
+    "linkTitle": "אבטח את החשבון שלך",
+    "linkDescription": "קשר אימייל וסיסמה כדי לגשת לחשבון שלך מכל מכשיר.",
+    "email": "אימייל",
+    "emailPlaceholder": "הזן את כתובת האימייל",
+    "password": "סיסמה",
+    "passwordPlaceholder": "צור סיסמה (6 תווים לפחות)",
+    "confirmPassword": "אימות סיסמה",
+    "confirmPasswordPlaceholder": "הזן את הסיסמה שוב",
+    "linkAccount": "קשר אימייל וסיסמה",
+    "linking": "מקשר...",
+    "linkSuccess": "החשבון קושר בהצלחה! כעת תוכל להתחבר עם האימייל שלך.",
+    "emailAlreadyInUse": "כתובת אימייל זו כבר בשימוש על ידי חשבון אחר.",
+    "passwordTooShort": "הסיסמה חייבת להכיל לפחות 6 תווים.",
+    "passwordMismatch": "הסיסמאות אינן תואמות.",
+    "invalidEmail": "אנא הזן כתובת אימייל תקינה.",
+    "genericError": "קישור החשבון נכשל. אנא נסה שוב.",
+    "linkedTitle": "חשבון מקושר",
+    "linkedEmail": "אימייל: {{email}}",
+    "resetPassword": "איפוס סיסמה",
+    "resetSent": "אימייל לאיפוס סיסמה נשלח.",
+    "backToDashboard": "חזרה ללוח הבקרה"
+  },
+  "accountBanner": {
+    "message": "אבטח את חשבונך כדי שתוכל להתחבר מכל מכשיר.",
+    "setupEmail": "הגדר אימייל",
+    "dismiss": "סגור"
+  }
 }
