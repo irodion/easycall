@@ -25,7 +25,10 @@ describe('Dashboard', () => {
       query: vi.fn().mockReturnValue('query-ref'),
       where: vi.fn().mockReturnValue('where-ref'),
     }));
-    vi.doMock('@/services/firebase', () => ({ db: {} }));
+    vi.doMock('@/services/firebase', () => ({
+      db: {},
+      auth: { currentUser: { uid: 'caregiver-1', providerData: [] } },
+    }));
   });
 
   afterEach(() => {

@@ -117,13 +117,6 @@
     "language": "Language",
     "loadError": "Unable to load settings. Check permissions and try again."
   },
-  "roleSelector": {
-    "notSignedIn": "Not signed in. Please try again.",
-    "saveFailed": "Failed to save role: {{error}}",
-    "whoAreYou": "Who are you?",
-    "elderlyUser": "I am an elderly user",
-    "caregiver": "I am a family caregiver"
-  },
   "onboarding": {
     "welcome": "Welcome to EasyCall",
     "elderlyDescription": "Simple video calling with your family. Just tap a photo to call!",
@@ -193,5 +186,69 @@
     "poor": "Poor connection",
     "weakSignal": "Video quality reduced due to weak signal"
   },
-  "skipToContent": "Skip to content"
+  "skipToContent": "Skip to content",
+  "login": {
+    "title": "Sign In",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "forgotPassword": "Forgot password?",
+    "continueAsNew": "Continue as new user",
+    "wrongPassword": "Incorrect password. Please try again.",
+    "userNotFound": "No account found with this email.",
+    "invalidEmail": "Please enter a valid email address.",
+    "genericError": "Sign in failed. Please try again."
+  },
+  "forgotPassword": {
+    "title": "Reset Password",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "sendReset": "Send Reset Email",
+    "sending": "Sending...",
+    "success": "Check your email for a password reset link.",
+    "backToLogin": "Back to sign in",
+    "invalidEmail": "Please enter a valid email address.",
+    "userNotFound": "No account found with this email.",
+    "genericError": "Failed to send reset email. Please try again."
+  },
+  "caregiverAccount": {
+    "title": "Account Settings",
+    "linkTitle": "Secure Your Account",
+    "linkDescription": "Link an email and password to access your account on any device.",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Create a password (6+ characters)",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "linkAccount": "Link Email & Password",
+    "linking": "Linking...",
+    "linkSuccess": "Account linked successfully! You can now sign in with your email.",
+    "emailAlreadyInUse": "This email is already in use by another account.",
+    "passwordTooShort": "Password must be at least 6 characters.",
+    "passwordMismatch": "Passwords do not match.",
+    "invalidEmail": "Please enter a valid email address.",
+    "genericError": "Failed to link account. Please try again.",
+    "linkedTitle": "Account Linked",
+    "linkedEmail": "Email: {{email}}",
+    "resetPassword": "Reset Password",
+    "resetSent": "Password reset email sent.",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "accountBanner": {
+    "message": "Secure your account so you can sign in on any device.",
+    "setupEmail": "Set Up Email",
+    "dismiss": "Dismiss"
+  },
+  "roleSelector": {
+    "notSignedIn": "Not signed in. Please try again.",
+    "saveFailed": "Failed to save role: {{error}}",
+    "whoAreYou": "Who are you?",
+    "elderlyUser": "I am an elderly user",
+    "caregiver": "I am a family caregiver",
+    "alreadyHaveAccount": "Already have an account? Sign in"
+  }
 }

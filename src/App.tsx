@@ -19,6 +19,9 @@ import { Dashboard } from '@/components/caregiver/Dashboard';
 import { ManageContacts } from '@/components/caregiver/ManageContacts';
 import { PairElderlyUser } from '@/components/caregiver/PairElderlyUser';
 import { ElderlyUserSettings } from '@/components/caregiver/ElderlyUserSettings';
+import { CaregiverAccount } from '@/components/caregiver/CaregiverAccount';
+import { LoginForm } from '@/components/shared/LoginForm';
+import { ForgotPasswordForm } from '@/components/shared/ForgotPasswordForm';
 import { DEFAULT_USER_SETTINGS } from '@/types/user';
 import type { UserSettings } from '@/types/user';
 import { SkipToContent } from '@/components/shared/SkipToContent';
@@ -108,6 +111,8 @@ function AuthenticatedApp() {
         <main id="main-content">
           <Routes>
             <Route path="/" element={<RoleSelector />} />
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/forgot-password" element={<ForgotPasswordForm />} />
             <Route element={<AuthGuard requiredRole="elderly" />}>
               <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
               <Route
@@ -135,6 +140,7 @@ function AuthenticatedApp() {
                 path="/caregiver/settings/:elderlyUserId"
                 element={<CaregiverSettingsPage />}
               />
+              <Route path="/caregiver/account" element={<CaregiverAccount />} />
             </Route>
           </Routes>
         </main>
