@@ -50,13 +50,15 @@ const mockContact = createMockContact({
   jitsiRoomId: 'easycall-alice-abc123',
 });
 
+const mockSubscribeToContacts = vi.fn().mockReturnValue(() => {});
+
 vi.mock('@/stores/contactStore', () => ({
   useContactStore: vi.fn((selector) =>
     selector({
       contacts: [mockContact],
       loading: false,
       error: null,
-      subscribeToContacts: vi.fn().mockReturnValue(() => {}),
+      subscribeToContacts: mockSubscribeToContacts,
       addContact: vi.fn(),
       removeContact: vi.fn(),
       fetchContacts: vi.fn(),
@@ -85,15 +87,16 @@ describe('CallScreen', () => {
     } as unknown as typeof window.JitsiMeetExternalAPI;
   });
 
-  async function renderLoaded() {
+  async function renderLoaded(path = '/call/contact-1') {
     const { CallScreen } = await import('./CallScreen');
     let result: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <I18nextProvider i18n={i18n}>
-          <MemoryRouter initialEntries={['/call/contact-1']}>
+          <MemoryRouter initialEntries={[path]}>
             <Routes>
               <Route path="/call/:contactId" element={<CallScreen />} />
+              <Route path="/call-room/:roomId" element={<CallScreen />} />
             </Routes>
           </MemoryRouter>
         </I18nextProvider>,
@@ -237,6 +240,19 @@ describe('CallScreen', () => {
         outcome: 'completed',
       }),
     );
+  });
+
+  it('finds contact by roomId when accessed via /call-room/:roomId', async () => {
+    await renderLoaded('/call-room/easycall-alice-abc123');
+    // Should find the contact and create the Jitsi API (not show "contact not found")
+    expect(lastApiInstance).not.toBeNull();
+    expect(lastApiInstance?.options?.roomName).toBe('easycall-alice-abc123');
+  });
+
+  it('subscribes to contacts on mount', async () => {
+    mockSubscribeToContacts.mockClear();
+    await renderLoaded();
+    expect(mockSubscribeToContacts).toHaveBeenCalledWith('user-1');
   });
 
   it('does not write call history entry twice', async () => {

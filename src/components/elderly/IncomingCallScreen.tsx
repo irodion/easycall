@@ -41,8 +41,12 @@ export function IncomingCallScreen() {
   if (!isRinging || !incomingCall) return null;
 
   const handleAnswer = () => {
+    if (!incomingCall.roomId) {
+      clearIncomingCall();
+      return;
+    }
     clearIncomingCall();
-    void navigate(`/call/${incomingCall.roomId}`);
+    void navigate(`/call-room/${incomingCall.roomId}`);
   };
 
   const handleDecline = () => {

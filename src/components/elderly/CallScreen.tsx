@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Timestamp } from 'firebase/firestore';
@@ -13,7 +13,7 @@ import type { JitsiMeetExternalAPI } from '@/types/jitsi';
 
 export function CallScreen() {
   const { t } = useTranslation();
-  const { contactId } = useParams<{ contactId: string }>();
+  const { contactId, roomId } = useParams<{ contactId?: string; roomId?: string }>();
   const navigate = useNavigate();
   const apiRef = useRef<JitsiMeetExternalAPI | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -29,7 +29,21 @@ export function CallScreen() {
   const contactNameRef = useRef<string>('');
 
   const contacts = useContactStore((s) => s.contacts);
-  const contact = contacts.find((c) => c.id === contactId);
+  const subscribeToContacts = useContactStore((s) => s.subscribeToContacts);
+  const contact = useMemo(
+    () =>
+      contacts.find(
+        (c) => (contactId && c.id === contactId) || (roomId && c.jitsiRoomId === roomId),
+      ),
+    [contacts, contactId, roomId],
+  );
+
+  // Ensure contacts are loaded (handles direct URL navigation / incoming call)
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    return subscribeToContacts(uid);
+  }, [subscribeToContacts]);
 
   function writeHistory() {
     if (historyWrittenRef.current) return;
@@ -40,7 +54,7 @@ export function CallScreen() {
     const endMs = Date.now();
     const durationSec = Math.floor((endMs - startMs) / 1000);
     void writeCallHistoryEntry(uid, {
-      contactId: contactId ?? '',
+      contactId: contact?.id ?? contactId ?? '',
       contactName: contactNameRef.current,
       direction: 'outgoing',
       outcome: 'completed',
@@ -51,9 +65,8 @@ export function CallScreen() {
   }
 
   useEffect(() => {
-    const currentContact = contacts.find((c) => c.id === contactId);
-    if (!currentContact) return;
-    const { jitsiRoomId, name: contactName } = currentContact;
+    if (!contact) return;
+    const { jitsiRoomId, name: contactName } = contact;
 
     let mounted = true;
 
@@ -95,7 +108,7 @@ export function CallScreen() {
 
         if (user.uid) {
           void setActiveCall(user.uid, {
-            contactId: contactId!,
+            contactId: contact.id,
             contactName: contactName,
             jitsiRoomId,
             startedAt: Timestamp.now(),
@@ -166,7 +179,7 @@ export function CallScreen() {
         apiRef.current = null;
       }
     };
-  }, [contactId, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [contact, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleHangup = () => {
     writeHistory();

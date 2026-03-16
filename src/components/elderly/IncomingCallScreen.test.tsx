@@ -78,7 +78,7 @@ describe('IncomingCallScreen', () => {
     expect(img.className).toMatch(/min-h-\[120px\]/);
   });
 
-  it('Answer button navigates to /call/:roomId and clears store', async () => {
+  it('Answer button navigates to /call-room/:roomId and clears store', async () => {
     const user = userEvent.setup();
     useCallStore.setState({
       isRinging: true,
@@ -93,7 +93,7 @@ describe('IncomingCallScreen', () => {
     renderWithProviders(<IncomingCallScreen />);
     await user.click(screen.getByRole('button', { name: /answer/i }));
 
-    expect(mockNavigate).toHaveBeenCalledWith('/call/room-1');
+    expect(mockNavigate).toHaveBeenCalledWith('/call-room/room-1');
     expect(useCallStore.getState().isRinging).toBe(false);
   });
 
