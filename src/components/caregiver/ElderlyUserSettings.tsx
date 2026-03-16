@@ -216,7 +216,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                   return;
                 }
                 setPinSaving(true);
-                void hashPin(pin)
+                void hashPin(pin, elderlyUserId)
                   .then((hash) => {
                     updateSettings({ appLockEnabled: true, appLockPinHash: hash });
                     setPendingLockEnabled(false);

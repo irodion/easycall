@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import type { QueryDocumentSnapshot } from 'firebase/firestore';
 import { fetchCallHistory } from '@/services/callHistory';
 import { formatDuration, formatDateTime } from '@/utils/formatTime';
 import { EasyCallText } from '@/components/shared/EasyCallText';
@@ -25,7 +26,7 @@ export function CallHistory({ userId }: CallHistoryProps) {
   const navigate = useNavigate();
   const [entries, setEntries] = useState<CallHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lastDoc, setLastDoc] = useState<unknown>(null);
+  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 

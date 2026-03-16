@@ -36,12 +36,11 @@ export function usePairingCode(userId: string | null) {
       if (cancelled) return;
       setCode(newCode);
       setSecondsRemaining(600);
-      // Start countdown only after first code is ready
-      if (!countdownRef.current) {
-        countdownRef.current = setInterval(() => {
-          setSecondsRemaining((s) => (s <= 1 ? 0 : s - 1));
-        }, 1000);
-      }
+      // Clear existing countdown and start fresh
+      clearInterval(countdownRef.current);
+      countdownRef.current = setInterval(() => {
+        setSecondsRemaining((s) => (s <= 1 ? 0 : s - 1));
+      }, 1000);
       refreshRef.current = setTimeout(() => void generateAndSchedule(), AUTO_REFRESH_MS);
     }
 

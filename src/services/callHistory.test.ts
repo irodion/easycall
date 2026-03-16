@@ -119,8 +119,9 @@ describe('callHistory service', () => {
 
     it('uses startAfter when lastDocSnapshot provided', async () => {
       mockGetDocs.mockResolvedValue({ docs: [] });
-      await fetchCallHistory('user-1', 20, 'last-doc-snap');
-      expect(mockStartAfter).toHaveBeenCalledWith('last-doc-snap');
+      const mockSnap = { id: 'snap-1', data: () => ({}) } as never;
+      await fetchCallHistory('user-1', 20, mockSnap);
+      expect(mockStartAfter).toHaveBeenCalledWith(mockSnap);
     });
   });
 

@@ -14,7 +14,13 @@ const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const COOLDOWN_SECONDS = 30;
 const MAX_ATTEMPTS = 3;
 
-export function useAppLock({ settings }: { settings: UserSettings }): UseAppLockReturn {
+export function useAppLock({
+  settings,
+  userId,
+}: {
+  settings: UserSettings;
+  userId?: string | null;
+}): UseAppLockReturn {
   const location = useLocation();
   const isOnCallRoute = location.pathname.includes('/call/');
 
@@ -120,7 +126,7 @@ export function useAppLock({ settings }: { settings: UserSettings }): UseAppLock
 
       if (!settings.appLockPinHash) return false;
 
-      const valid = await verifyPin(pin, settings.appLockPinHash);
+      const valid = await verifyPin(pin, settings.appLockPinHash, userId ?? undefined);
       if (valid) {
         setIsUnlocked(true);
         setFailedAttempts(0);
@@ -136,7 +142,7 @@ export function useAppLock({ settings }: { settings: UserSettings }): UseAppLock
       setCooldownRemaining((prev) => (triggered ? COOLDOWN_SECONDS : prev));
       return false;
     },
-    [settings.appLockPinHash],
+    [settings.appLockPinHash, userId],
   );
 
   if (!lockEnabled) {

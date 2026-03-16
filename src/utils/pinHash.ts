@@ -1,7 +1,7 @@
 const APP_SALT = 'easycall-pin-v1';
 
-export async function hashPin(pin: string): Promise<string> {
-  const data = new TextEncoder().encode(APP_SALT + pin);
+async function sha256(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
   const buffer = await crypto.subtle.digest('SHA-256', data);
   const bytes = new Uint8Array(buffer);
   return Array.from(bytes)
@@ -9,7 +9,21 @@ export async function hashPin(pin: string): Promise<string> {
     .join('');
 }
 
-export async function verifyPin(pin: string, storedHash: string): Promise<boolean> {
-  const hash = await hashPin(pin);
-  return hash === storedHash;
+export async function hashPin(pin: string, userId?: string): Promise<string> {
+  return sha256(APP_SALT + (userId ?? '') + pin);
+}
+
+export async function verifyPin(
+  pin: string,
+  storedHash: string,
+  userId?: string,
+): Promise<boolean> {
+  // Try with per-user salt first
+  if (userId) {
+    const saltedHash = await hashPin(pin, userId);
+    if (saltedHash === storedHash) return true;
+  }
+  // Fallback: verify against legacy unsalted hash (migration path)
+  const legacyHash = await sha256(APP_SALT + pin);
+  return legacyHash === storedHash;
 }
