@@ -18,6 +18,12 @@ describe('hashPin', () => {
     const hash = await hashPin('0042');
     expect(hash).toMatch(/^[0-9a-f]{64}$/);
   });
+
+  it('produces different hashes for same PIN with different userIds', async () => {
+    const hash1 = await hashPin('1234', 'user-1');
+    const hash2 = await hashPin('1234', 'user-2');
+    expect(hash1).not.toBe(hash2);
+  });
 });
 
 describe('verifyPin', () => {
@@ -42,16 +48,13 @@ describe('verifyPin', () => {
     expect(await verifyPin('1234', hash, 'user-1')).toBe(true);
   });
 
-  it('produces different hashes for same PIN with different userIds', async () => {
-    const hash1 = await hashPin('1234', 'user-1');
-    const hash2 = await hashPin('1234', 'user-2');
-    expect(hash1).not.toBe(hash2);
+  it('salted hash does not verify without userId', async () => {
+    const saltedHash = await hashPin('1234', 'user-1');
+    expect(await verifyPin('1234', saltedHash)).toBe(false);
   });
 
   it('falls back to legacy unsalted hash when salted does not match', async () => {
-    // Hash without userId (legacy)
     const legacyHash = await hashPin('1234');
-    // Verify with userId should still match via fallback
     expect(await verifyPin('1234', legacyHash, 'user-1')).toBe(true);
   });
 
