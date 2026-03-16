@@ -66,15 +66,18 @@ describe('PairElderlyUser', () => {
     expect(onSuccess).toHaveBeenCalledWith('elderly-1');
   });
 
-  it('error: renders error message with role=alert', async () => {
-    mockValidatePairingCode.mockRejectedValue(new Error('Pairing code has expired.'));
+  it('error: renders friendly error for Firebase "internal" error', async () => {
+    mockValidatePairingCode.mockRejectedValue(new Error('internal'));
 
     const user = userEvent.setup();
     renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
     await user.type(screen.getByLabelText(/6-digit code/i), '123456');
     await user.click(screen.getByRole('button', { name: /link account/i }));
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Pairing code has expired.');
+    const alert = screen.getByRole('alert');
+    expect(alert).toBeInTheDocument();
+    // Should show friendly message, not raw "internal"
+    expect(alert.textContent).not.toContain('internal');
   });
 
   it('does not submit when code is empty via form submit', () => {
