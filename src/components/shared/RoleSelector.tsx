@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/services/firebase';
+import { db, ensureAuthenticated } from '@/services/firebase';
 import { EasyCallButton } from './EasyCallButton';
 import { EasyCallText } from './EasyCallText';
 
@@ -13,21 +13,18 @@ export function RoleSelector() {
   const [error, setError] = useState<string | null>(null);
 
   const handleSelectRole = async (role: 'elderly' | 'caregiver') => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) {
-      setError(t('roleSelector.notSignedIn'));
-      return;
-    }
-
     setIsSaving(true);
     setError(null);
     try {
-      await setDoc(doc(db, 'users', uid), { role, onboardingComplete: false }, { merge: true });
-      void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
-    } catch (err) {
-      setError(
-        t('roleSelector.saveFailed', { error: err instanceof Error ? err.message : String(err) }),
+      const user = await ensureAuthenticated();
+      await setDoc(
+        doc(db, 'users', user.uid),
+        { role, onboardingComplete: false },
+        { merge: true },
       );
+      void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
+    } catch {
+      setError(t('common.somethingWentWrong'));
     } finally {
       setIsSaving(false);
     }

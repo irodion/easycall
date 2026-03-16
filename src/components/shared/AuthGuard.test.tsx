@@ -12,7 +12,7 @@ vi.mock('firebase/auth', () => ({
 
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn().mockReturnValue('doc-ref'),
-  getDoc: vi.fn(),
+  onSnapshot: vi.fn(),
   setDoc: vi.fn().mockResolvedValue(undefined),
   getFirestore: vi.fn(),
 }));
@@ -21,6 +21,7 @@ vi.mock('@/services/firebase', () => ({
   auth: {},
   db: {},
   app: {},
+  ensureAuthenticated: vi.fn().mockResolvedValue({ uid: 'user-1' }),
 }));
 
 describe('AuthGuard', () => {
@@ -50,9 +51,6 @@ describe('AuthGuard', () => {
       return () => {};
     });
 
-    const { getDoc } = await import('firebase/firestore');
-    vi.mocked(getDoc).mockResolvedValue({ exists: () => false, data: () => undefined } as never);
-
     const { AuthGuard } = await import('./AuthGuard');
     await act(async () => {
       renderWithProviders(
@@ -71,11 +69,13 @@ describe('AuthGuard', () => {
       return () => {};
     });
 
-    const { getDoc } = await import('firebase/firestore');
-    vi.mocked(getDoc).mockResolvedValue({
-      exists: () => true,
-      data: () => ({ role: undefined }),
-    } as never);
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> | undefined }) => void)({
+        data: () => ({}),
+      });
+      return () => {};
+    });
 
     const { AuthGuard } = await import('./AuthGuard');
     await act(async () => {
@@ -97,11 +97,13 @@ describe('AuthGuard', () => {
       return () => {};
     });
 
-    const { getDoc } = await import('firebase/firestore');
-    vi.mocked(getDoc).mockResolvedValue({
-      exists: () => true,
-      data: () => ({ role: 'elderly', onboardingComplete: true }),
-    } as never);
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'elderly', onboardingComplete: true }),
+      });
+      return () => {};
+    });
 
     const { AuthGuard } = await import('./AuthGuard');
     await act(async () => {
@@ -121,11 +123,13 @@ describe('AuthGuard', () => {
       return () => {};
     });
 
-    const { getDoc } = await import('firebase/firestore');
-    vi.mocked(getDoc).mockResolvedValue({
-      exists: () => true,
-      data: () => ({ role: 'caregiver', onboardingComplete: true }),
-    } as never);
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'caregiver', onboardingComplete: true }),
+      });
+      return () => {};
+    });
 
     const { AuthGuard } = await import('./AuthGuard');
     await act(async () => {
@@ -138,6 +142,44 @@ describe('AuthGuard', () => {
     });
     // Wrong role → Navigate renders, child content is NOT shown
     expect(screen.queryByText('Elderly Content')).not.toBeInTheDocument();
+  });
+
+  it('transitions from no-role to correct-role when Firestore doc updates reactively', async () => {
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    let snapshotCallback: ((snap: { data: () => Record<string, unknown> | undefined }) => void) | undefined;
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      snapshotCallback = onNext as typeof snapshotCallback;
+      // Initially no role
+      snapshotCallback!({ data: () => ({}) });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="elderly">
+          <div>Protected Content</div>
+        </AuthGuard>,
+      );
+    });
+
+    // Should show RoleSelector initially
+    expect(screen.getByText(/who are you/i)).toBeInTheDocument();
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+
+    // Simulate Firestore doc update with role set
+    await act(async () => {
+      snapshotCallback!({ data: () => ({ role: 'elderly' }) });
+    });
+
+    // Should now show protected content without page reload
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
   });
 
   it('passes vitest-axe while loading', async () => {

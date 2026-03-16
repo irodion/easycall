@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getAuth, connectAuthEmulator, signInAnonymously } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import type { Messaging } from 'firebase/messaging';
 
@@ -30,6 +31,15 @@ export const db = getFirestore(app);
 if (import.meta.env.VITE_USE_EMULATORS === 'true') {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
+}
+
+/**
+ * Ensures a Firebase user exists. Returns the current user or signs in anonymously.
+ */
+export async function ensureAuthenticated(): Promise<User> {
+  if (auth.currentUser) return auth.currentUser;
+  const cred = await signInAnonymously(auth);
+  return cred.user;
 }
 
 let cachedMessaging: Messaging | null | undefined;
