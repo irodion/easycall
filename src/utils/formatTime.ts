@@ -1,5 +1,14 @@
 import type { FirestoreTimestamp } from '@/types/user';
 
+/** Convert an epoch-millisecond number into a FirestoreTimestamp-compatible object. */
+export function timestampFromMillis(ms: number): FirestoreTimestamp {
+  return {
+    seconds: Math.floor(ms / 1000),
+    nanoseconds: 0,
+    toDate: () => new Date(ms),
+  };
+}
+
 export function formatRelativeTime(timestamp: FirestoreTimestamp, now: Date = new Date()): string {
   const then = timestamp.toDate();
   const diffMs = now.getTime() - then.getTime();

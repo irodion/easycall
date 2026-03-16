@@ -185,7 +185,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         apiRef.current = null;
       }
     };
-  }, [contact, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [contact, navigate, setInCall]);
 
   const handleHangup = () => {
     writeHistory();

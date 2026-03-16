@@ -140,9 +140,10 @@ async function checkEmulators(): Promise<void> {
   ] as const) {
     try {
       await fetch(url);
-    } catch {
+    } catch (err) {
       throw new Error(
         `${name} not reachable at ${url}.\nRun: firebase emulators:start --only auth,firestore,database`,
+        { cause: err },
       );
     }
   }
@@ -275,16 +276,20 @@ test.describe('Online Presence Indicators', () => {
     await page.goto('/elderly');
     await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 10_000 });
 
-    // Wait for usePresence hook to write to RTDB
-    await page.waitForTimeout(3_000);
-
-    // Verify RTDB has the user's presence as online
-    const rtdbRes = await fetch(
-      `${RTDB_EMULATOR}/status/${user.localId}.json?ns=${PROJECT_ID}-default-rtdb`,
-      { headers: EMULATOR_AUTH_HEADER },
-    );
-    const rtdbData = (await rtdbRes.json()) as { state?: string } | null;
-    expect(rtdbData?.state).toBe('online');
+    // Poll RTDB until usePresence hook writes 'online' (avoids fixed wait)
+    await expect
+      .poll(
+        async () => {
+          const res = await fetch(
+            `${RTDB_EMULATOR}/status/${user.localId}.json?ns=${PROJECT_ID}-default-rtdb`,
+            { headers: EMULATOR_AUTH_HEADER },
+          );
+          const data = (await res.json()) as { state?: string } | null;
+          return data?.state;
+        },
+        { timeout: 10_000, intervals: [500] },
+      )
+      .toBe('online');
 
     await ctx.close();
   });

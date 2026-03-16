@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/services/firebase';
-import { formatRelativeTime } from '@/utils/formatTime';
+import { formatRelativeTime, timestampFromMillis } from '@/utils/formatTime';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { StatusIndicator } from '@/components/shared/StatusIndicator';
 import { presenceTextStyles, presenceI18nKeys } from '@/components/shared/presenceStyles';
@@ -129,11 +129,7 @@ export function Dashboard({ userId }: DashboardProps) {
                 ) : presence?.lastChanged ? (
                   <EasyCallText variant="body" className="text-base-content/60">
                     {t('presence.lastSeen', {
-                      time: formatRelativeTime({
-                        seconds: Math.floor(presence.lastChanged / 1000),
-                        nanoseconds: 0,
-                        toDate: () => new Date(presence.lastChanged!),
-                      }),
+                      time: formatRelativeTime(timestampFromMillis(presence.lastChanged)),
                     })}
                   </EasyCallText>
                 ) : user.lastSeen ? (
