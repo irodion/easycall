@@ -42,7 +42,7 @@ export function IncomingCallScreen() {
 
   const handleAnswer = () => {
     clearIncomingCall();
-    void navigate(`/call/${incomingCall.roomId}`);
+    void navigate(`/call-room/${incomingCall.roomId}`);
   };
 
   const handleDecline = () => {

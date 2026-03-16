@@ -93,7 +93,7 @@ describe('IncomingCallScreen', () => {
     renderWithProviders(<IncomingCallScreen />);
     await user.click(screen.getByRole('button', { name: /answer/i }));
 
-    expect(mockNavigate).toHaveBeenCalledWith('/call/room-1');
+    expect(mockNavigate).toHaveBeenCalledWith('/call-room/room-1');
     expect(useCallStore.getState().isRinging).toBe(false);
   });
 

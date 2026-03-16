@@ -125,6 +125,7 @@ function AuthenticatedApp() {
                 element={userId ? <CallHistory userId={userId} /> : null}
               />
               <Route path="/call/:contactId" element={<CallScreen />} />
+              <Route path="/call-room/:roomId" element={<CallScreen />} />
             </Route>
             <Route element={<AuthGuard requiredRole="caregiver" />}>
               <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />
