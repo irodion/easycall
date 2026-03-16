@@ -50,13 +50,15 @@ const mockContact = createMockContact({
   jitsiRoomId: 'easycall-alice-abc123',
 });
 
+const mockSubscribeToContacts = vi.fn().mockReturnValue(() => {});
+
 vi.mock('@/stores/contactStore', () => ({
   useContactStore: vi.fn((selector) =>
     selector({
       contacts: [mockContact],
       loading: false,
       error: null,
-      subscribeToContacts: vi.fn().mockReturnValue(() => {}),
+      subscribeToContacts: mockSubscribeToContacts,
       addContact: vi.fn(),
       removeContact: vi.fn(),
       fetchContacts: vi.fn(),
@@ -248,11 +250,9 @@ describe('CallScreen', () => {
   });
 
   it('subscribes to contacts on mount', async () => {
+    mockSubscribeToContacts.mockClear();
     await renderLoaded();
-    const { useContactStore } = await import('@/stores/contactStore');
-    const store = useContactStore.getState?.() as { subscribeToContacts?: unknown } | undefined;
-    // The mock subscribeToContacts should have been called
-    expect(store?.subscribeToContacts || true).toBeTruthy();
+    expect(mockSubscribeToContacts).toHaveBeenCalledWith('user-1');
   });
 
   it('does not write call history entry twice', async () => {

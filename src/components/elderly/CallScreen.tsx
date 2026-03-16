@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Timestamp } from 'firebase/firestore';
@@ -30,8 +30,12 @@ export function CallScreen() {
 
   const contacts = useContactStore((s) => s.contacts);
   const subscribeToContacts = useContactStore((s) => s.subscribeToContacts);
-  const contact = contacts.find(
-    (c) => (contactId && c.id === contactId) || (roomId && c.jitsiRoomId === roomId),
+  const contact = useMemo(
+    () =>
+      contacts.find(
+        (c) => (contactId && c.id === contactId) || (roomId && c.jitsiRoomId === roomId),
+      ),
+    [contacts, contactId, roomId],
   );
 
   // Ensure contacts are loaded (handles direct URL navigation / incoming call)
@@ -61,11 +65,8 @@ export function CallScreen() {
   }
 
   useEffect(() => {
-    const currentContact = contacts.find(
-      (c) => (contactId && c.id === contactId) || (roomId && c.jitsiRoomId === roomId),
-    );
-    if (!currentContact) return;
-    const { jitsiRoomId, name: contactName } = currentContact;
+    if (!contact) return;
+    const { jitsiRoomId, name: contactName } = contact;
 
     let mounted = true;
 
@@ -107,7 +108,7 @@ export function CallScreen() {
 
         if (user.uid) {
           void setActiveCall(user.uid, {
-            contactId: currentContact.id,
+            contactId: contact.id,
             contactName: contactName,
             jitsiRoomId,
             startedAt: Timestamp.now(),
@@ -178,7 +179,7 @@ export function CallScreen() {
         apiRef.current = null;
       }
     };
-  }, [contactId, roomId, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [contact, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleHangup = () => {
     writeHistory();
