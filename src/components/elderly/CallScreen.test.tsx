@@ -41,6 +41,7 @@ vi.mock('@/services/firebase', () => ({
   app: {},
   auth: { currentUser: { uid: 'user-1', displayName: 'Elderly User' } },
   db: {},
+  ensureAuthenticated: vi.fn().mockResolvedValue({ uid: 'user-1', displayName: 'Elderly User' }),
 }));
 
 const mockContact = createMockContact({

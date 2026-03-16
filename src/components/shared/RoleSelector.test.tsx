@@ -76,8 +76,9 @@ describe('RoleSelector', () => {
     });
   });
 
-  it('shows friendly error when ensureAuthenticated fails', async () => {
+  it('shows friendly error when ensureAuthenticated fails and does not write to Firestore', async () => {
     const { ensureAuthenticated } = await import('@/services/firebase');
+    const { setDoc } = await import('firebase/firestore');
     vi.mocked(ensureAuthenticated).mockRejectedValueOnce(new Error('auth/network-error'));
 
     const { RoleSelector } = await import('./RoleSelector');
@@ -90,6 +91,8 @@ describe('RoleSelector', () => {
       // Should NOT expose raw Firebase error message
       expect(alert.textContent).not.toContain('auth/network-error');
     });
+    // Auth failure should short-circuit before any database write
+    expect(setDoc).not.toHaveBeenCalled();
   });
 
   it('shows error when setDoc rejects', async () => {

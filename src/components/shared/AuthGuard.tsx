@@ -37,8 +37,9 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
       unsubDoc = onSnapshot(
         doc(db, 'users', user.uid),
         (snap) => {
-          const role = snap.data()?.['role'] as string | undefined;
-          if (!role) {
+          const role = snap.data()?.['role'];
+          // Only accept known roles; malformed values fall through to no-role
+          if (role !== 'elderly' && role !== 'caregiver') {
             setAuthState('no-role');
           } else if (role === requiredRole) {
             setAuthState('correct-role');
