@@ -81,11 +81,11 @@ export function CaregiverAccount() {
 
   const handleReset = async () => {
     if (!linkedEmail) return;
+    clearTimeout(resetTimeoutRef.current);
     setResetState('loading');
     try {
       await sendCaregiverPasswordReset(linkedEmail);
       setResetState('sent');
-      clearTimeout(resetTimeoutRef.current);
       resetTimeoutRef.current = setTimeout(() => setResetState('idle'), 5000);
     } catch {
       setResetState('error');

@@ -13,10 +13,10 @@ describe('generateRoomId', () => {
     expect(namePart).toMatch(/^[a-z0-9]+$/);
   });
 
-  it('truncates name to 20 characters', () => {
+  it('truncates name to exactly 20 characters', () => {
     const id = generateRoomId('VeryLongContactNameThatExceedsTwentyChars');
     const namePart = id.replace(/^easycall-/, '').replace(/-[a-z0-9]+$/, '');
-    expect(namePart.length).toBeLessThanOrEqual(20);
+    expect(namePart).toBe('verylongcontactnamethatexceedstwentychar'.slice(0, 20));
   });
 
   it('generates unique IDs for same name', () => {
@@ -27,11 +27,17 @@ describe('generateRoomId', () => {
 
   it('handles empty name with fallback', () => {
     const id = generateRoomId('');
-    expect(id).toMatch(/^easycall-room-[a-z0-9]+$/);
+    expect(id).toMatch(/^easycall-room-[a-z0-9]{12}$/);
   });
 
   it('handles name with only special characters', () => {
     const id = generateRoomId('!!!');
-    expect(id).toMatch(/^easycall-room-[a-z0-9]+$/);
+    expect(id).toMatch(/^easycall-room-[a-z0-9]{12}$/);
+  });
+
+  it('suffix is exactly 12 hex characters', () => {
+    const id = generateRoomId('Alice');
+    const suffix = id.split('-').pop()!;
+    expect(suffix).toMatch(/^[a-z0-9]{12}$/);
   });
 });

@@ -93,7 +93,8 @@
     "addFailed": "Error al agregar contacto: {{error}}",
     "removeFailed": "Error al eliminar contacto: {{error}}",
     "saveNewContact": "Guardar nuevo contacto",
-    "cancelAdd": "Cancelar agregar"
+    "cancelAdd": "Cancelar agregar",
+    "choosePhoto": "Elegir foto"
   },
   "elderlySettings": {
     "fontSize": "Tamaño de Fuente",

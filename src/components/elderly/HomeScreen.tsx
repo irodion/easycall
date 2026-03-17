@@ -25,7 +25,7 @@ export function HomeScreen({ userId }: HomeScreenProps) {
   const contactUserIds = useMemo(() => contacts.map((c) => c.contactUserId), [contacts]);
   const presenceMap = useContactsPresence(contactUserIds);
 
-  const [failedPhotos, setFailedPhotos] = useState<Set<string>>(new Set());
+  const [failedPhotoUrls, setFailedPhotoUrls] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     return subscribeToContacts(userId);
@@ -86,12 +86,14 @@ export function HomeScreen({ userId }: HomeScreenProps) {
               className="flex flex-col items-center gap-2 p-4"
             >
               <div className="relative">
-                {contact.photoURL && !failedPhotos.has(contact.id) ? (
+                {contact.photoURL && !failedPhotoUrls.has(contact.photoURL) ? (
                   <img
                     src={contact.photoURL}
                     alt=""
                     className="w-24 h-24 rounded-full object-cover ring-2 ring-primary/20"
-                    onError={() => setFailedPhotos((prev) => new Set(prev).add(contact.id))}
+                    onError={() =>
+                      setFailedPhotoUrls((prev) => new Set(prev).add(contact.photoURL!))
+                    }
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-3xl font-bold text-primary-content ring-2 ring-primary/20">

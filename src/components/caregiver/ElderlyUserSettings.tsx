@@ -87,14 +87,17 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
     );
   }
 
-  const updateSettings = (partial: Partial<UserSettings>) => {
+  const updateSettings = async (partial: Partial<UserSettings>) => {
     const previous = settings;
     const updated = { ...settings, ...partial };
     setSettings(updated);
     const ref = doc(db, 'users', elderlyUserId);
-    updateDoc(ref, { settings: updated }).catch(() => {
+    try {
+      await updateDoc(ref, { settings: updated });
+    } catch {
       setSettings(previous);
-    });
+      throw new Error('Settings write failed');
+    }
   };
 
   return (
@@ -222,7 +225,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                 void (async () => {
                   try {
                     const hash = await hashPin(pin, elderlyUserId);
-                    updateSettings({ appLockEnabled: true, appLockPinHash: hash });
+                    await updateSettings({ appLockEnabled: true, appLockPinHash: hash });
                     setPendingLockEnabled(false);
                     setPin('');
                     setPinConfirm('');

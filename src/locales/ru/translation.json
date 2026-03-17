@@ -93,7 +93,8 @@
     "addFailed": "Не удалось добавить контакт: {{error}}",
     "removeFailed": "Не удалось удалить контакт: {{error}}",
     "saveNewContact": "Сохранить новый контакт",
-    "cancelAdd": "Отменить добавление"
+    "cancelAdd": "Отменить добавление",
+    "choosePhoto": "Выбрать фото"
   },
   "elderlySettings": {
     "fontSize": "Размер шрифта",

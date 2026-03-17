@@ -38,8 +38,15 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
     try {
       let photoURL: string | null = null;
       if (photoFile) {
-        const compressed = await compressImage(photoFile);
-        photoURL = await blobToDataUrl(compressed);
+        try {
+          const compressed = await compressImage(photoFile);
+          photoURL = await blobToDataUrl(compressed);
+        } catch {
+          setPhotoFile(null);
+          setError(t('addContact.photoError'));
+          setIsAdding(false);
+          return;
+        }
       }
       const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), -1);
       const displayOrder = maxOrder + 1;
@@ -123,7 +130,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
             accept="image/*"
             className="file-input file-input-bordered w-full min-h-14 min-w-14"
             onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
-            aria-label={t('addContact.choosePhoto')}
+            aria-label={t('manageContacts.choosePhoto')}
           />
           <div className="flex gap-3">
             <EasyCallButton

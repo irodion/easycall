@@ -96,7 +96,8 @@
     "addFailed": "Failed to add contact: {{error}}",
     "removeFailed": "Failed to remove contact: {{error}}",
     "saveNewContact": "Save new contact",
-    "cancelAdd": "Cancel add"
+    "cancelAdd": "Cancel add",
+    "choosePhoto": "Choose photo"
   },
   "elderlySettings": {
     "fontSize": "Font Size",

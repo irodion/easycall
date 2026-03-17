@@ -41,7 +41,7 @@ export function ForgotPasswordForm() {
     setErrorMessage('');
 
     try {
-      await sendCaregiverPasswordReset(email);
+      await sendCaregiverPasswordReset(trimmed);
       setState('success');
     } catch (err) {
       setState('error');

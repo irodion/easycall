@@ -93,7 +93,8 @@
     "addFailed": "שגיאה בהוספת איש קשר: {{error}}",
     "removeFailed": "שגיאה בהסרת איש קשר: {{error}}",
     "saveNewContact": "שמור איש קשר חדש",
-    "cancelAdd": "בטל הוספה"
+    "cancelAdd": "בטל הוספה",
+    "choosePhoto": "בחר תמונה"
   },
   "elderlySettings": {
     "fontSize": "גודל גופן",

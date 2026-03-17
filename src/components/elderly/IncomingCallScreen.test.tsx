@@ -167,6 +167,45 @@ describe('IncomingCallScreen', () => {
     expect(declineBtn).toHaveClass('touch-target-primary');
   });
 
+  it('Answer clears store without navigating when roomId is empty', async () => {
+    const user = userEvent.setup();
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: '',
+        roomId: '',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    renderWithProviders(<IncomingCallScreen />);
+    await user.click(screen.getByRole('button', { name: /answer/i }));
+
+    expect(useCallStore.getState().isRinging).toBe(false);
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('Decline clears store even when declineCall throws', async () => {
+    const user = userEvent.setup();
+    mockDeclineCall.mockRejectedValueOnce(new Error('Network error'));
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: '',
+        roomId: 'room-1',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    renderWithProviders(<IncomingCallScreen />);
+    await user.click(screen.getByRole('button', { name: /decline/i }));
+
+    expect(mockDeclineCall).toHaveBeenCalledWith('user-1');
+    expect(useCallStore.getState().isRinging).toBe(false);
+  });
+
   it('passes vitest-axe accessibility audit', async () => {
     useCallStore.setState({
       isRinging: true,

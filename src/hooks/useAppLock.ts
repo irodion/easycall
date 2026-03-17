@@ -22,7 +22,8 @@ export function useAppLock({
   userId?: string | null;
 }): UseAppLockReturn {
   const location = useLocation();
-  const isOnCallRoute = location.pathname.includes('/call/');
+  const isOnCallRoute =
+    location.pathname.includes('/call/') || location.pathname.includes('/call-room/');
 
   const lockEnabled = settings.appLockEnabled && settings.appLockPinHash !== null;
 

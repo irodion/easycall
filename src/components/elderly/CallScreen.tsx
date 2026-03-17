@@ -55,7 +55,10 @@ export function CallScreen({ setInCall }: CallScreenProps) {
     if (historyWrittenRef.current) return;
     historyWrittenRef.current = true; // Set FIRST, synchronously — prevents concurrent calls
     const uid = auth.currentUser?.uid;
-    if (!uid || !callStartTimeRef.current) return;
+    if (!uid || !callStartTimeRef.current) {
+      historyWrittenRef.current = false; // Reset — prerequisites not met
+      return;
+    }
     const startMs = callStartTimeRef.current;
     const endMs = Date.now();
     const durationSec = Math.floor((endMs - startMs) / 1000);

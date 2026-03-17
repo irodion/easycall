@@ -93,7 +93,8 @@
     "addFailed": "Kontakt konnte nicht hinzugefügt werden: {{error}}",
     "removeFailed": "Kontakt konnte nicht entfernt werden: {{error}}",
     "saveNewContact": "Neuen Kontakt speichern",
-    "cancelAdd": "Hinzufügen abbrechen"
+    "cancelAdd": "Hinzufügen abbrechen",
+    "choosePhoto": "Foto auswählen"
   },
   "elderlySettings": {
     "fontSize": "Schriftgröße",

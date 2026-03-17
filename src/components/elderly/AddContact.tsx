@@ -58,6 +58,10 @@ export function AddContact({ userId }: AddContactProps) {
           const compressed = await compressImage(photoFile);
           photoURL = await blobToDataUrl(compressed);
         } catch {
+          if (blobUrlRef.current) {
+            URL.revokeObjectURL(blobUrlRef.current);
+            blobUrlRef.current = null;
+          }
           setError(t('addContact.photoError'));
           setPhotoFile(null);
           setPhotoPreview(null);
