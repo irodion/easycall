@@ -51,9 +51,9 @@ export function CallScreen({ setInCall }: CallScreenProps) {
 
   const writeHistory = useCallback(() => {
     if (historyWrittenRef.current) return;
-    historyWrittenRef.current = true;
     const uid = auth.currentUser?.uid;
     if (!uid || !callStartTimeRef.current) return;
+    historyWrittenRef.current = true;
     const startMs = callStartTimeRef.current;
     const endMs = Date.now();
     const durationSec = Math.floor((endMs - startMs) / 1000);
