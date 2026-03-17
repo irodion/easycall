@@ -10,7 +10,12 @@ import { useContactStore } from '@/stores/contactStore';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { Icon } from '@/components/shared/Icon';
+import { ConnectionQualityIndicator } from '@/components/shared/ConnectionQualityIndicator';
+import { mapConnectionQuality } from '@/components/shared/connectionQualityStyles';
+import type { ConnectionQuality } from '@/components/shared/connectionQualityStyles';
 import type { JitsiMeetExternalAPI } from '@/types/jitsi';
+
+const WEAK_SIGNAL_BANNER_DURATION_MS = 5000;
 
 interface CallScreenProps {
   setInCall?: (inCall: boolean) => void;
@@ -27,6 +32,9 @@ export function CallScreen({ setInCall }: CallScreenProps) {
   const [audioMuted, setAudioMuted] = useState(false);
   const [videoMuted, setVideoMuted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
+  const [connectionQuality, setConnectionQuality] = useState<ConnectionQuality | null>(null);
+  const [showWeakSignalBanner, setShowWeakSignalBanner] = useState(false);
+  const weakSignalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const callStartTimeRef = useRef<number | null>(null);
   const historyWrittenRef = useRef(false);
@@ -172,6 +180,32 @@ export function CallScreen({ setInCall }: CallScreenProps) {
           }
         });
 
+        let prevQuality: ConnectionQuality | null = null;
+        api.addListener('connectionQuality', (eventData: unknown) => {
+          const d = eventData as { local: boolean; quality: number };
+          if (d.local) {
+            const quality = mapConnectionQuality(d.quality);
+            if (quality === prevQuality) return;
+            prevQuality = quality;
+            setConnectionQuality(quality);
+            if (quality === 'poor') {
+              setShowWeakSignalBanner(true);
+              if (!weakSignalTimerRef.current) {
+                weakSignalTimerRef.current = setTimeout(() => {
+                  setShowWeakSignalBanner(false);
+                  weakSignalTimerRef.current = null;
+                }, WEAK_SIGNAL_BANNER_DURATION_MS);
+              }
+            } else {
+              setShowWeakSignalBanner(false);
+              if (weakSignalTimerRef.current) {
+                clearTimeout(weakSignalTimerRef.current);
+                weakSignalTimerRef.current = null;
+              }
+            }
+          }
+        });
+
         if (mounted) setLoading(false);
       } catch {
         if (mounted) setLoading(false);
@@ -189,6 +223,10 @@ export function CallScreen({ setInCall }: CallScreenProps) {
       if (autoNavigateTimerRef.current) {
         clearTimeout(autoNavigateTimerRef.current);
         autoNavigateTimerRef.current = null;
+      }
+      if (weakSignalTimerRef.current) {
+        clearTimeout(weakSignalTimerRef.current);
+        weakSignalTimerRef.current = null;
       }
       if (apiRef.current) {
         apiRef.current.dispose();
@@ -237,6 +275,19 @@ export function CallScreen({ setInCall }: CallScreenProps) {
           <EasyCallText as="h2" variant="heading">
             {t('call.ended')}
           </EasyCallText>
+        </div>
+      )}
+
+      {!loading && !callEnded && (
+        <ConnectionQualityIndicator quality={connectionQuality} className="absolute top-4 start-4 z-10" />
+      )}
+
+      {showWeakSignalBanner && !callEnded && !loading && (
+        <div
+          role="alert"
+          className="absolute top-4 start-14 end-4 z-10 bg-error/90 text-error-content rounded-lg px-4 py-2 text-center"
+        >
+          <EasyCallText variant="body">{t('connection.weakSignal')}</EasyCallText>
         </div>
       )}
 
