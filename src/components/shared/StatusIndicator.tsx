@@ -26,7 +26,7 @@ export function StatusIndicator({ state, size = 'sm', className }: StatusIndicat
     <span
       role="status"
       aria-label={t(presenceI18nKeys[state])}
-      className={`inline-block rounded-full ${stateStyles[state]} ${sizeStyles[size]}${className ? ` ${className}` : ''}`}
+      className={`inline-block rounded-full ring-2 ring-base-100 ${stateStyles[state]} ${sizeStyles[size]}${className ? ` ${className}` : ''}`}
     />
   );
 }

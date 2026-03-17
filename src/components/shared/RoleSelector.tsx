@@ -31,7 +31,7 @@ export function RoleSelector() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 flex flex-col items-center justify-center gap-8 p-8">
+    <div className="min-h-screen bg-gradient-to-b from-base-200/50 to-base-100 flex flex-col items-center justify-center gap-8 p-8">
       <EasyCallText as="h1" variant="heading" className="text-center">
         {t('roleSelector.whoAreYou')}
       </EasyCallText>

@@ -57,6 +57,13 @@ describe('StatusIndicator', () => {
     expect(dot.className).toContain('h-4');
   });
 
+  it('has ring-2 and ring-base-100 classes on the dot', () => {
+    const { container } = renderWithI18n(<StatusIndicator state="online" />);
+    const dot = container.querySelector('span[role="status"]')!;
+    expect(dot.className).toContain('ring-2');
+    expect(dot.className).toContain('ring-base-100');
+  });
+
   it('passes vitest-axe accessibility check', async () => {
     const { container } = renderWithI18n(<StatusIndicator state="online" />);
     expect(await axe(container)).toHaveNoViolations();

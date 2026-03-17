@@ -91,7 +91,7 @@ export function Dashboard({ userId }: DashboardProps) {
   }, [userId]);
 
   return (
-    <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-base-100 to-base-100 p-6 flex flex-col gap-6">
       <EasyCallText as="h1" variant="heading">
         {t('dashboard.title')}
       </EasyCallText>

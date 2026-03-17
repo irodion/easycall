@@ -12,8 +12,8 @@ interface EasyCallButtonProps {
 }
 
 const variantClass: Record<NonNullable<EasyCallButtonProps['variant']>, string> = {
-  primary: 'btn-primary',
-  danger: 'btn-error',
+  primary: 'btn-primary shadow-sm',
+  danger: 'btn-error shadow-sm',
   secondary: 'btn-secondary',
 };
 
@@ -36,7 +36,7 @@ export function EasyCallButton({
   return (
     <button
       type={type}
-      className={`btn ${variantClass[variant]} ${sizeClass[size]} font-bold text-[length:var(--text-button)]${className ? ` ${className}` : ''}`}
+      className={`btn ${variantClass[variant]} ${sizeClass[size]} font-bold text-[length:var(--text-button)] active:shadow-none active:translate-y-px transition-all duration-150${className ? ` ${className}` : ''}`}
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
