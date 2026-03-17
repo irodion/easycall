@@ -32,6 +32,7 @@ export function ConnectionQualityIndicator({ quality, className }: ConnectionQua
       aria-label={t(connectionQualityI18nKeys[quality])}
       className={`${connectionQualityColors[quality]}${className ? ` ${className}` : ''}`}
     >
+      <span className="sr-only">{t(connectionQualityI18nKeys[quality])}</span>
       <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
         {BARS.map((bar, idx) => {
           const filled = filledCount >= idx + 1;

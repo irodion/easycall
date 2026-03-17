@@ -1,61 +1,59 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { axe } from 'vitest-axe';
-import { I18nextProvider } from 'react-i18next';
-import i18n from '@/i18n';
+import { renderWithProviders } from '@/test/helpers';
 import { ConnectionQualityIndicator } from './ConnectionQualityIndicator';
 import type { ConnectionQuality } from './connectionQualityStyles';
 
-function renderWithI18n(ui: React.ReactElement) {
-  return render(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
-}
-
 describe('ConnectionQualityIndicator', () => {
   it('returns null when quality is null', () => {
-    const { container } = renderWithI18n(<ConnectionQualityIndicator quality={null} />);
+    const { container } = renderWithProviders(<ConnectionQualityIndicator quality={null} />);
     expect(container.innerHTML).toBe('');
   });
 
   it.each<ConnectionQuality>(['good', 'fair', 'poor'])(
     'renders role="status" for %s quality',
     (quality) => {
-      renderWithI18n(<ConnectionQualityIndicator quality={quality} />);
+      renderWithProviders(<ConnectionQualityIndicator quality={quality} />);
       expect(screen.getByRole('status')).toBeInTheDocument();
     },
   );
 
-  it('has aria-label "Good connection" for good', () => {
-    renderWithI18n(<ConnectionQualityIndicator quality="good" />);
-    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Good connection');
+  it('has accessible name "Good connection" for good', () => {
+    renderWithProviders(<ConnectionQualityIndicator quality="good" />);
+    const status = screen.getByRole('status', { name: /good connection/i });
+    expect(status).toHaveTextContent('Good connection');
   });
 
-  it('has aria-label "Fair connection" for fair', () => {
-    renderWithI18n(<ConnectionQualityIndicator quality="fair" />);
-    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Fair connection');
+  it('has accessible name "Fair connection" for fair', () => {
+    renderWithProviders(<ConnectionQualityIndicator quality="fair" />);
+    const status = screen.getByRole('status', { name: /fair connection/i });
+    expect(status).toHaveTextContent('Fair connection');
   });
 
-  it('has aria-label "Poor connection" for poor', () => {
-    renderWithI18n(<ConnectionQualityIndicator quality="poor" />);
-    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Poor connection');
+  it('has accessible name "Poor connection" for poor', () => {
+    renderWithProviders(<ConnectionQualityIndicator quality="poor" />);
+    const status = screen.getByRole('status', { name: /poor connection/i });
+    expect(status).toHaveTextContent('Poor connection');
   });
 
   it('applies text-success class for good', () => {
-    renderWithI18n(<ConnectionQualityIndicator quality="good" />);
+    renderWithProviders(<ConnectionQualityIndicator quality="good" />);
     expect(screen.getByRole('status').className).toContain('text-success');
   });
 
   it('applies text-warning class for fair', () => {
-    renderWithI18n(<ConnectionQualityIndicator quality="fair" />);
+    renderWithProviders(<ConnectionQualityIndicator quality="fair" />);
     expect(screen.getByRole('status').className).toContain('text-warning');
   });
 
   it('applies text-error class for poor', () => {
-    renderWithI18n(<ConnectionQualityIndicator quality="poor" />);
+    renderWithProviders(<ConnectionQualityIndicator quality="poor" />);
     expect(screen.getByRole('status').className).toContain('text-error');
   });
 
   it('fills all 3 bars for good', () => {
-    const { container } = renderWithI18n(<ConnectionQualityIndicator quality="good" />);
+    const { container } = renderWithProviders(<ConnectionQualityIndicator quality="good" />);
     const rects = container.querySelectorAll('rect');
     expect(rects).toHaveLength(3);
     rects.forEach((rect) => {
@@ -64,7 +62,7 @@ describe('ConnectionQualityIndicator', () => {
   });
 
   it('fills 2 bars for fair (third is outlined)', () => {
-    const { container } = renderWithI18n(<ConnectionQualityIndicator quality="fair" />);
+    const { container } = renderWithProviders(<ConnectionQualityIndicator quality="fair" />);
     const rects = container.querySelectorAll('rect');
     expect(rects).toHaveLength(3);
     expect(rects[0]!.getAttribute('fill')).toBe('currentColor');
@@ -73,7 +71,7 @@ describe('ConnectionQualityIndicator', () => {
   });
 
   it('fills 1 bar for poor (second and third are outlined)', () => {
-    const { container } = renderWithI18n(<ConnectionQualityIndicator quality="poor" />);
+    const { container } = renderWithProviders(<ConnectionQualityIndicator quality="poor" />);
     const rects = container.querySelectorAll('rect');
     expect(rects).toHaveLength(3);
     expect(rects[0]!.getAttribute('fill')).toBe('currentColor');
@@ -82,14 +80,16 @@ describe('ConnectionQualityIndicator', () => {
   });
 
   it('forwards className prop', () => {
-    renderWithI18n(<ConnectionQualityIndicator quality="good" className="extra-class" />);
+    renderWithProviders(<ConnectionQualityIndicator quality="good" className="extra-class" />);
     expect(screen.getByRole('status').className).toContain('extra-class');
   });
 
   it.each<ConnectionQuality>(['good', 'fair', 'poor'])(
     'passes vitest-axe for %s',
     async (quality) => {
-      const { container } = renderWithI18n(<ConnectionQualityIndicator quality={quality} />);
+      const { container } = renderWithProviders(
+        <ConnectionQualityIndicator quality={quality} />,
+      );
       expect(await axe(container)).toHaveNoViolations();
     },
   );

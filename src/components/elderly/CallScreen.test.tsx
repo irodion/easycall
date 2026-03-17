@@ -337,15 +337,18 @@ describe('CallScreen', () => {
     it('auto-dismisses weak signal banner after 5s', async () => {
       await renderLoaded();
       vi.useFakeTimers();
-      await act(async () => {
-        lastApiInstance?._emit('connectionQuality', { local: true, quality: 15 });
-      });
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-      await act(async () => {
-        vi.advanceTimersByTime(5000);
-      });
-      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-      vi.useRealTimers();
+      try {
+        await act(async () => {
+          lastApiInstance?._emit('connectionQuality', { local: true, quality: 15 });
+        });
+        expect(screen.getByRole('alert')).toBeInTheDocument();
+        await act(async () => {
+          vi.advanceTimersByTime(5000);
+        });
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('clears weak signal banner when quality improves', async () => {
