@@ -65,7 +65,7 @@ export function LoginForm() {
       <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4 w-full max-w-sm">
         <div className="form-control">
           <label htmlFor="login-email" className="label">
-            <EasyCallText as="span" variant="body" className="font-semibold">
+            <EasyCallText as="span" variant="body" className="font-[number:var(--font-weight-medium)]">
               {t('login.email')}
             </EasyCallText>
           </label>
@@ -83,7 +83,7 @@ export function LoginForm() {
 
         <div className="form-control">
           <label htmlFor="login-password" className="label">
-            <EasyCallText as="span" variant="body" className="font-semibold">
+            <EasyCallText as="span" variant="body" className="font-[number:var(--font-weight-medium)]">
               {t('login.password')}
             </EasyCallText>
           </label>
