@@ -75,7 +75,7 @@ export function ForgotPasswordForm() {
         >
           <div className="form-control">
             <label htmlFor="reset-email" className="label">
-              <EasyCallText as="span" variant="body" className="font-[number:var(--font-weight-medium)]">
+              <EasyCallText as="span" variant="body" className="font-semibold">
                 {t('forgotPassword.email')}
               </EasyCallText>
             </label>

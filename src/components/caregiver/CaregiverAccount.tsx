@@ -160,7 +160,7 @@ export function CaregiverAccount() {
       <form onSubmit={(e) => void handleLink(e)} className="flex flex-col gap-4 w-full max-w-sm">
         <div className="form-control">
           <label htmlFor="account-email" className="label">
-            <EasyCallText as="span" variant="body" className="font-[number:var(--font-weight-medium)]">
+            <EasyCallText as="span" variant="body" className="font-semibold">
               {t('caregiverAccount.email')}
             </EasyCallText>
           </label>
@@ -178,7 +178,7 @@ export function CaregiverAccount() {
 
         <div className="form-control">
           <label htmlFor="account-password" className="label">
-            <EasyCallText as="span" variant="body" className="font-[number:var(--font-weight-medium)]">
+            <EasyCallText as="span" variant="body" className="font-semibold">
               {t('caregiverAccount.password')}
             </EasyCallText>
           </label>
@@ -196,7 +196,7 @@ export function CaregiverAccount() {
 
         <div className="form-control">
           <label htmlFor="account-confirm-password" className="label">
-            <EasyCallText as="span" variant="body" className="font-[number:var(--font-weight-medium)]">
+            <EasyCallText as="span" variant="body" className="font-semibold">
               {t('caregiverAccount.confirmPassword')}
             </EasyCallText>
           </label>

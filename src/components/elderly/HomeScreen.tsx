@@ -35,7 +35,7 @@ export function HomeScreen({ userId }: HomeScreenProps) {
 
       <div className="flex justify-between items-center mb-6">
         <div>
-          <EasyCallText as="span" variant="body" className="text-[length:0.75rem] font-[number:var(--font-weight-medium)] text-primary tracking-wide uppercase">EasyCall</EasyCallText>
+          <span className="text-xs font-semibold text-primary tracking-wide uppercase">EasyCall</span>
           <EasyCallText as="h1" variant="heading">
             {t('home.title')}
           </EasyCallText>
@@ -105,9 +105,9 @@ export function HomeScreen({ userId }: HomeScreenProps) {
                 {contact.name}
               </EasyCallText>
               {contact.contactUserId && presenceMap.has(contact.contactUserId) && (
-                <EasyCallText as="span" variant="body" className="text-[length:0.75rem] text-base-content/60">
+                <span className="text-xs text-base-content/60">
                   {t(presenceI18nKeys[presenceMap.get(contact.contactUserId)!.state])}
-                </EasyCallText>
+                </span>
               )}
             </EasyCallCard>
           ))}
