@@ -285,7 +285,6 @@ export function CallScreen({ setInCall }: CallScreenProps) {
       {showWeakSignalBanner && !callEnded && !loading && (
         <div
           role="alert"
-          aria-live="polite"
           className="absolute top-4 start-14 end-4 z-10 bg-error/90 text-error-content rounded-lg px-4 py-2 text-center"
         >
           <EasyCallText variant="body">{t('connection.weakSignal')}</EasyCallText>
