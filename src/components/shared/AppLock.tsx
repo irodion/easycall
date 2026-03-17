@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { Icon } from '@/components/shared/Icon';
 
 interface AppLockProps {
   isLocked: boolean;
@@ -137,7 +138,7 @@ export function AppLock({
           disabled={isCoolingDown || submitting}
           aria-label={t('appLock.backspace')}
         >
-          ←
+          <Icon name="backspace" size={22} />
         </button>
       </div>
     </div>

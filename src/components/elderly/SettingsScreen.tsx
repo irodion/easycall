@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import { EasyCallText } from '@/components/shared/EasyCallText';
+import { Icon } from '@/components/shared/Icon';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import { PairingCodeDisplay } from '@/components/shared/PairingCodeDisplay';
 import type { UserSettings } from '@/types/user';
@@ -25,14 +26,14 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
+    <div className="min-h-screen bg-gradient-to-b from-base-200/30 to-base-100 p-6 flex flex-col gap-6">
       <div className="flex items-center gap-4">
         <Link
           to="/elderly"
           className="btn btn-ghost touch-target-min min-h-14 min-w-14 font-bold text-[length:var(--text-button)]"
           aria-label={t('common.back')}
         >
-          ← {t('common.back')}
+          <Icon name="arrow-left" size={22} /> {t('common.back')}
         </Link>
         <EasyCallText as="h1" variant="heading">
           {t('settings.title')}

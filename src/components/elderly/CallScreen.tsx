@@ -9,6 +9,7 @@ import { setActiveCall, clearActiveCall, writeCallHistoryEntry } from '@/service
 import { useContactStore } from '@/stores/contactStore';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
+import { Icon } from '@/components/shared/Icon';
 import type { JitsiMeetExternalAPI } from '@/types/jitsi';
 
 interface CallScreenProps {
@@ -246,7 +247,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
           onClick={handleToggleAudio}
           aria-label={audioMuted ? t('call.unmuteMic') : t('call.muteMic')}
         >
-          {audioMuted ? '🎤✕' : '🎤'}
+          <Icon name={audioMuted ? 'mic-off' : 'mic'} size={28} />
         </EasyCallButton>
 
         <EasyCallButton
@@ -255,7 +256,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
           onClick={handleHangup}
           aria-label={t('call.endCall')}
         >
-          ✕
+          <Icon name="phone-end" size={32} />
         </EasyCallButton>
 
         <EasyCallButton
@@ -264,7 +265,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
           onClick={handleToggleVideo}
           aria-label={videoMuted ? t('call.cameraOn') : t('call.cameraOff')}
         >
-          {videoMuted ? '📷✕' : '📷'}
+          <Icon name={videoMuted ? 'camera-off' : 'camera'} size={28} />
         </EasyCallButton>
       </div>
     </div>

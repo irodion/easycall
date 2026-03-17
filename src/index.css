@@ -48,6 +48,33 @@
   --tab-radius: 0.75rem;
 }
 
+@layer base {
+  html {
+    font-family: var(--font-family);
+  }
+
+  .input:focus, .file-input:focus, .select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px oklch(0.4 0.15 155 / 0.2);
+    border-color: oklch(0.4 0.15 155);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@utility animate-pulse-ring {
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
 @utility touch-target-min {
   min-height: var(--touch-min);
   min-width: var(--touch-min);

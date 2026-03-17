@@ -57,25 +57,28 @@ export function IncomingCallScreen() {
   return (
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-[var(--space-lg)] bg-base-100 p-[var(--space-md)]"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-[var(--space-lg)] bg-gradient-to-b from-success/5 to-base-100 p-[var(--space-md)]"
       role="alertdialog"
       aria-modal="true"
       aria-label={t('incomingCall.isCalling', { name: incomingCall.callerName })}
     >
-      {incomingCall.callerPhotoURL ? (
-        <img
-          src={incomingCall.callerPhotoURL}
-          alt={incomingCall.callerName}
-          className="min-w-[120px] min-h-[120px] w-[120px] h-[120px] rounded-full object-cover"
-        />
-      ) : (
-        <div
-          className="min-w-[120px] min-h-[120px] w-[120px] h-[120px] rounded-full bg-primary flex items-center justify-center text-primary-content text-[length:var(--text-display)]"
-          aria-hidden="true"
-        >
-          {incomingCall.callerName.charAt(0).toUpperCase()}
-        </div>
-      )}
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full bg-success/20 animate-pulse-ring" aria-hidden="true" />
+        {incomingCall.callerPhotoURL ? (
+          <img
+            src={incomingCall.callerPhotoURL}
+            alt={incomingCall.callerName}
+            className="relative min-w-[120px] min-h-[120px] w-[120px] h-[120px] rounded-full object-cover"
+          />
+        ) : (
+          <div
+            className="relative min-w-[120px] min-h-[120px] w-[120px] h-[120px] rounded-full bg-primary flex items-center justify-center text-primary-content text-[length:var(--text-display)]"
+            aria-hidden="true"
+          >
+            {incomingCall.callerName.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </div>
 
       <div className="text-center">
         <p className="text-[length:var(--text-heading)] font-bold">{incomingCall.callerName}</p>
@@ -88,7 +91,7 @@ export function IncomingCallScreen() {
         <button
           type="button"
           onClick={handleAnswer}
-          className="btn btn-success touch-target-call w-full font-bold text-[length:var(--text-button)]"
+          className="btn btn-success touch-target-call w-full font-bold text-[length:var(--text-button)] shadow-lg shadow-success/30"
           aria-label={t('incomingCall.answerCall')}
         >
           {t('incomingCall.answer')}

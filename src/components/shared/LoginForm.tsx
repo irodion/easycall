@@ -49,7 +49,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 flex flex-col items-center justify-center gap-8 p-8">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-base-100 flex flex-col items-center justify-center gap-8 p-8">
       <EasyCallText as="h1" variant="heading" className="text-center">
         {t('login.title')}
       </EasyCallText>
@@ -65,7 +65,7 @@ export function LoginForm() {
       <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4 w-full max-w-sm">
         <div className="form-control">
           <label htmlFor="login-email" className="label">
-            <EasyCallText as="span" variant="body">
+            <EasyCallText as="span" variant="body" className="font-semibold">
               {t('login.email')}
             </EasyCallText>
           </label>
@@ -83,7 +83,7 @@ export function LoginForm() {
 
         <div className="form-control">
           <label htmlFor="login-password" className="label">
-            <EasyCallText as="span" variant="body">
+            <EasyCallText as="span" variant="body" className="font-semibold">
               {t('login.password')}
             </EasyCallText>
           </label>

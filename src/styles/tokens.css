@@ -28,8 +28,9 @@
   --color-warning: #b35c00;
 
   /* Typography */
-  --font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+  --font-family: 'Nunito', system-ui, -apple-system, sans-serif;
   --font-weight-normal: 400;
+  --font-weight-medium: 600;
   --font-weight-bold: 700;
   --line-height: 1.6;
 

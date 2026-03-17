@@ -44,7 +44,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-[var(--space-md)] gap-[var(--space-lg)]">
+    <div className="min-h-screen bg-gradient-to-b from-base-200/30 to-base-100 flex flex-col items-center justify-center p-[var(--space-md)] gap-[var(--space-lg)]">
       {step === 1 && (
         <div className="flex flex-col items-center gap-[var(--space-md)] text-center max-w-md">
           <h1 className="text-[length:var(--text-heading)] font-bold">{t('onboarding.welcome')}</h1>

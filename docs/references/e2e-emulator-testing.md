@@ -191,6 +191,12 @@ These run without emulators and do not require `USE_EMULATORS=true`.
 
 ## Troubleshooting
 
+### `pnpm test:e2e` vs `pnpm test:e2e:emulators`
+
+Do **not** use `pnpm test:e2e` to run emulator-backed tests. It runs both Chromium and WebKit projects with 4 parallel workers, which causes emulator state races — `clearEmulators()` in one worker wipes seeded data for another, and most tests fail with "element not found" errors even though emulators are running.
+
+Always use `pnpm test:e2e:emulators`, which sets `USE_EMULATORS=true`, restricts to Chromium only, and enforces `workers: 1`.
+
 ### "Process from config.webServer was not able to start"
 
 The Playwright webServer config does **not** start the Firebase emulators. Start them manually first with `firebase emulators:start --only auth,firestore,database`.
