@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -16,13 +17,19 @@ interface SettingsScreenProps {
 export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   const { t } = useTranslation();
   const fontLabelId = 'font-size-label';
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const saveSettings = (partial: Partial<UserSettings>) => {
+  const saveSettings = async (partial: Partial<UserSettings>) => {
+    setSaveError(null);
     const payload: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(partial)) {
       payload[`settings.${key}`] = value;
     }
-    void updateDoc(doc(db, 'users', userId), payload);
+    try {
+      await updateDoc(doc(db, 'users', userId), payload);
+    } catch {
+      setSaveError(t('settings.saveError'));
+    }
   };
 
   return (
@@ -40,6 +47,14 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
         </EasyCallText>
       </div>
 
+      {saveError && (
+        <div role="alert" className="alert alert-error">
+          <EasyCallText as="span" variant="body">
+            {saveError}
+          </EasyCallText>
+        </div>
+      )}
+
       <section>
         <EasyCallText as="h2" variant="button" className="font-bold mb-3" id={fontLabelId}>
           {t('settings.textSize')}
@@ -55,7 +70,7 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
               name="fontSize"
               value="large"
               checked={settings.fontSize === 'large'}
-              onChange={() => saveSettings({ fontSize: 'large' })}
+              onChange={() => void saveSettings({ fontSize: 'large' })}
               className="radio radio-primary"
             />
             <EasyCallText as="span" variant="body">
@@ -72,7 +87,7 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
               name="fontSize"
               value="x-large"
               checked={settings.fontSize === 'x-large'}
-              onChange={() => saveSettings({ fontSize: 'x-large' })}
+              onChange={() => void saveSettings({ fontSize: 'x-large' })}
               className="radio radio-primary"
             />
             <EasyCallText as="span" variant="body">
@@ -84,7 +99,7 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
 
       <LanguageSelector
         value={settings.language}
-        onChange={(language) => saveSettings({ language })}
+        onChange={(language) => void saveSettings({ language })}
       />
 
       <section data-testid="pairing-code-section">

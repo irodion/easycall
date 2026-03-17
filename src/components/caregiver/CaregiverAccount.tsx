@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { auth } from '@/services/firebase';
@@ -44,6 +44,14 @@ export function CaregiverAccount() {
   const [errorMessage, setErrorMessage] = useState('');
   const [validationError, setValidationError] = useState('');
 
+  const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(resetTimeoutRef.current);
+    };
+  }, []);
+
   const linked = isLinked();
   const linkedEmail = getLinkedEmail();
 
@@ -77,6 +85,8 @@ export function CaregiverAccount() {
     try {
       await sendCaregiverPasswordReset(linkedEmail);
       setResetState('sent');
+      clearTimeout(resetTimeoutRef.current);
+      resetTimeoutRef.current = setTimeout(() => setResetState('idle'), 5000);
     } catch {
       setResetState('error');
     }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { rtdb } from '@/services/firebase';
 import type { PresenceState } from '@/types/user';
@@ -58,27 +58,23 @@ export function useContactsPresence(contactUserIds: string[]): Map<string, Prese
     };
   }, [stableKey]);
 
-  // No IDs to track — return constant empty map
-  if (!stableKey) {
-    return EMPTY_MAP;
-  }
-
-  // Prune entries for contacts no longer tracked (derived during render, no state mutation)
-  const trackedIds = new Set(stableKey.split(','));
-  let hasStale = false;
-  for (const key of presenceMap.keys()) {
-    if (!trackedIds.has(key)) {
-      hasStale = true;
-      break;
+  const prunedMap = useMemo(() => {
+    if (!stableKey) return EMPTY_MAP;
+    const trackedIds = new Set(stableKey.split(','));
+    let hasStale = false;
+    for (const key of presenceMap.keys()) {
+      if (!trackedIds.has(key)) {
+        hasStale = true;
+        break;
+      }
     }
-  }
-  if (hasStale) {
+    if (!hasStale) return presenceMap; // Same reference, no re-render
     const pruned = new Map<string, PresenceInfo>();
     for (const [uid, info] of presenceMap) {
       if (trackedIds.has(uid)) pruned.set(uid, info);
     }
     return pruned;
-  }
+  }, [presenceMap, stableKey]);
 
-  return presenceMap;
+  return prunedMap;
 }

@@ -144,6 +144,9 @@ export function useAppLock({
         if (next >= MAX_ATTEMPTS) triggered = true;
         return triggered ? 0 : next;
       });
+      if (triggered) {
+        cooldownActive.current = true; // Set IMMEDIATELY, not via effect
+      }
       setCooldownRemaining((prev) => (triggered ? COOLDOWN_SECONDS : prev));
       return false;
     },

@@ -219,20 +219,20 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                   return;
                 }
                 setPinSaving(true);
-                void hashPin(pin, elderlyUserId)
-                  .then((hash) => {
+                void (async () => {
+                  try {
+                    const hash = await hashPin(pin, elderlyUserId);
                     updateSettings({ appLockEnabled: true, appLockPinHash: hash });
                     setPendingLockEnabled(false);
                     setPin('');
                     setPinConfirm('');
                     setPinError(null);
-                  })
-                  .catch(() => {
+                  } catch {
                     setPinError(t('elderlySettings.pinSaveError'));
-                  })
-                  .finally(() => {
+                  } finally {
                     setPinSaving(false);
-                  });
+                  }
+                })();
               }}
               disabled={pinSaving}
             >

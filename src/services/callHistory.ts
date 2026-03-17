@@ -41,6 +41,9 @@ export async function fetchCallHistory(
   lastDoc: QueryDocumentSnapshot | null;
   hasMore: boolean;
 }> {
+  // Note: 30-day window is relative to client device time. If the device clock
+  // is significantly wrong, results may be inaccurate. Acceptable trade-off
+  // vs. requiring a Cloud Function for server-time filtering.
   const thirtyDaysAgo = Timestamp.fromDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   const constraints: QueryConstraint[] = [
     orderBy('startedAt', 'desc'),

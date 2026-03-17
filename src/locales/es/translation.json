@@ -38,7 +38,8 @@
     "extraLarge": "Muy Grande",
     "pairingCode": "Código de Emparejamiento",
     "addContact": "Agregar Contacto",
-    "language": "Idioma"
+    "language": "Idioma",
+    "saveError": "Error al guardar los ajustes. Por favor inténtelo de nuevo."
   },
   "permissions": {
     "checking": "Verificando permisos de cámara y micrófono",
@@ -71,7 +72,8 @@
     "completed": "Completada",
     "missed": "Perdida",
     "declined": "Rechazada",
-    "showMore": "Mostrar más"
+    "showMore": "Mostrar más",
+    "loadError": "Error al cargar más llamadas. Por favor inténtelo de nuevo."
   },
   "dashboard": {
     "title": "Panel del Cuidador",

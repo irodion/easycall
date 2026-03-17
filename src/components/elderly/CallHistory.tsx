@@ -29,6 +29,7 @@ export function CallHistory({ userId }: CallHistoryProps) {
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -50,13 +51,14 @@ export function CallHistory({ userId }: CallHistoryProps) {
 
   const handleShowMore = async () => {
     setLoadingMore(true);
+    setLoadError(null);
     try {
       const result = await fetchCallHistory(userId, 20, lastDoc);
       setEntries((prev) => [...prev, ...result.entries]);
       setLastDoc(result.lastDoc);
       setHasMore(result.hasMore);
     } catch {
-      // Keep existing entries on pagination failure
+      setLoadError(t('callHistory.loadError'));
     } finally {
       setLoadingMore(false);
     }
@@ -122,6 +124,14 @@ export function CallHistory({ userId }: CallHistoryProps) {
               </button>
             );
           })}
+
+          {loadError && (
+            <div role="alert" className="alert alert-error mt-2">
+              <EasyCallText as="span" variant="body">
+                {loadError}
+              </EasyCallText>
+            </div>
+          )}
 
           {hasMore && (
             <EasyCallButton

@@ -1,7 +1,16 @@
 import { useEffect } from 'react';
-import { onSnapshot } from 'firebase/firestore';
+import { onSnapshot, type Timestamp as FirestoreTimestamp } from 'firebase/firestore';
 import { useCallStore } from '@/stores/callStore';
 import { incomingCallRef } from '@/services/callSignaling';
+
+interface IncomingCallDoc {
+  status: string;
+  timestamp: FirestoreTimestamp;
+  callerId: string;
+  callerName: string;
+  callerPhotoURL?: string;
+  jitsiRoomId: string;
+}
 
 export function useIncomingCall(userId: string | null): void {
   useEffect(() => {
@@ -22,25 +31,24 @@ export function useIncomingCall(userId: string | null): void {
           return;
         }
 
-        const data = snap.data();
-        const status = data['status'] as string;
+        const data = snap.data() as IncomingCallDoc;
 
-        if (status !== 'ringing') {
+        if (data.status !== 'ringing') {
           if (store.isRinging) store.clearIncomingCall();
           return;
         }
 
         // Ignore stale calls (>60 seconds old)
-        const timestamp = (data['timestamp'] as { toDate?: () => Date })?.toDate?.() ?? new Date(0);
+        const timestamp = data.timestamp?.toDate?.() ?? new Date(0);
         if (Date.now() - timestamp.getTime() > 60_000) {
           if (store.isRinging) store.clearIncomingCall();
           return;
         }
 
         useCallStore.getState().setIncomingCall({
-          callerName: String(data['callerName'] ?? ''),
-          callerPhotoURL: String(data['callerPhotoURL'] ?? ''),
-          roomId: String(data['jitsiRoomId'] ?? ''),
+          callerName: String(data.callerName ?? ''),
+          callerPhotoURL: String(data.callerPhotoURL ?? ''),
+          roomId: String(data.jitsiRoomId ?? ''),
           elderlyUserId: userId,
         });
       },

@@ -35,8 +35,10 @@ onBackgroundMessage(messaging, (payload) => {
 
 self.addEventListener('notificationclick', (event: NotificationEvent) => {
   event.notification.close();
-  const { roomId } = event.notification.data as { roomId: string };
-  event.waitUntil(self.clients.openWindow(`/call/${roomId}`));
+  const data = event.notification.data as Record<string, unknown> | undefined;
+  const roomId = typeof data?.roomId === 'string' ? data.roomId : null;
+  const url = roomId ? `/call-room/${roomId}` : '/elderly';
+  event.waitUntil(self.clients.openWindow(url));
 });
 
 export type {};

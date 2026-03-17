@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContactStore } from '@/stores/contactStore';
 import { generateRoomId } from '@/utils/generateRoomId';
+import { compressImage, blobToDataUrl } from '@/utils/compressImage';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
@@ -20,6 +21,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -34,17 +36,23 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
     setIsAdding(true);
     setError(null);
     try {
-      const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
+      let photoURL: string | null = null;
+      if (photoFile) {
+        const compressed = await compressImage(photoFile);
+        photoURL = await blobToDataUrl(compressed);
+      }
+      const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), -1);
       const displayOrder = maxOrder + 1;
       const jitsiRoomId = generateRoomId(newName);
       await addContact(elderlyUserId, {
         name: newName.trim(),
-        photoURL: null,
+        photoURL,
         jitsiRoomId,
         contactUserId: '',
         displayOrder,
       });
       setNewName('');
+      setPhotoFile(null);
       setShowAddForm(false);
     } catch (err) {
       setError(
@@ -114,6 +122,8 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
             type="file"
             accept="image/*"
             className="file-input file-input-bordered w-full min-h-14 min-w-14"
+            onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
+            aria-label={t('addContact.choosePhoto')}
           />
           <div className="flex gap-3">
             <EasyCallButton
@@ -131,6 +141,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
               onClick={() => {
                 setShowAddForm(false);
                 setNewName('');
+                setPhotoFile(null);
               }}
               aria-label={t('manageContacts.cancelAdd')}
             >
