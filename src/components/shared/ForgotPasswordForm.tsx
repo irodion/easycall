@@ -31,11 +31,17 @@ export function ForgotPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed || !trimmed.includes('@')) {
+      setState('error');
+      setErrorMessage(t('forgotPassword.invalidEmail'));
+      return;
+    }
     setState('loading');
     setErrorMessage('');
 
     try {
-      await sendCaregiverPasswordReset(email);
+      await sendCaregiverPasswordReset(trimmed);
       setState('success');
     } catch (err) {
       setState('error');

@@ -45,12 +45,19 @@ export function IncomingCallScreen() {
       clearIncomingCall();
       return;
     }
+    const roomId = incomingCall.roomId; // capture before clearing
     clearIncomingCall();
-    void navigate(`/call-room/${incomingCall.roomId}`);
+    void navigate(`/call-room/${roomId}`);
   };
 
-  const handleDecline = () => {
-    void declineCall(incomingCall.elderlyUserId);
+  const handleDecline = async () => {
+    if (!incomingCall) return;
+    try {
+      await declineCall(incomingCall.elderlyUserId);
+    } catch {
+      // Log but still clear — user intent is to dismiss
+      console.error('Failed to decline call');
+    }
     clearIncomingCall();
   };
 
@@ -63,7 +70,10 @@ export function IncomingCallScreen() {
       aria-label={t('incomingCall.isCalling', { name: incomingCall.callerName })}
     >
       <div className="relative">
-        <div className="absolute inset-0 rounded-full bg-success/20 animate-pulse-ring" aria-hidden="true" />
+        <div
+          className="absolute inset-0 rounded-full bg-success/20 animate-pulse-ring"
+          aria-hidden="true"
+        />
         {incomingCall.callerPhotoURL ? (
           <img
             src={incomingCall.callerPhotoURL}
@@ -98,7 +108,7 @@ export function IncomingCallScreen() {
         </button>
         <button
           type="button"
-          onClick={handleDecline}
+          onClick={() => void handleDecline()}
           className="btn btn-error touch-target-primary w-full font-bold text-[length:var(--text-button)]"
           aria-label={t('incomingCall.declineCall')}
         >

@@ -22,7 +22,8 @@ export function useAppLock({
   userId?: string | null;
 }): UseAppLockReturn {
   const location = useLocation();
-  const isOnCallRoute = location.pathname.includes('/call/');
+  const isOnCallRoute =
+    location.pathname.includes('/call/') || location.pathname.includes('/call-room/');
 
   const lockEnabled = settings.appLockEnabled && settings.appLockPinHash !== null;
 
@@ -144,6 +145,9 @@ export function useAppLock({
         if (next >= MAX_ATTEMPTS) triggered = true;
         return triggered ? 0 : next;
       });
+      if (triggered) {
+        cooldownActive.current = true; // Set IMMEDIATELY, not via effect
+      }
       setCooldownRemaining((prev) => (triggered ? COOLDOWN_SECONDS : prev));
       return false;
     },

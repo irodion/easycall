@@ -83,7 +83,9 @@ function AuthenticatedApp() {
         return incoming;
       });
     });
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+    };
   }, [userId]);
 
   useEffect(() => {

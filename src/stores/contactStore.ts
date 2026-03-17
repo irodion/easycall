@@ -70,7 +70,7 @@ export const useContactStore = create<ContactStore>((set) => ({
         set({ contacts, error: null });
       },
       (err) => {
-        set({ error: String(err) });
+        set({ contacts: [], error: String(err) });
       },
     );
     return unsubscribe;

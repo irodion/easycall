@@ -58,12 +58,18 @@ export function AddContact({ userId }: AddContactProps) {
           const compressed = await compressImage(photoFile);
           photoURL = await blobToDataUrl(compressed);
         } catch {
+          if (blobUrlRef.current) {
+            URL.revokeObjectURL(blobUrlRef.current);
+            blobUrlRef.current = null;
+          }
           setError(t('addContact.photoError'));
+          setPhotoFile(null);
+          setPhotoPreview(null);
           setIsSaving(false);
           return;
         }
       }
-      const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), 0);
+      const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), -1);
       const displayOrder = maxOrder + 1;
       await addContact(userId, {
         name,
@@ -95,6 +101,7 @@ export function AddContact({ userId }: AddContactProps) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          maxLength={30}
           placeholder={t('addContact.namePlaceholder')}
           className="input input-bordered w-full text-[length:var(--text-body)] min-h-14"
           aria-label={t('addContact.contactName')}

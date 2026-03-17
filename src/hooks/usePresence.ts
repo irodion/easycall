@@ -42,6 +42,9 @@ export function usePresence(userId: string | null): { setInCall: (inCall: boolea
 
     return () => {
       unsubscribe();
+      // Use locally-captured statusRef (not statusRefRef.current) to ensure
+      // cleanup always writes to the correct ref, even if a subsequent effect
+      // run has already set statusRefRef.current = null.
       void set(statusRef, presencePayload('offline'));
       void onDisconnect(statusRef).cancel();
       statusRefRef.current = null;

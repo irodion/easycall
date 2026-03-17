@@ -22,8 +22,7 @@ const ICON_PATHS: Record<IconName, string> = {
   mic: 'M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8',
   'mic-off':
     'M1 1l22 22M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.12 1.5-.34 2.18M12 19v4M8 23h8',
-  camera:
-    'M23 7l-7 5 7 5zM14 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z',
+  camera: 'M23 7l-7 5 7 5zM14 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z',
   'camera-off':
     'M1 1l22 22M14 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8m5-3V7a2 2 0 0 0-2-2M23 7l-7 5 7 5',
   'phone-end':
@@ -38,12 +37,7 @@ const ICON_PATHS: Record<IconName, string> = {
   backspace: 'M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM18 9l-6 6M12 9l6 6',
 };
 
-export function Icon({
-  name,
-  size = 24,
-  className,
-  'aria-hidden': ariaHidden = true,
-}: IconProps) {
+export function Icon({ name, size = 24, className, 'aria-hidden': ariaHidden = true }: IconProps) {
   return (
     <svg
       width={size}

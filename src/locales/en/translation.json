@@ -40,7 +40,8 @@
     "extraLarge": "Extra Large",
     "pairingCode": "Pairing Code",
     "addContact": "Add Contact",
-    "language": "Language"
+    "language": "Language",
+    "saveError": "Failed to save settings. Please try again."
   },
   "permissions": {
     "checking": "Checking camera and microphone permissions",
@@ -74,7 +75,8 @@
     "completed": "Completed",
     "missed": "Missed",
     "declined": "Declined",
-    "showMore": "Show more"
+    "showMore": "Show more",
+    "loadError": "Failed to load more calls. Please try again."
   },
   "dashboard": {
     "title": "Caregiver Dashboard",
@@ -94,7 +96,8 @@
     "addFailed": "Failed to add contact: {{error}}",
     "removeFailed": "Failed to remove contact: {{error}}",
     "saveNewContact": "Save new contact",
-    "cancelAdd": "Cancel add"
+    "cancelAdd": "Cancel add",
+    "choosePhoto": "Choose photo"
   },
   "elderlySettings": {
     "fontSize": "Font Size",

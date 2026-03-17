@@ -32,6 +32,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
   const historyWrittenRef = useRef(false);
   const beforeUnloadRef = useRef<((e: BeforeUnloadEvent) => void) | null>(null);
   const contactNameRef = useRef<string>('');
+  const contactIdRef = useRef<string>('');
 
   const contacts = useContactStore((s) => s.contacts);
   const subscribeToContacts = useContactStore((s) => s.subscribeToContacts);
@@ -50,24 +51,31 @@ export function CallScreen({ setInCall }: CallScreenProps) {
     return subscribeToContacts(uid);
   }, [subscribeToContacts]);
 
-  const writeHistory = useCallback(() => {
+  const writeHistory = useCallback(async () => {
     if (historyWrittenRef.current) return;
+    historyWrittenRef.current = true; // Set FIRST, synchronously — prevents concurrent calls
     const uid = auth.currentUser?.uid;
-    if (!uid || !callStartTimeRef.current) return;
-    historyWrittenRef.current = true;
+    if (!uid || !callStartTimeRef.current) {
+      historyWrittenRef.current = false; // Reset — prerequisites not met
+      return;
+    }
     const startMs = callStartTimeRef.current;
     const endMs = Date.now();
     const durationSec = Math.floor((endMs - startMs) / 1000);
-    void writeCallHistoryEntry(uid, {
-      contactId: contact?.id ?? contactId ?? '',
-      contactName: contactNameRef.current,
-      direction: 'outgoing',
-      outcome: 'completed',
-      duration: durationSec,
-      startedAt: Timestamp.fromMillis(startMs),
-      endedAt: Timestamp.fromMillis(endMs),
-    });
-  }, [contact?.id, contactId]);
+    try {
+      await writeCallHistoryEntry(uid, {
+        contactId: contactIdRef.current,
+        contactName: contactNameRef.current,
+        direction: 'outgoing',
+        outcome: 'completed',
+        duration: durationSec,
+        startedAt: Timestamp.fromMillis(startMs),
+        endedAt: Timestamp.fromMillis(endMs),
+      });
+    } catch {
+      historyWrittenRef.current = false; // Reset on failure so retry is possible
+    }
+  }, []);
 
   useEffect(() => {
     if (!contact) return;
@@ -110,6 +118,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         apiRef.current = api;
         callStartTimeRef.current = Date.now();
         contactNameRef.current = contactName;
+        contactIdRef.current = contact!.id;
         setInCall?.(true);
 
         if (user.uid) {
@@ -138,7 +147,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         });
 
         api.addListener('readyToClose', () => {
-          writeHistory();
+          void writeHistory();
           if (mounted) void navigate('/elderly');
         });
 
@@ -157,7 +166,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
           if (participantCount === 0) {
             setCallEnded(true);
             autoNavigateTimerRef.current = setTimeout(() => {
-              writeHistory();
+              void writeHistory();
               if (mounted) void navigate('/elderly');
             }, 3000);
           }
@@ -189,7 +198,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
   }, [contact, navigate, setInCall, writeHistory]);
 
   const handleHangup = () => {
-    writeHistory();
+    void writeHistory();
     const uid = auth.currentUser?.uid;
     if (uid) void clearActiveCall(uid);
     apiRef.current?.executeCommand('hangup');
