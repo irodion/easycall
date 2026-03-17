@@ -13,9 +13,7 @@ vi.mock('./firebase', () => ({
 }));
 
 const mockLinkWithCredential = vi.fn().mockResolvedValue({ user: { uid: 'caregiver-1' } });
-const mockSignInWithEmailAndPassword = vi
-  .fn()
-  .mockResolvedValue({ user: { uid: 'caregiver-1' } });
+const mockSignInWithEmailAndPassword = vi.fn().mockResolvedValue({ user: { uid: 'caregiver-1' } });
 const mockSendPasswordResetEmail = vi.fn().mockResolvedValue(undefined);
 const mockCredential = vi.fn((...args: unknown[]) => ({ email: args[0] }));
 
@@ -93,9 +91,7 @@ describe('caregiverAuth service', () => {
       mockSignInWithEmailAndPassword.mockRejectedValueOnce(error);
 
       const { signInCaregiverEmail } = await import('./caregiverAuth');
-      await expect(signInCaregiverEmail('a@b.com', 'wrong')).rejects.toThrow(
-        'auth/wrong-password',
-      );
+      await expect(signInCaregiverEmail('a@b.com', 'wrong')).rejects.toThrow('auth/wrong-password');
     });
 
     it('propagates auth/user-not-found error', async () => {

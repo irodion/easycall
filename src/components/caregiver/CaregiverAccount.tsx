@@ -14,9 +14,7 @@ interface FirebaseError {
 }
 
 function isLinked(): boolean {
-  return (
-    auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false
-  );
+  return auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false;
 }
 
 function getLinkedEmail(): string | null {
@@ -159,10 +157,7 @@ export function CaregiverAccount() {
         </div>
       )}
 
-      <form
-        onSubmit={(e) => void handleLink(e)}
-        className="flex flex-col gap-4 w-full max-w-sm"
-      >
+      <form onSubmit={(e) => void handleLink(e)} className="flex flex-col gap-4 w-full max-w-sm">
         <div className="form-control">
           <label htmlFor="account-email" className="label">
             <EasyCallText as="span" variant="body">

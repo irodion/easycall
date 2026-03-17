@@ -113,6 +113,12 @@
     "savePin": "Сохранить PIN",
     "language": "Язык"
   },
+  "presence": {
+    "online": "В сети",
+    "inCall": "На звонке",
+    "offline": "Не в сети",
+    "lastSeen": "Был(а) {{time}} назад"
+  },
   "roleSelector": {
     "notSignedIn": "Вы не вошли в систему. Пожалуйста, попробуйте снова.",
     "saveFailed": "Не удалось сохранить роль: {{error}}",

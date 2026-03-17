@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useContactStore } from '@/stores/contactStore';
@@ -7,6 +7,8 @@ import { RejoinPrompt } from './RejoinPrompt';
 import { EasyCallCard } from '@/components/shared/EasyCallCard';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
+import { StatusIndicator } from '@/components/shared/StatusIndicator';
+import { useContactsPresence } from '@/hooks/useContactsPresence';
 
 interface HomeScreenProps {
   userId: string;
@@ -18,6 +20,8 @@ export function HomeScreen({ userId }: HomeScreenProps) {
   const contacts = useContactStore((s) => s.contacts);
   const subscribeToContacts = useContactStore((s) => s.subscribeToContacts);
   const { activeCall, dismiss } = useActiveCall(userId);
+  const contactUserIds = useMemo(() => contacts.map((c) => c.contactUserId), [contacts]);
+  const presenceMap = useContactsPresence(contactUserIds);
 
   useEffect(() => {
     return subscribeToContacts(userId);
@@ -69,17 +73,26 @@ export function HomeScreen({ userId }: HomeScreenProps) {
               aria-label={t('home.callContact', { name: contact.name })}
               className="flex flex-col items-center gap-2 p-4"
             >
-              {contact.photoURL ? (
-                <img
-                  src={contact.photoURL}
-                  alt=""
-                  className="w-20 h-20 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-primary-content">
-                  {contact.name[0] ?? '?'}
-                </div>
-              )}
+              <div className="relative">
+                {contact.photoURL ? (
+                  <img
+                    src={contact.photoURL}
+                    alt=""
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-primary-content">
+                    {contact.name[0] ?? '?'}
+                  </div>
+                )}
+                {contact.contactUserId && presenceMap.has(contact.contactUserId) && (
+                  <StatusIndicator
+                    state={presenceMap.get(contact.contactUserId)!.state}
+                    size="md"
+                    className="absolute bottom-0 right-0"
+                  />
+                )}
+              </div>
               <EasyCallText as="span" variant="button" className="font-bold text-center">
                 {contact.name}
               </EasyCallText>

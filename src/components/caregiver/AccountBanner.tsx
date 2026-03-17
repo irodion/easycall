@@ -7,16 +7,12 @@ import { EasyCallText } from '@/components/shared/EasyCallText';
 const DISMISS_KEY = 'easycall_account_banner_dismissed';
 
 function isLinked(): boolean {
-  return (
-    auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false
-  );
+  return auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false;
 }
 
 export function AccountBanner() {
   const { t } = useTranslation();
-  const [dismissed, setDismissed] = useState(
-    () => localStorage.getItem(DISMISS_KEY) === 'true',
-  );
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === 'true');
 
   if (isLinked() || dismissed) return null;
 

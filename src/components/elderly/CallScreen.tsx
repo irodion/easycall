@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Timestamp } from 'firebase/firestore';
@@ -11,7 +11,11 @@ import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import type { JitsiMeetExternalAPI } from '@/types/jitsi';
 
-export function CallScreen() {
+interface CallScreenProps {
+  setInCall?: (inCall: boolean) => void;
+}
+
+export function CallScreen({ setInCall }: CallScreenProps) {
   const { t } = useTranslation();
   const { contactId, roomId } = useParams<{ contactId?: string; roomId?: string }>();
   const navigate = useNavigate();
@@ -45,11 +49,11 @@ export function CallScreen() {
     return subscribeToContacts(uid);
   }, [subscribeToContacts]);
 
-  function writeHistory() {
+  const writeHistory = useCallback(() => {
     if (historyWrittenRef.current) return;
-    historyWrittenRef.current = true;
     const uid = auth.currentUser?.uid;
     if (!uid || !callStartTimeRef.current) return;
+    historyWrittenRef.current = true;
     const startMs = callStartTimeRef.current;
     const endMs = Date.now();
     const durationSec = Math.floor((endMs - startMs) / 1000);
@@ -62,7 +66,7 @@ export function CallScreen() {
       startedAt: Timestamp.fromMillis(startMs),
       endedAt: Timestamp.fromMillis(endMs),
     });
-  }
+  }, [contact?.id, contactId]);
 
   useEffect(() => {
     if (!contact) return;
@@ -105,6 +109,7 @@ export function CallScreen() {
         apiRef.current = api;
         callStartTimeRef.current = Date.now();
         contactNameRef.current = contactName;
+        setInCall?.(true);
 
         if (user.uid) {
           void setActiveCall(user.uid, {
@@ -167,6 +172,7 @@ export function CallScreen() {
 
     return () => {
       mounted = false;
+      setInCall?.(false);
       if (beforeUnloadRef.current) {
         window.removeEventListener('beforeunload', beforeUnloadRef.current);
       }
@@ -179,7 +185,7 @@ export function CallScreen() {
         apiRef.current = null;
       }
     };
-  }, [contact, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [contact, navigate, setInCall, writeHistory]);
 
   const handleHangup = () => {
     writeHistory();

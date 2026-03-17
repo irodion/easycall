@@ -9,6 +9,7 @@ import { InstallPrompt } from '@/components/shared/InstallPrompt';
 import { AppLock } from '@/components/shared/AppLock';
 import { IncomingCallScreen } from '@/components/elderly/IncomingCallScreen';
 import { useIncomingCall } from '@/hooks/useIncomingCall';
+import { usePresence } from '@/hooks/usePresence';
 import { useAppLock } from '@/hooks/useAppLock';
 import { HomeScreen } from '@/components/elderly/HomeScreen';
 import { SettingsScreen } from '@/components/elderly/SettingsScreen';
@@ -96,6 +97,7 @@ function AuthenticatedApp() {
   }, [settings.fontSize]);
 
   useIncomingCall(userId);
+  const { setInCall } = usePresence(userId);
 
   const lockState = useAppLock({ settings, userId });
 
@@ -117,9 +119,7 @@ function AuthenticatedApp() {
               <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
               <Route
                 path="/elderly/settings"
-                element={
-                  userId ? <SettingsScreen userId={userId} settings={settings} /> : null
-                }
+                element={userId ? <SettingsScreen userId={userId} settings={settings} /> : null}
               />
               <Route
                 path="/elderly/add-contact"
@@ -129,8 +129,8 @@ function AuthenticatedApp() {
                 path="/elderly/history"
                 element={userId ? <CallHistory userId={userId} /> : null}
               />
-              <Route path="/call/:contactId" element={<CallScreen />} />
-              <Route path="/call-room/:roomId" element={<CallScreen />} />
+              <Route path="/call/:contactId" element={<CallScreen setInCall={setInCall} />} />
+              <Route path="/call-room/:roomId" element={<CallScreen setInCall={setInCall} />} />
             </Route>
             <Route element={<AuthGuard requiredRole="caregiver" />}>
               <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />

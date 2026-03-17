@@ -49,10 +49,7 @@ async function createEmulatorUser(): Promise<EmulatorUser> {
   return res.json() as Promise<EmulatorUser>;
 }
 
-async function seedUserAsElderly(
-  uid: string,
-  settings?: Record<string, unknown>,
-): Promise<void> {
+async function seedUserAsElderly(uid: string, settings?: Record<string, unknown>): Promise<void> {
   const settingsFields: Record<string, unknown> = {
     fontSize: { stringValue: 'large' },
     highContrast: { booleanValue: false },
@@ -104,10 +101,7 @@ async function seedContact(uid: string, contactId: string, name: string): Promis
   if (!res.ok) throw new Error(`Failed to seed contact: ${res.status}`);
 }
 
-async function updateUserSettings(
-  uid: string,
-  settings: Record<string, unknown>,
-): Promise<void> {
+async function updateUserSettings(uid: string, settings: Record<string, unknown>): Promise<void> {
   // Read current doc, merge settings, write back
   const settingsFields: Record<string, unknown> = {
     fontSize: { stringValue: 'large' },

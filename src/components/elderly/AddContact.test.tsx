@@ -128,7 +128,8 @@ describe('AddContact', () => {
 
   it('revokes previous blob URL when selecting a new photo', () => {
     const revokeObjectURL = vi.fn();
-    const createObjectURL = vi.fn()
+    const createObjectURL = vi
+      .fn()
       .mockReturnValueOnce('blob:first')
       .mockReturnValueOnce('blob:second');
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
@@ -168,7 +169,10 @@ describe('AddContact', () => {
   it('double-click Save does not call addContact twice', async () => {
     let resolveAdd!: () => void;
     mockAddContact.mockImplementationOnce(
-      () => new Promise<void>((resolve) => { resolveAdd = resolve; }),
+      () =>
+        new Promise<void>((resolve) => {
+          resolveAdd = resolve;
+        }),
     );
 
     renderWithProviders(<AddContact userId="user-1" />);
@@ -190,7 +194,9 @@ describe('AddContact', () => {
     expect(mockAddContact).toHaveBeenCalledTimes(1);
 
     // Resolve the pending promise to avoid act warnings
-    await act(async () => { resolveAdd(); });
+    await act(async () => {
+      resolveAdd();
+    });
   });
 
   it('passes vitest-axe on Step 1', async () => {

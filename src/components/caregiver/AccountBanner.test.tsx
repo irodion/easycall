@@ -61,9 +61,7 @@ describe('AccountBanner', () => {
   });
 
   it('does not render when already linked', async () => {
-    mockAuth.currentUser.providerData = [
-      { providerId: 'password', email: 'linked@example.com' },
-    ];
+    mockAuth.currentUser.providerData = [{ providerId: 'password', email: 'linked@example.com' }];
 
     const { AccountBanner } = await import('./AccountBanner');
     renderWithProviders(<AccountBanner />);

@@ -151,7 +151,9 @@ describe('AuthGuard', () => {
       return () => {};
     });
 
-    let snapshotCallback: ((snap: { data: () => Record<string, unknown> | undefined }) => void) | undefined;
+    let snapshotCallback:
+      | ((snap: { data: () => Record<string, unknown> | undefined }) => void)
+      | undefined;
     const { onSnapshot } = await import('firebase/firestore');
     vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
       snapshotCallback = onNext as typeof snapshotCallback;

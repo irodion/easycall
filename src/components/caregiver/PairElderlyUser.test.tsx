@@ -105,7 +105,10 @@ describe('PairElderlyUser', () => {
   it('does not double-submit while loading', async () => {
     let resolveValidate!: (value: { elderlyUserId: string }) => void;
     mockValidatePairingCode.mockImplementationOnce(
-      () => new Promise((resolve) => { resolveValidate = resolve; }),
+      () =>
+        new Promise((resolve) => {
+          resolveValidate = resolve;
+        }),
     );
 
     const user = userEvent.setup();

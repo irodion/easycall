@@ -38,10 +38,17 @@ vi.mock('@/services/callHistory', () => ({
   clearActiveCall: vi.fn().mockResolvedValue(undefined),
 }));
 
+const mockPresenceMap = new Map<string, { state: string; lastChanged: number | null }>();
+
+vi.mock('@/hooks/useContactsPresence', () => ({
+  useContactsPresence: () => mockPresenceMap,
+}));
+
 describe('HomeScreen', () => {
   beforeEach(() => {
     mockContacts.length = 0;
     mockActiveCall = null;
+    mockPresenceMap.clear();
     mockSubscribeToContacts.mockClear();
     mockSubscribeToContacts.mockReturnValue(() => {});
     mockDismiss.mockClear();
@@ -146,5 +153,45 @@ describe('HomeScreen', () => {
     renderWithProviders(<HomeScreen userId="user-1" />);
     fireEvent.click(screen.getByRole('button', { name: /settings/i }));
     expect(mockNavigate).toHaveBeenCalledWith('/elderly/settings');
+  });
+
+  it('renders status dot for contacts with presence data', () => {
+    const contact = createMockContact({ contactUserId: 'user-10' });
+    mockContacts.push(contact);
+    mockPresenceMap.set('user-10', { state: 'online', lastChanged: Date.now() });
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    expect(screen.getByRole('status', { name: /online/i })).toBeInTheDocument();
+  });
+
+  it('hides status dot for contacts without contactUserId', () => {
+    mockContacts.push(createMockContact({ contactUserId: '' }));
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('shows online indicator for online contacts', () => {
+    const contact = createMockContact({ contactUserId: 'user-10' });
+    mockContacts.push(contact);
+    mockPresenceMap.set('user-10', { state: 'online', lastChanged: Date.now() });
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    const dot = screen.getByRole('status');
+    expect(dot).toHaveAttribute('aria-label', 'Online');
+  });
+
+  it('shows in-call indicator for contacts in a call', () => {
+    const contact = createMockContact({ contactUserId: 'user-10' });
+    mockContacts.push(contact);
+    mockPresenceMap.set('user-10', { state: 'in-call', lastChanged: Date.now() });
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    const dot = screen.getByRole('status');
+    expect(dot).toHaveAttribute('aria-label', 'In a call');
+  });
+
+  it('does not show status dot when presence data is absent', () => {
+    const contact = createMockContact({ contactUserId: 'user-10' });
+    mockContacts.push(contact);
+    // No entry in presenceMap
+    renderWithProviders(<HomeScreen userId="user-1" />);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 });

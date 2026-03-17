@@ -5,6 +5,8 @@ export interface FirestoreTimestamp {
   toDate: () => Date;
 }
 
+export type PresenceState = 'online' | 'in-call' | 'offline';
+
 export interface EasyCallUser {
   uid: string;
   displayName: string;
@@ -13,6 +15,7 @@ export interface EasyCallUser {
   settings: UserSettings;
   pushTokens: string[];
   onboardingComplete: boolean;
+  presenceState?: PresenceState;
   lastSeen: FirestoreTimestamp;
   createdAt: FirestoreTimestamp;
 }

@@ -36,7 +36,11 @@ export async function fetchCallHistory(
   userId: string,
   pageSize: number = 20,
   lastDocSnapshot?: QueryDocumentSnapshot | null,
-): Promise<{ entries: CallHistoryEntry[]; lastDoc: QueryDocumentSnapshot | null; hasMore: boolean }> {
+): Promise<{
+  entries: CallHistoryEntry[];
+  lastDoc: QueryDocumentSnapshot | null;
+  hasMore: boolean;
+}> {
   const thirtyDaysAgo = Timestamp.fromDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   const constraints: QueryConstraint[] = [
     orderBy('startedAt', 'desc'),
