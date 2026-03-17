@@ -287,4 +287,89 @@ describe('CallScreen', () => {
     // Should not throw when setInCall is undefined
     await expect(renderLoaded('/call/contact-1')).resolves.toBeTruthy();
   });
+
+  describe('connection quality indicator', () => {
+    it('registers connectionQuality event listener', async () => {
+      await renderLoaded();
+      expect(lastApiInstance?.listeners.has('connectionQuality')).toBe(true);
+    });
+
+    it('shows good connection indicator on high quality', async () => {
+      await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 85 });
+      });
+      expect(screen.getByRole('status', { name: /good connection/i })).toBeInTheDocument();
+    });
+
+    it('shows fair connection indicator', async () => {
+      await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 50 });
+      });
+      expect(screen.getByRole('status', { name: /fair connection/i })).toBeInTheDocument();
+    });
+
+    it('shows poor connection indicator', async () => {
+      await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 15 });
+      });
+      expect(screen.getByRole('status', { name: /poor connection/i })).toBeInTheDocument();
+    });
+
+    it('ignores remote quality events', async () => {
+      await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: false, quality: 10 });
+      });
+      expect(screen.queryByRole('status', { name: /connection/i })).not.toBeInTheDocument();
+    });
+
+    it('shows weak signal banner when quality is poor', async () => {
+      await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 15 });
+      });
+      expect(screen.getByRole('alert')).toHaveTextContent(/video quality reduced/i);
+    });
+
+    it('auto-dismisses weak signal banner after 5s', async () => {
+      await renderLoaded();
+      vi.useFakeTimers();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 15 });
+      });
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      vi.useRealTimers();
+    });
+
+    it('clears weak signal banner when quality improves', async () => {
+      await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 15 });
+      });
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 50 });
+      });
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it(
+      'passes axe with connection indicator visible',
+      async () => {
+        const { container } = await renderLoaded();
+        await act(async () => {
+          lastApiInstance?._emit('connectionQuality', { local: true, quality: 50 });
+        });
+        expect(await axe(container)).toHaveNoViolations();
+      },
+      10000,
+    );
+  });
 });
