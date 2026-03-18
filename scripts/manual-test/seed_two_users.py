@@ -19,91 +19,10 @@ Prerequisites:
     firebase emulators:start --only auth,firestore,database,functions
 """
 
-import json
 import sys
 import time
-import urllib.error
-import urllib.request
 
-from emulator_config import AUTH_URL, FIRESTORE_URL, PROJECT_ID
-
-
-def firestore_doc(path: str, fields: dict) -> None:
-    """Write a Firestore document via the emulator REST API."""
-    fs_fields = {}
-    for k, v in fields.items():
-        if isinstance(v, str):
-            fs_fields[k] = {"stringValue": v}
-        elif isinstance(v, bool):
-            fs_fields[k] = {"booleanValue": v}
-        elif isinstance(v, int):
-            fs_fields[k] = {"integerValue": str(v)}
-        elif isinstance(v, list):
-            array_values = []
-            for item in v:
-                if isinstance(item, str):
-                    array_values.append({"stringValue": item})
-            fs_fields[k] = {"arrayValue": {"values": array_values}}
-        elif v is None:
-            fs_fields[k] = {"nullValue": None}
-        elif isinstance(v, dict) and "__timestamp__" in v:
-            fs_fields[k] = {"timestampValue": v["__timestamp__"]}
-        elif isinstance(v, dict) and "__map__" in v:
-            map_fields = {}
-            for mk, mv in v["__map__"].items():
-                if isinstance(mv, str):
-                    map_fields[mk] = {"stringValue": mv}
-                elif isinstance(mv, bool):
-                    map_fields[mk] = {"booleanValue": mv}
-                elif isinstance(mv, int):
-                    map_fields[mk] = {"integerValue": str(mv)}
-                elif mv is None:
-                    map_fields[mk] = {"nullValue": None}
-            fs_fields[k] = {"mapValue": {"fields": map_fields}}
-
-    parts = path.split("/")
-    parent_path = "/".join(parts[:-2]) if len(parts) > 2 else ""
-    collection_id = parts[-2]
-    doc_id = parts[-1]
-
-    base = f"{FIRESTORE_URL}/v1/projects/{PROJECT_ID}/databases/(default)/documents"
-    if parent_path:
-        url = f"{base}/{parent_path}/{collection_id}?documentId={doc_id}"
-    else:
-        url = f"{base}/{collection_id}?documentId={doc_id}"
-
-    req = urllib.request.Request(
-        url,
-        data=json.dumps({"fields": fs_fields}).encode(),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": "Bearer owner",
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req) as resp:
-            resp.read()
-        print(f"  Wrote: {path}")
-    except urllib.error.HTTPError as e:
-        if e.code == 409:
-            patch_url = f"{base}/{path}"
-            patch_req = urllib.request.Request(
-                patch_url,
-                data=json.dumps({"fields": fs_fields}).encode(),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer owner",
-                },
-                method="PATCH",
-            )
-            with urllib.request.urlopen(patch_req) as resp:
-                resp.read()
-            print(f"  Updated: {path}")
-        else:
-            body = e.read().decode()[:300]
-            print(f"  Error ({e.code}): {body}")
-            raise
+from firestore_writer import firestore_doc
 
 
 def main() -> None:
