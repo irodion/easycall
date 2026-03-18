@@ -36,25 +36,44 @@ def firestore_patch(path: str, fields: dict) -> None:
     base = f"{FIRESTORE_URL}/v1/projects/{PROJECT_ID}/databases/(default)/documents"
     url = f"{base}/{path}"
 
-    # Try PATCH first (update existing), fall back to creating parent + doc
-    for method in ["PATCH", "POST"]:
-        req = urllib.request.Request(
-            url if method == "PATCH" else url.rsplit("/", 1)[0] + f"?documentId={path.split('/')[-1]}",
-            data=json.dumps({"fields": fs_fields}).encode(),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": "Bearer owner",
-            },
-            method=method,
-        )
-        try:
-            with urllib.request.urlopen(req) as resp:
-                resp.read()
-            return
-        except urllib.error.HTTPError:
-            continue
-    print("Failed to write document")
-    sys.exit(1)
+    # Try PATCH first (update existing), fall back to POST if doc doesn't exist
+    patch_req = urllib.request.Request(
+        url,
+        data=json.dumps({"fields": fs_fields}).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer owner",
+        },
+        method="PATCH",
+    )
+    try:
+        with urllib.request.urlopen(patch_req) as resp:
+            resp.read()
+        return
+    except urllib.error.HTTPError as e:
+        if e.code not in (404, 405, 501):
+            body = e.read().decode()[:300]
+            print(f"Failed to PATCH document (HTTP {e.code}): {body}")
+            sys.exit(1)
+
+    # Document doesn't exist yet — create via POST
+    post_url = url.rsplit("/", 1)[0] + f"?documentId={path.split('/')[-1]}"
+    post_req = urllib.request.Request(
+        post_url,
+        data=json.dumps({"fields": fs_fields}).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer owner",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(post_req) as resp:
+            resp.read()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()[:300]
+        print(f"Failed to create document (HTTP {e.code}): {body}")
+        sys.exit(1)
 
 
 def find_elderly_uid() -> str | None:
@@ -65,7 +84,11 @@ def find_elderly_uid() -> str | None:
     try:
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read().decode())
-    except Exception:
+    except (urllib.error.URLError, urllib.error.HTTPError) as e:
+        print(f"  ⚠ Could not query Firestore emulator: {e}")
+        return None
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"  ⚠ Invalid JSON from Firestore emulator: {e}")
         return None
 
     for doc in data.get("documents", []):

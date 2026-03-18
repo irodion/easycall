@@ -24,7 +24,11 @@ def find_elderly_uid() -> str | None:
     try:
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read().decode())
-    except Exception:
+    except (urllib.error.URLError, urllib.error.HTTPError) as e:
+        print(f"  ⚠ Could not query Firestore emulator: {e}")
+        return None
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"  ⚠ Invalid JSON from Firestore emulator: {e}")
         return None
     for doc in data.get("documents", []):
         fields = doc.get("fields", {})

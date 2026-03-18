@@ -16,8 +16,9 @@ Complete step-by-step guide to test the full application flow locally using Fire
 
 ## Setup (one-time)
 
+Run from the repository root:
+
 ```bash
-cd /Users/rodion/Projects/easycall
 pnpm install
 cd functions && pnpm install && cd ..
 ```

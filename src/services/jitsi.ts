@@ -10,11 +10,12 @@ export function _resetLoadPromise(): void {
  * Throws if unconfigured (except in test mode).
  */
 export function getJaasAppId(): string {
-  const appId = import.meta.env.VITE_JAAS_APP_ID as string | undefined;
+  const raw = import.meta.env.VITE_JAAS_APP_ID as string | undefined;
+  const appId = (raw ?? '').trim();
   if (!appId && import.meta.env.MODE !== 'test') {
     throw new Error('VITE_JAAS_APP_ID is not set. Check your .env.local file.');
   }
-  return appId ?? '';
+  return appId;
 }
 
 export function loadJitsiApi(): Promise<void> {
