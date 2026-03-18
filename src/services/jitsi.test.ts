@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { loadJitsiApi, _resetLoadPromise } from './jitsi';
+import { loadJitsiApi, _resetLoadPromise, getJaasAppId } from './jitsi';
 import { MockJitsiMeetExternalAPI } from '@/test/mocks/jitsi';
 
 describe('loadJitsiApi', () => {
@@ -58,6 +58,11 @@ describe('loadJitsiApi', () => {
     await expect(loadJitsiApi()).resolves.toBeUndefined();
     // Should NOT append a script
     expect(document.head.querySelector('script[src*="8x8.vc"]')).toBeNull();
+  });
+
+  it('getJaasAppId returns empty string in test mode', () => {
+    // In test mode, missing env var returns '' instead of throwing
+    expect(getJaasAppId()).toBe('');
   });
 
   it('allows retry after script error (loadPromise is reset)', async () => {
