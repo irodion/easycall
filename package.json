@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "security": "semgrep --config auto --config .semgrep.yml --error",
+    "security:deps": "vet scan -D . --filter 'vulns.critical.exists(p, true)' --filter-fail",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
