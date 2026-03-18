@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Timestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, auth, ensureAuthenticated } from '@/services/firebase';
-import { loadJitsiApi } from '@/services/jitsi';
+import { loadJitsiApi, getJaasAppId } from '@/services/jitsi';
 import { setActiveCall, clearActiveCall, writeCallHistoryEntry } from '@/services/callHistory';
 import { useContactStore } from '@/stores/contactStore';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
@@ -110,8 +110,9 @@ export function CallScreen({ setInCall }: CallScreenProps) {
 
         if (!mounted || !containerRef.current) return;
 
+        const appId = getJaasAppId();
         const api = new window.JitsiMeetExternalAPI('8x8.vc', {
-          roomName: jitsiRoomId,
+          roomName: `${appId}/${jitsiRoomId}`,
           parentNode: containerRef.current,
           jwt: data.token,
           configOverwrite: {

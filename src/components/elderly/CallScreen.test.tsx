@@ -19,6 +19,7 @@ vi.mock('@/services/callHistory', () => ({
 
 vi.mock('@/services/jitsi', () => ({
   loadJitsiApi: vi.fn().mockResolvedValue(undefined),
+  getJaasAppId: vi.fn().mockReturnValue('vpaas-magic-cookie-test123'),
 }));
 
 vi.mock('firebase/firestore', () => ({
@@ -113,6 +114,13 @@ describe('CallScreen', () => {
     await renderLoaded();
     expect(lastApiInstance).not.toBeNull();
     expect(lastApiInstance?.domain).toBe('8x8.vc');
+  });
+
+  it('prefixes roomName with JaaS AppID', async () => {
+    await renderLoaded();
+    expect(lastApiInstance?.options?.roomName).toBe(
+      'vpaas-magic-cookie-test123/easycall-alice-abc123',
+    );
   });
 
   it('passes jwt token to Jitsi', async () => {
@@ -248,7 +256,7 @@ describe('CallScreen', () => {
     await renderLoaded('/call-room/easycall-alice-abc123');
     // Should find the contact and create the Jitsi API (not show "contact not found")
     expect(lastApiInstance).not.toBeNull();
-    expect(lastApiInstance?.options?.roomName).toBe('easycall-alice-abc123');
+    expect(lastApiInstance?.options?.roomName).toBe('vpaas-magic-cookie-test123/easycall-alice-abc123');
   });
 
   it('subscribes to contacts on mount', async () => {
