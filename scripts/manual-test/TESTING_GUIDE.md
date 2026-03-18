@@ -75,11 +75,11 @@ This also creates a caregiver account: `caregiver@test.local` / `test1234`.
 
 1. Complete Step 3 above (seed with your UID)
 2. You see **HomeScreen** with two contact cards (Alex, Sarah)
-5. Click the **gear icon** (top-right) → **SettingsScreen**
+3. Click the **gear icon** (top-right) → **SettingsScreen**
    - Change font size, language, etc.
    - Changes sync to Firestore emulator in real-time (verify in Emulator UI → Firestore tab)
-6. Go back, click **"History"** → **CallHistory** screen (empty initially)
-7. Click **"+"** or **"Add Contact"** if visible → **AddContact** screen
+4. Go back, click **"History"** → **CallHistory** screen (empty initially)
+5. Click **"+"** or **"Add Contact"** if visible → **AddContact** screen
 
 ### Flow 2: Elderly User — Make a Call
 

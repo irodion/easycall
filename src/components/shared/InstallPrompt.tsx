@@ -45,7 +45,7 @@ export function InstallPrompt() {
   const handleDismiss = () => {
     setVisible(false);
     // Wait for slide-out animation before removing from DOM
-    setTimeout(() => setDismissed(true), 200);
+    setTimeout(() => setDismissed(true), 300);
   };
 
   return (
@@ -78,7 +78,7 @@ export function InstallPrompt() {
         </div>
 
         {/* Text */}
-        <p className="flex-1 text-sm font-semibold leading-tight">
+        <p className="flex-1 text-[length:var(--text-body)] font-semibold leading-tight">
           {t('installPrompt.title')}
         </p>
 
@@ -86,7 +86,7 @@ export function InstallPrompt() {
         <button
           type="button"
           onClick={() => void handleInstall()}
-          className="shrink-0 min-h-11 min-w-11 px-4 py-2 bg-primary-content text-primary font-bold text-sm rounded-xl active:scale-95 transition-transform"
+          className="shrink-0 min-h-14 min-w-14 px-4 py-2 bg-primary-content text-primary font-bold text-[length:var(--text-body)] rounded-xl active:scale-95 transition-transform"
           aria-label={t('installPrompt.installApp')}
         >
           {t('common.install')}
@@ -96,7 +96,7 @@ export function InstallPrompt() {
         <button
           type="button"
           onClick={handleDismiss}
-          className="shrink-0 min-h-11 min-w-11 flex items-center justify-center rounded-xl hover:bg-primary-content/10 active:scale-95 transition-all"
+          className="shrink-0 min-h-14 min-w-14 flex items-center justify-center rounded-xl hover:bg-primary-content/10 active:scale-95 transition-all"
           aria-label={t('common.dismiss')}
         >
           <svg

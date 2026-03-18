@@ -71,7 +71,7 @@ export function CallHistory({ userId }: CallHistoryProps) {
           type="button"
           onClick={() => void navigate('/elderly')}
           aria-label={t('callHistory.backToContacts')}
-          className="min-h-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center gap-2"
+          className="min-h-14 min-w-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center gap-2"
         >
           <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M19 12H5M12 19l-7-7 7-7" />
