@@ -261,7 +261,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col relative">
+    <div className="h-screen bg-black flex flex-col relative">
       {loading && (
         <div className="absolute inset-0 bg-base-100 flex items-center justify-center z-10">
           <div role="status" aria-label={t('call.connecting')}>
@@ -295,7 +295,7 @@ export function CallScreen({ setInCall }: CallScreenProps) {
       {/* Jitsi iframe container */}
       <div
         ref={containerRef}
-        className="flex-1"
+        className="flex-1 [&>iframe]:w-full [&>iframe]:h-full"
         role="region"
         aria-label={t('call.videoCallArea')}
       />

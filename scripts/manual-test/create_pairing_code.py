@@ -13,8 +13,7 @@ import urllib.error
 import urllib.request
 import random
 
-FIRESTORE_URL = "http://127.0.0.1:8080"
-PROJECT_ID = "demo-easycall"
+from emulator_config import FIRESTORE_URL, PROJECT_ID
 
 
 def find_elderly_uid() -> str | None:

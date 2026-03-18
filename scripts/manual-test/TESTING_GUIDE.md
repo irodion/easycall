@@ -28,30 +28,16 @@ cd functions && pnpm install && cd ..
 ## Step 1: Start Firebase Emulators
 
 ```bash
-firebase emulators:start --only auth,firestore,database,functions --project demo-easycall
+firebase emulators:start --only auth,firestore,database,functions
 ```
 
 Leave this terminal open. You should see the Emulator UI at **http://127.0.0.1:4000**.
 
 > The `demo-easycall` project prefix tells Firebase this is a demo project — no real credentials needed.
 
-## Step 2: Seed Test Data
+## Step 2: Start Dev Server (with emulators)
 
 In a second terminal:
-
-```bash
-python3 scripts/manual-test/seed_emulator.py
-```
-
-This creates:
-- **Elderly user**: `grandma@test.local` / `test1234`
-- **Caregiver user**: `caregiver@test.local` / `test1234`
-- Caregiver linked to elderly user
-- Two contacts for the elderly user (Alex + Sarah)
-
-Note the UIDs printed — you'll need them for some steps.
-
-## Step 3: Start Dev Server (with emulators)
 
 ```bash
 VITE_USE_EMULATORS=true pnpm dev
@@ -61,16 +47,34 @@ The app is now at **http://localhost:5173**.
 
 > **Important:** The `VITE_USE_EMULATORS=true` flag connects to local emulators instead of production Firebase.
 
+## Step 3: Seed Test Data for the Elderly User
+
+The elderly flow uses **anonymous auth** — the app creates a fresh UID when you first visit. You need to seed data under *that* UID:
+
+1. Open http://localhost:5173
+2. Click **"I need help calling"** (elderly role) — the app signs in anonymously
+3. Find your UID in the browser console (DevTools → Console):
+   ```js
+   (await import('/src/services/firebase.ts')).auth.currentUser.uid
+   ```
+4. Seed data under that UID:
+   ```bash
+   python3 scripts/manual-test/seed_emulator.py --elderly-uid <YOUR_UID>
+   ```
+5. **Reload the page** — contacts appear
+
+This also creates a caregiver account: `caregiver@test.local` / `test1234`.
+
+> **Why not just `seed_emulator.py`?** Running without `--elderly-uid` creates auth users with *new* UIDs, but the app's anonymous sign-in won't use those UIDs. The `--elderly-uid` flag seeds data under your actual browser session's UID.
+
 ---
 
 ## Test Flows
 
 ### Flow 1: Elderly User — Browse & Navigate
 
-1. Open http://localhost:5173
-2. You land on **RoleSelector**. Click **"I need help calling"** (elderly role)
-3. The app signs in anonymously and redirects to `/elderly`
-4. You see **HomeScreen** with two contact cards (Alex, Sarah)
+1. Complete Step 3 above (seed with your UID)
+2. You see **HomeScreen** with two contact cards (Alex, Sarah)
 5. Click the **gear icon** (top-right) → **SettingsScreen**
    - Change font size, language, etc.
    - Changes sync to Firestore emulator in real-time (verify in Emulator UI → Firestore tab)
