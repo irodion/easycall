@@ -70,7 +70,10 @@ def main() -> None:
         with urllib.request.urlopen(req) as resp:
             resp.read()
     except urllib.error.HTTPError as e:
-        print(f"❌ Error: {e.read().decode()[:300]}")
+        print(f"❌ Error (HTTP {e.code}): {e.read().decode()[:300]}")
+        sys.exit(1)
+    except urllib.error.URLError as e:
+        print(f"❌ Cannot reach Firestore emulator: {e.reason}")
         sys.exit(1)
 
     print(f"✅ Pairing code created: {code}")

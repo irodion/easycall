@@ -55,6 +55,9 @@ def firestore_patch(path: str, fields: dict) -> None:
             body = e.read().decode()[:300]
             print(f"Failed to PATCH document (HTTP {e.code}): {body}")
             sys.exit(1)
+    except urllib.error.URLError as e:
+        print(f"Cannot reach Firestore emulator: {e.reason}")
+        sys.exit(1)
 
     # Document doesn't exist yet — create via POST
     post_url = url.rsplit("/", 1)[0] + f"?documentId={path.split('/')[-1]}"
@@ -73,6 +76,9 @@ def firestore_patch(path: str, fields: dict) -> None:
     except urllib.error.HTTPError as e:
         body = e.read().decode()[:300]
         print(f"Failed to create document (HTTP {e.code}): {body}")
+        sys.exit(1)
+    except urllib.error.URLError as e:
+        print(f"Cannot reach Firestore emulator: {e.reason}")
         sys.exit(1)
 
 
