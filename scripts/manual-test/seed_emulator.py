@@ -137,6 +137,8 @@ def firestore_doc(path: str, fields: dict) -> None:
                     map_fields[mk] = {"booleanValue": mv}
                 elif isinstance(mv, int):
                     map_fields[mk] = {"integerValue": str(mv)}
+                elif mv is None:
+                    map_fields[mk] = {"nullValue": None}
             fs_fields[k] = {"mapValue": {"fields": map_fields}}
 
     # Split path into collection + document
@@ -254,6 +256,7 @@ def seed_firestore(elderly_uid: str, caregiver_uid: str) -> tuple[str, str]:
             "ringtoneVolume": 80,
             "autoAnswer": False,
             "appLockEnabled": False,
+            "appLockPinHash": None,
             "language": "en",
         }},
         "createdAt": {"__timestamp__": now_iso},
@@ -273,6 +276,7 @@ def seed_firestore(elderly_uid: str, caregiver_uid: str) -> tuple[str, str]:
             "ringtoneVolume": 80,
             "autoAnswer": False,
             "appLockEnabled": False,
+            "appLockPinHash": None,
             "language": "en",
         }},
         "createdAt": {"__timestamp__": now_iso},
@@ -289,6 +293,7 @@ def seed_firestore(elderly_uid: str, caregiver_uid: str) -> tuple[str, str]:
     room_id = f"easycall-test-{int(time.time())}"
     firestore_doc(f"users/{elderly_uid}/contacts/contact1", {
         "name": "Alex (Caregiver)",
+        "photoURL": None,
         "contactUserId": caregiver_uid,
         "jitsiRoomId": room_id,
         "displayOrder": 0,
@@ -298,6 +303,7 @@ def seed_firestore(elderly_uid: str, caregiver_uid: str) -> tuple[str, str]:
     room_id_2 = f"easycall-test2-{int(time.time())}"
     firestore_doc(f"users/{elderly_uid}/contacts/contact2", {
         "name": "Sarah Daughter",
+        "photoURL": None,
         "contactUserId": "",
         "jitsiRoomId": room_id_2,
         "displayOrder": 1,

@@ -57,6 +57,8 @@ def firestore_doc(path: str, fields: dict) -> None:
                     map_fields[mk] = {"booleanValue": mv}
                 elif isinstance(mv, int):
                     map_fields[mk] = {"integerValue": str(mv)}
+                elif mv is None:
+                    map_fields[mk] = {"nullValue": None}
             fs_fields[k] = {"mapValue": {"fields": map_fields}}
 
     parts = path.split("/")
@@ -135,6 +137,7 @@ def main() -> None:
         "ringtoneVolume": 80,
         "autoAnswer": False,
         "appLockEnabled": False,
+        "appLockPinHash": None,
         "language": "en",
     }}
 
@@ -153,6 +156,7 @@ def main() -> None:
     })
     firestore_doc(f"users/{uid1}/contacts/contact-user2", {
         "name": "Alex Family",
+        "photoURL": None,
         "contactUserId": uid2,
         "jitsiRoomId": room_1to2,
         "displayOrder": 0,
@@ -174,6 +178,7 @@ def main() -> None:
     })
     firestore_doc(f"users/{uid2}/contacts/contact-user1", {
         "name": "Grandma Rose",
+        "photoURL": None,
         "contactUserId": uid1,
         "jitsiRoomId": room_2to1,
         "displayOrder": 0,
