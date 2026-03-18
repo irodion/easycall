@@ -4,6 +4,7 @@ const mockApp = { name: '[DEFAULT]' };
 const mockAuth = { app: mockApp };
 const mockDb = { app: mockApp, type: 'firestore' };
 const mockRtdb = { app: mockApp, type: 'database' };
+const mockFunctions = { app: mockApp, type: 'functions' };
 const mockMessaging = { app: mockApp, type: 'messaging' };
 
 function mockAllFirebaseModules() {
@@ -21,6 +22,10 @@ function mockAllFirebaseModules() {
   vi.doMock('firebase/database', () => ({
     getDatabase: vi.fn(() => mockRtdb),
     connectDatabaseEmulator: vi.fn(),
+  }));
+  vi.doMock('firebase/functions', () => ({
+    getFunctions: vi.fn(() => mockFunctions),
+    connectFunctionsEmulator: vi.fn(),
   }));
 }
 
@@ -110,10 +115,12 @@ describe('Firebase service layer', () => {
       await import('./firebase');
       const { connectAuthEmulator } = await import('firebase/auth');
       const { connectFirestoreEmulator } = await import('firebase/firestore');
+      const { connectFunctionsEmulator } = await import('firebase/functions');
       expect(connectAuthEmulator).toHaveBeenCalledWith(mockAuth, 'http://127.0.0.1:9099', {
         disableWarnings: true,
       });
       expect(connectFirestoreEmulator).toHaveBeenCalledWith(mockDb, '127.0.0.1', 8080);
+      expect(connectFunctionsEmulator).toHaveBeenCalledWith(mockFunctions, '127.0.0.1', 5001);
     });
 
     it('calls connectDatabaseEmulator when VITE_USE_EMULATORS=true', async () => {
@@ -143,9 +150,11 @@ describe('Firebase service layer', () => {
       const { connectAuthEmulator } = await import('firebase/auth');
       const { connectFirestoreEmulator } = await import('firebase/firestore');
       const { connectDatabaseEmulator } = await import('firebase/database');
+      const { connectFunctionsEmulator } = await import('firebase/functions');
       expect(connectAuthEmulator).not.toHaveBeenCalled();
       expect(connectFirestoreEmulator).not.toHaveBeenCalled();
       expect(connectDatabaseEmulator).not.toHaveBeenCalled();
+      expect(connectFunctionsEmulator).not.toHaveBeenCalled();
     });
   });
 

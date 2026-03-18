@@ -3,6 +3,7 @@ import { getAuth, connectAuthEmulator, signInAnonymously } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getDatabase, connectDatabaseEmulator } from 'firebase/database';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import type { Messaging } from 'firebase/messaging';
 
 const firebaseConfig: Record<string, string | undefined> = {
@@ -40,6 +41,7 @@ if (import.meta.env.VITE_USE_EMULATORS === 'true') {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
   connectDatabaseEmulator(rtdb, '127.0.0.1', 9000);
+  connectFunctionsEmulator(getFunctions(app), '127.0.0.1', 5001);
 }
 
 /**
