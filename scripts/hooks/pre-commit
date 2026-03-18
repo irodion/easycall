@@ -20,5 +20,11 @@ else
   exit 1
 fi
 
+if git diff --cached --name-only | grep -qE '^(pnpm-lock\.yaml|package\.json)$'; then
+  echo ""
+  echo "⚠ Dependencies changed — run 'pnpm security:deps' to check for vulnerabilities."
+  echo ""
+fi
+
 echo "Running tests before commit..."
 pnpm test

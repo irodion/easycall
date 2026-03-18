@@ -19,6 +19,7 @@ pnpm lint                   # ESLint (flat config)
 pnpm lint:fix               # ESLint autofix
 pnpm format:check           # Prettier check
 pnpm security               # Semgrep security scan
+pnpm security:deps          # vet dependency vulnerability scan (slow ~3min, on-demand)
 
 # E2E (Playwright)
 pnpm test:e2e               # All E2E tests (Chromium + WebKit)
@@ -89,3 +90,4 @@ The hook (`scripts/hooks/pre-commit`) blocks direct commits to `main`, runs semg
 
 - macOS (Apple Silicon), Node 20+, pnpm
 - `semgrep` required for pre-commit hook (`brew install semgrep`)
+- `vet` for dependency scanning (`brew install safedep/tap/vet`)

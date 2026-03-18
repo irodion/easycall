@@ -1,0 +1,25 @@
+name: Dependency Security Check
+
+on:
+  pull_request:
+    paths:
+      - 'pnpm-lock.yaml'
+      - 'package.json'
+  workflow_dispatch:
+
+jobs:
+  vet-scan:
+    name: vet dependency scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install vet v1.14.0 (pinned + checksum verified)
+        run: |
+          curl -sL https://github.com/safedep/vet/releases/download/v1.14.0/vet_Linux_x86_64.tar.gz -o vet.tar.gz
+          echo "3bb8b8cd9e98eff80ceb5d28a5e384cd5147573b71bd45f6b16b0bb586bf009f  vet.tar.gz" | sha256sum -c
+          tar xzf vet.tar.gz
+          sudo mv vet /usr/local/bin/
+
+      - name: Scan dependencies for critical vulnerabilities
+        run: vet scan -D . --filter 'vulns.critical.exists(p, true)' --filter-fail
