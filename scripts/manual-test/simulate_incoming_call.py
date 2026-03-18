@@ -121,7 +121,7 @@ def main() -> None:
 
     print(f"📞 Simulating incoming call to elderly user {elderly_uid}...")
     print(f"   Room: {room_id}")
-    print(f"   Caller: Test Caller")
+    print("   Caller: Test Caller")
 
     firestore_patch(f"users/{elderly_uid}/incomingCall/current", {
         "callerId": "simulated-caller-id",
