@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, act } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 import { InstallPrompt } from './InstallPrompt';
+import { _resetForTest } from '@/hooks/useInstallPrompt';
 
 function createFakeBeforeInstallPromptEvent(outcome: 'accepted' | 'dismissed' = 'accepted') {
   const event = Object.assign(new Event('beforeinstallprompt'), {
@@ -13,6 +14,10 @@ function createFakeBeforeInstallPromptEvent(outcome: 'accepted' | 'dismissed' = 
 }
 
 describe('InstallPrompt', () => {
+  beforeEach(() => {
+    _resetForTest();
+  });
+
   it('renders nothing before beforeinstallprompt fires', () => {
     const { container } = renderWithProviders(<InstallPrompt />);
     expect(container.firstChild).toBeNull();

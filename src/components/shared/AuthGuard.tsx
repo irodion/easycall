@@ -5,7 +5,6 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
 import { RoleSelector } from './RoleSelector';
 import { OnboardingFlow } from './OnboardingFlow';
-import type { EasyCallUser } from '@/types/user';
 
 interface AuthGuardProps {
   requiredRole: 'elderly' | 'caregiver';
@@ -16,7 +15,7 @@ type AuthState = 'loading' | 'no-role' | 'onboarding' | 'correct-role' | 'wrong-
 
 export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
   const [authState, setAuthState] = useState<AuthState>('loading');
-  const [user, setUser] = useState<EasyCallUser | null>(null);
+  const [user, setUser] = useState<{ uid: string; role: 'elderly' | 'caregiver' } | null>(null);
 
   useEffect(() => {
     let unsubDoc: (() => void) | undefined;
@@ -49,13 +48,7 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
           } else if (role === requiredRole) {
             const onboardingComplete = data?.['onboardingComplete'] === true;
             if (!onboardingComplete) {
-              setUser({
-                uid: firebaseUser.uid,
-                displayName: firebaseUser.displayName ?? '',
-                role,
-                email: firebaseUser.email,
-                settings: data?.['settings'] ?? {},
-              } as EasyCallUser);
+              setUser({ uid: firebaseUser.uid, role });
               setAuthState('onboarding');
             } else {
               setAuthState('correct-role');
