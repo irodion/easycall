@@ -70,9 +70,14 @@ def firestore_doc(path: str, fields: dict) -> None:
                 },
                 method="PATCH",
             )
-            with urllib.request.urlopen(patch_req) as resp:
-                resp.read()
-            print(f"  Updated: {path}")
+            try:
+                with urllib.request.urlopen(patch_req) as resp:
+                    resp.read()
+                print(f"  Updated: {path}")
+            except urllib.error.HTTPError as patch_err:
+                body_text = patch_err.read().decode()
+                print(f"  Firestore PATCH error ({patch_err.code}): {body_text[:300]}")
+                raise
         else:
             body_text = e.read().decode()
             print(f"  Firestore error ({e.code}): {body_text[:300]}")

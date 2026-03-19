@@ -37,7 +37,7 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
       <div className="flex items-center gap-4">
         <Link
           to="/elderly"
-          className="btn btn-ghost touch-target-min min-h-14 min-w-14 font-bold text-[length:var(--text-button)]"
+          className="min-h-14 min-w-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center gap-2"
           aria-label={t('common.back')}
         >
           <Icon name="arrow-left" size={22} /> {t('common.back')}

@@ -43,7 +43,7 @@
 
 /* Add bottom padding to main when install prompt is visible */
 :has(> #install-prompt) > #main-content {
-  padding-bottom: 12rem; /* pb-48 equivalent */
+  padding-bottom: 5rem;
 }
 
 /* Extra-large font size overrides */

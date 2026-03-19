@@ -26,15 +26,19 @@ from firestore_writer import firestore_doc
 
 
 def main() -> None:
-    if "--uid1" not in sys.argv or "--uid2" not in sys.argv:
-        print("Usage: python3 seed_two_users.py --uid1 <UID1> --uid2 <UID2>")
-        print()
-        print("Get UIDs from browser console:")
-        print("  (await import('/src/services/firebase.ts')).auth.currentUser.uid")
-        sys.exit(1)
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Seed two EasyCall users who can call each other.",
+        epilog="Get UIDs from browser console:\n"
+               "  (await import('/src/services/firebase.ts')).auth.currentUser.uid",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--uid1", required=True, help="UID of the first user (Grandma Rose)")
+    parser.add_argument("--uid2", required=True, help="UID of the second user (Alex Family)")
+    args = parser.parse_args()
 
-    uid1 = sys.argv[sys.argv.index("--uid1") + 1]
-    uid2 = sys.argv[sys.argv.index("--uid2") + 1]
+    uid1 = args.uid1
+    uid2 = args.uid2
 
     print("=" * 60)
     print("EasyCall — Seed Two Users for Call Testing")
