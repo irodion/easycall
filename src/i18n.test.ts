@@ -15,7 +15,7 @@ describe('i18n', () => {
   });
 
   it('resolves English translation keys', () => {
-    expect(i18n.t('home.title')).toBe('Your Contacts');
+    expect(i18n.t('home.title')).toBe('Contacts');
     expect(i18n.t('common.cancel')).toBe('Cancel');
   });
 
