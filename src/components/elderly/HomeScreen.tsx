@@ -31,36 +31,16 @@ export function HomeScreen({ userId }: HomeScreenProps) {
   }, [userId, subscribeToContacts]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-base-100 to-base-100 p-4 flex flex-col">
+    <div
+      className="min-h-screen bg-gradient-to-b from-primary/5 via-base-100 to-base-100 p-4 flex flex-col"
+      style={{ paddingBottom: 'max(1rem, var(--safe-bottom, 0px))' }}
+    >
       {activeCall && <RejoinPrompt activeCall={activeCall} userId={userId} onDismiss={dismiss} />}
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-4">
         <EasyCallText as="h1" variant="heading">
           {t('home.title')}
         </EasyCallText>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => void navigate('/elderly/history')}
-            aria-label={t('callHistory.title')}
-            className="min-h-14 min-w-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center gap-2"
-          >
-            <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            {t('home.history')}
-          </button>
-          <button
-            type="button"
-            onClick={() => void navigate('/elderly/settings')}
-            aria-label={t('home.settings')}
-            className="min-h-14 min-w-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center gap-2"
-          >
-            <Icon name="settings" size={22} />
-            {t('home.settings')}
-          </button>
-        </div>
       </div>
 
       {contacts.length === 0 ? (
@@ -123,6 +103,31 @@ export function HomeScreen({ userId }: HomeScreenProps) {
           ))}
         </div>
       )}
+
+      {/* Navigation — pinned to bottom via mt-auto */}
+      <nav className="mt-auto pt-6 flex gap-3" aria-label={t('home.navigation')}>
+        <button
+          type="button"
+          onClick={() => void navigate('/elderly/history')}
+          aria-label={t('callHistory.title')}
+          className="flex-1 min-h-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+        >
+          <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          {t('home.history')}
+        </button>
+        <button
+          type="button"
+          onClick={() => void navigate('/elderly/settings')}
+          aria-label={t('home.settings')}
+          className="flex-1 min-h-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+        >
+          <Icon name="settings" size={22} />
+          {t('home.settings')}
+        </button>
+      </nav>
     </div>
   );
 }
