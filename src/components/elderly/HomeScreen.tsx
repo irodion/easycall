@@ -35,14 +35,9 @@ export function HomeScreen({ userId }: HomeScreenProps) {
       {activeCall && <RejoinPrompt activeCall={activeCall} userId={userId} onDismiss={dismiss} />}
 
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <span className="text-xs font-semibold text-primary tracking-wide uppercase">
-            EasyCall
-          </span>
-          <EasyCallText as="h1" variant="heading">
-            {t('home.title')}
-          </EasyCallText>
-        </div>
+        <EasyCallText as="h1" variant="heading">
+          {t('home.title')}
+        </EasyCallText>
         <div className="flex gap-3">
           <button
             type="button"
@@ -94,13 +89,13 @@ export function HomeScreen({ userId }: HomeScreenProps) {
                   <img
                     src={contact.photoURL}
                     alt=""
-                    className="w-24 h-24 rounded-full object-cover ring-2 ring-primary/20"
+                    className="w-28 h-28 rounded-full object-cover ring-2 ring-primary/20"
                     onError={() =>
                       setFailedPhotoUrls((prev) => new Set(prev).add(contact.photoURL!))
                     }
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-3xl font-bold text-primary-content ring-2 ring-primary/20">
+                  <div className="w-28 h-28 rounded-full bg-primary flex items-center justify-center text-3xl font-bold text-primary-content ring-2 ring-primary/20">
                     {contact.name[0] ?? '?'}
                   </div>
                 )}
