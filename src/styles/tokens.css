@@ -18,13 +18,13 @@
   --space-lg: 32px;
   --space-xl: 48px;
 
-  /* Colors (WCAG AAA compliant for large text / UI components only) */
+  /* Colors (WCAG AAA compliant — warm palette for aging vision) */
   --color-call-green: #1b7a1b;
   --color-call-red: #c41e1e;
-  --color-bg: #ffffff;
+  --color-bg: #fdf8f0;
   --color-text: #1a1a1a;
   --color-text-secondary: #4a4a4a;
-  --color-border: #cccccc;
+  --color-border: #c9c0b5;
   --color-warning: #b35c00;
 
   /* Typography */
