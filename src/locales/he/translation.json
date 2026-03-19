@@ -42,7 +42,8 @@
     "addContact": "הוסף איש קשר",
     "language": "שפה",
     "saveError": "שמירת ההגדרות נכשלה. אנא נסה שוב.",
-    "reviewSetup": "סקירת מדריך ההגדרה"
+    "reviewSetup": "סקירת מדריך ההגדרה",
+    "installApp": "התקן אפליקציה"
   },
   "permissions": {
     "checking": "בודק הרשאות מצלמה ומיקרופון",

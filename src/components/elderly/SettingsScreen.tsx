@@ -7,6 +7,7 @@ import { EasyCallText } from '@/components/shared/EasyCallText';
 import { Icon } from '@/components/shared/Icon';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import { PairingCodeDisplay } from '@/components/shared/PairingCodeDisplay';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import type { UserSettings } from '@/types/user';
 
 interface SettingsScreenProps {
@@ -19,6 +20,7 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   const navigate = useNavigate();
   const fontLabelId = 'font-size-label';
   const [saveError, setSaveError] = useState<string | null>(null);
+  const { canInstall, install } = useInstallPrompt();
 
   const saveSettings = async (partial: Partial<UserSettings>) => {
     setSaveError(null);
@@ -131,6 +133,16 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
         >
           {t('settings.reviewSetup')}
         </button>
+
+        {canInstall && (
+          <button
+            type="button"
+            onClick={() => void install()}
+            className="btn bg-base-200 hover:bg-base-300 min-h-14 w-full font-bold text-[length:var(--text-body)]"
+          >
+            {t('settings.installApp')}
+          </button>
+        )}
 
         <Link
           to="/elderly"

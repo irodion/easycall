@@ -44,7 +44,8 @@
     "addContact": "Add Contact",
     "language": "Language",
     "saveError": "Failed to save settings. Please try again.",
-    "reviewSetup": "Review Setup Guide"
+    "reviewSetup": "Review Setup Guide",
+    "installApp": "Install App"
   },
   "permissions": {
     "checking": "Checking camera and microphone permissions",

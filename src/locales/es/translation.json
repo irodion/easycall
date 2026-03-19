@@ -42,7 +42,8 @@
     "addContact": "Agregar Contacto",
     "language": "Idioma",
     "saveError": "Error al guardar los ajustes. Por favor inténtelo de nuevo.",
-    "reviewSetup": "Revisar guía de configuración"
+    "reviewSetup": "Revisar guía de configuración",
+    "installApp": "Instalar aplicación"
   },
   "permissions": {
     "checking": "Verificando permisos de cámara y micrófono",

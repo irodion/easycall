@@ -1,24 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { flushSync } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 export function InstallPrompt() {
   const { t } = useTranslation();
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const { canInstall, install } = useInstallPrompt();
   const [dismissed, setDismissed] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      flushSync(() => {
-        setDeferredPrompt(e as unknown as BeforeInstallPromptEvent);
-      });
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
 
   const handleDismiss = useCallback(() => {
     setAnimateIn(false);
@@ -26,20 +15,8 @@ export function InstallPrompt() {
     setTimeout(() => setDismissed(true), 300);
   }, []);
 
-  const handleInstall = async () => {
-    const prompt = deferredPrompt;
-    if (!prompt) return;
-    try {
-      await prompt.prompt();
-      await prompt.userChoice;
-      setDeferredPrompt(null);
-    } catch {
-      // prompt() or userChoice failed — keep deferredPrompt so the user can retry
-    }
-  };
-
   // Slide-in animation after mount
-  const shouldShow = !!deferredPrompt && !dismissed;
+  const shouldShow = canInstall && !dismissed;
   useEffect(() => {
     if (!shouldShow) return;
     const timer = setTimeout(() => setAnimateIn(true), 100);
@@ -54,7 +31,6 @@ export function InstallPrompt() {
         handleDismiss();
       }
     };
-    // Delay listener to avoid dismissing on the same click that might trigger show
     const timer = setTimeout(() => {
       document.addEventListener('click', handleOutsideClick);
     }, 200);
@@ -67,7 +43,7 @@ export function InstallPrompt() {
   // Reset animation when prompt is no longer shown
   const visible = shouldShow && animateIn;
 
-  if (!deferredPrompt || dismissed) return null;
+  if (!canInstall || dismissed) return null;
 
   return (
     <div
@@ -108,7 +84,7 @@ export function InstallPrompt() {
         {/* Install button */}
         <button
           type="button"
-          onClick={() => void handleInstall()}
+          onClick={() => void install()}
           className="shrink-0 min-h-14 min-w-14 px-4 py-2 bg-primary-content text-primary font-bold text-[length:var(--text-body)] rounded-xl active:scale-95 transition-transform"
           aria-label={t('installPrompt.installApp')}
         >
