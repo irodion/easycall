@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { flushSync } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,7 @@ export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -19,18 +20,11 @@ export function InstallPrompt() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // Slide-in animation after mount
-  const shouldShow = !!deferredPrompt && !dismissed;
-  useEffect(() => {
-    if (!shouldShow) return;
-    const timer = setTimeout(() => setAnimateIn(true), 100);
-    return () => clearTimeout(timer);
-  }, [shouldShow]);
-
-  // Reset animation when prompt is no longer shown
-  const visible = shouldShow && animateIn;
-
-  if (!deferredPrompt || dismissed) return null;
+  const handleDismiss = useCallback(() => {
+    setAnimateIn(false);
+    // Wait for slide-out animation before removing from DOM
+    setTimeout(() => setDismissed(true), 300);
+  }, []);
 
   const handleInstall = async () => {
     const prompt = deferredPrompt;
@@ -44,23 +38,49 @@ export function InstallPrompt() {
     }
   };
 
-  const handleDismiss = () => {
-    setAnimateIn(false);
-    // Wait for slide-out animation before removing from DOM
-    setTimeout(() => setDismissed(true), 300);
-  };
+  // Slide-in animation after mount
+  const shouldShow = !!deferredPrompt && !dismissed;
+  useEffect(() => {
+    if (!shouldShow) return;
+    const timer = setTimeout(() => setAnimateIn(true), 100);
+    return () => clearTimeout(timer);
+  }, [shouldShow]);
+
+  // Dismiss on outside click
+  useEffect(() => {
+    if (!shouldShow) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (dialogRef.current && !dialogRef.current.contains(e.target as Node)) {
+        handleDismiss();
+      }
+    };
+    // Delay listener to avoid dismissing on the same click that might trigger show
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleOutsideClick);
+    }, 200);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, [shouldShow, handleDismiss]);
+
+  // Reset animation when prompt is no longer shown
+  const visible = shouldShow && animateIn;
+
+  if (!deferredPrompt || dismissed) return null;
 
   return (
     <div
+      ref={dialogRef}
       id="install-prompt"
       role="dialog"
       aria-label={t('installPrompt.ariaLabel')}
       className={`fixed start-4 end-4 z-50 transition-all duration-300 ease-out ${
         visible
           ? 'translate-y-0 opacity-100'
-          : 'translate-y-8 opacity-0'
+          : '-translate-y-8 opacity-0'
       }`}
-      style={{ bottom: 'max(1rem, var(--safe-bottom, 0px))' }}
+      style={{ top: 'max(1rem, var(--safe-top, 0px))' }}
     >
       <div className="bg-primary text-primary-content rounded-2xl shadow-lg px-4 py-3 flex items-center gap-3">
         {/* App icon */}

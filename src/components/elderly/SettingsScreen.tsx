@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase';
@@ -16,6 +16,7 @@ interface SettingsScreenProps {
 
 export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const fontLabelId = 'font-size-label';
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -32,20 +33,26 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
     }
   };
 
+  const handleReviewSetup = async () => {
+    try {
+      await updateDoc(doc(db, 'users', userId), { onboardingComplete: false });
+      // Navigate to trigger AuthGuard to show onboarding
+      void navigate('/elderly');
+      // Reload so AuthGuard re-evaluates onboardingComplete
+      window.location.reload();
+    } catch {
+      setSaveError(t('settings.saveError'));
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-base-200/30 to-base-100 p-6 flex flex-col gap-6">
-      <div className="flex items-center gap-4">
-        <Link
-          to="/elderly"
-          className="min-h-14 min-w-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center gap-2"
-          aria-label={t('common.back')}
-        >
-          <Icon name="arrow-left" size={22} /> {t('common.back')}
-        </Link>
-        <EasyCallText as="h1" variant="heading">
-          {t('settings.title')}
-        </EasyCallText>
-      </div>
+    <div
+      className="min-h-screen bg-gradient-to-b from-base-200/30 to-base-100 p-6 flex flex-col gap-6"
+      style={{ paddingBottom: 'max(1.5rem, var(--safe-bottom, 0px))' }}
+    >
+      <EasyCallText as="h1" variant="heading">
+        {t('settings.title')}
+      </EasyCallText>
 
       {saveError && (
         <div role="alert" className="alert alert-error">
@@ -109,13 +116,30 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
         <PairingCodeDisplay userId={userId} />
       </section>
 
-      <div className="mt-auto">
+      {/* Bottom actions — pushed down via mt-auto */}
+      <div className="mt-auto flex flex-col gap-3">
         <Link
           to="/elderly/add-contact"
           className="btn btn-primary min-h-14 w-full font-bold text-[length:var(--text-button)]"
           aria-label={t('settings.addContact')}
         >
           {t('settings.addContact')}
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => void handleReviewSetup()}
+          className="btn bg-base-200 hover:bg-base-300 min-h-14 w-full font-bold text-[length:var(--text-body)]"
+        >
+          {t('settings.reviewSetup')}
+        </button>
+
+        <Link
+          to="/elderly"
+          className="min-h-14 min-w-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+          aria-label={t('common.back')}
+        >
+          <Icon name="arrow-left" size={22} /> {t('common.back')}
         </Link>
       </div>
     </div>

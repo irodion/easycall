@@ -47,9 +47,9 @@
   --radius-round: 9999px;
 }
 
-/* Add bottom padding to main when install prompt is visible */
+/* Add top padding to main when install prompt is visible */
 :has(> #install-prompt) > #main-content {
-  padding-bottom: 5rem;
+  padding-top: 5rem;
 }
 
 /* Extra-large font size overrides */

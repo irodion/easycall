@@ -20,7 +20,8 @@
     "noContacts": "No contacts yet",
     "noContactsHint": "A caregiver can add contacts for you",
     "callContact": "Call {{name}}",
-    "tapToCall": "Tap to call"
+    "tapToCall": "Tap to call",
+    "navigation": "Navigation"
   },
   "call": {
     "contactNotFound": "Contact not found",
@@ -42,7 +43,8 @@
     "pairingCode": "Pairing Code",
     "addContact": "Add Contact",
     "language": "Language",
-    "saveError": "Failed to save settings. Please try again."
+    "saveError": "Failed to save settings. Please try again.",
+    "reviewSetup": "Review Setup Guide"
   },
   "permissions": {
     "checking": "Checking camera and microphone permissions",

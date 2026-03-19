@@ -18,7 +18,8 @@
     "noContacts": "Noch keine Kontakte",
     "noContactsHint": "Ein Betreuer kann Kontakte für Sie hinzufügen",
     "callContact": "{{name}} anrufen",
-    "tapToCall": "Zum Anrufen tippen"
+    "tapToCall": "Zum Anrufen tippen",
+    "navigation": "Navigation"
   },
   "call": {
     "contactNotFound": "Kontakt nicht gefunden",
@@ -40,7 +41,8 @@
     "pairingCode": "Kopplungscode",
     "addContact": "Kontakt hinzufügen",
     "language": "Sprache",
-    "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "reviewSetup": "Einrichtung erneut ansehen"
   },
   "permissions": {
     "checking": "Kamera- und Mikrofonberechtigungen werden überprüft",
