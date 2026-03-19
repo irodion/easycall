@@ -33,11 +33,16 @@ export function EasyCallButton({
   'aria-label': ariaLabel,
   children,
 }: EasyCallButtonProps) {
+  const handleClick = () => {
+    navigator.vibrate?.(30);
+    onClick?.();
+  };
+
   return (
     <button
       type={type}
       className={`btn ${variantClass[variant]} ${sizeClass[size]} font-bold text-[length:var(--text-button)] active:shadow-none active:translate-y-px transition-all duration-150${className ? ` ${className}` : ''}`}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       aria-label={ariaLabel}
     >

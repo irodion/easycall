@@ -17,7 +17,8 @@
     "settings": "Einstellungen",
     "noContacts": "Noch keine Kontakte",
     "noContactsHint": "Ein Betreuer kann Kontakte für Sie hinzufügen",
-    "callContact": "{{name}} anrufen"
+    "callContact": "{{name}} anrufen",
+    "tapToCall": "Zum Anrufen tippen"
   },
   "call": {
     "contactNotFound": "Kontakt nicht gefunden",

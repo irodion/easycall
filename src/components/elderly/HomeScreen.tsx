@@ -60,9 +60,10 @@ export function HomeScreen({ userId }: HomeScreenProps) {
             type="button"
             onClick={() => void navigate('/elderly/settings')}
             aria-label={t('home.settings')}
-            className="min-h-14 min-w-14 px-4 py-3 bg-base-200 text-base-content rounded-2xl active:scale-95 transition-transform flex items-center justify-center"
+            className="min-h-14 min-w-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center gap-2"
           >
-            <Icon name="settings" size={24} />
+            <Icon name="settings" size={22} />
+            {t('home.settings')}
           </button>
         </div>
       </div>
@@ -114,8 +115,12 @@ export function HomeScreen({ userId }: HomeScreenProps) {
               <EasyCallText as="span" variant="button" className="font-bold text-center">
                 {contact.name}
               </EasyCallText>
+              <span className="flex items-center gap-1 text-[length:var(--text-body)] text-primary/70">
+                <Icon name="phone" size={16} aria-hidden />
+                {t('home.tapToCall')}
+              </span>
               {contact.contactUserId && presenceMap.has(contact.contactUserId) && (
-                <span className="text-xs text-base-content/60">
+                <span className="text-[length:var(--text-body)] text-base-content/80">
                   {t(presenceI18nKeys[presenceMap.get(contact.contactUserId)!.state])}
                 </span>
               )}

@@ -17,7 +17,8 @@
     "settings": "Настройки",
     "noContacts": "Контактов пока нет",
     "noContactsHint": "Помощник может добавить контакты для вас",
-    "callContact": "Позвонить {{name}}"
+    "callContact": "Позвонить {{name}}",
+    "tapToCall": "Нажмите, чтобы позвонить"
   },
   "call": {
     "contactNotFound": "Контакт не найден",

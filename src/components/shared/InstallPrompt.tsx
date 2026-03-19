@@ -6,7 +6,7 @@ export function InstallPrompt() {
   const { t } = useTranslation();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [animateIn, setAnimateIn] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -20,13 +20,15 @@ export function InstallPrompt() {
   }, []);
 
   // Slide-in animation after mount
+  const shouldShow = !!deferredPrompt && !dismissed;
   useEffect(() => {
-    if (deferredPrompt && !dismissed) {
-      const timer = setTimeout(() => setVisible(true), 100);
-      return () => clearTimeout(timer);
-    }
-    setVisible(false);
-  }, [deferredPrompt, dismissed]);
+    if (!shouldShow) return;
+    const timer = setTimeout(() => setAnimateIn(true), 100);
+    return () => clearTimeout(timer);
+  }, [shouldShow]);
+
+  // Reset animation when prompt is no longer shown
+  const visible = shouldShow && animateIn;
 
   if (!deferredPrompt || dismissed) return null;
 
@@ -43,7 +45,7 @@ export function InstallPrompt() {
   };
 
   const handleDismiss = () => {
-    setVisible(false);
+    setAnimateIn(false);
     // Wait for slide-out animation before removing from DOM
     setTimeout(() => setDismissed(true), 300);
   };
@@ -53,11 +55,12 @@ export function InstallPrompt() {
       id="install-prompt"
       role="dialog"
       aria-label={t('installPrompt.ariaLabel')}
-      className={`fixed bottom-4 start-4 end-4 z-50 transition-all duration-300 ease-out ${
+      className={`fixed start-4 end-4 z-50 transition-all duration-300 ease-out ${
         visible
           ? 'translate-y-0 opacity-100'
           : 'translate-y-8 opacity-0'
       }`}
+      style={{ bottom: 'max(1rem, var(--safe-bottom, 0px))' }}
     >
       <div className="bg-primary text-primary-content rounded-2xl shadow-lg px-4 py-3 flex items-center gap-3">
         {/* App icon */}

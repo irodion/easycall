@@ -19,7 +19,8 @@
     "settings": "Settings",
     "noContacts": "No contacts yet",
     "noContactsHint": "A caregiver can add contacts for you",
-    "callContact": "Call {{name}}"
+    "callContact": "Call {{name}}",
+    "tapToCall": "Tap to call"
   },
   "call": {
     "contactNotFound": "Contact not found",

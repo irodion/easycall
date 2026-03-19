@@ -17,7 +17,8 @@
     "settings": "Ajustes",
     "noContacts": "No hay contactos aún",
     "noContactsHint": "Un cuidador puede agregar contactos por usted",
-    "callContact": "Llamar a {{name}}"
+    "callContact": "Llamar a {{name}}",
+    "tapToCall": "Toca para llamar"
   },
   "call": {
     "contactNotFound": "Contacto no encontrado",
