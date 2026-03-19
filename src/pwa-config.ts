@@ -7,8 +7,8 @@ export const pwaManifest: Partial<ManifestOptions> = {
   start_url: '/',
   display: 'standalone',
   orientation: 'portrait',
-  theme_color: '#166534',
-  background_color: '#f0fdf4',
+  theme_color: '#1a5276',
+  background_color: '#fdf8f0',
   icons: [
     {
       src: '/pwa-192x192.png',

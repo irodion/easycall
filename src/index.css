@@ -2,40 +2,47 @@
 @import './styles/tokens.css';
 @plugin "daisyui";
 
-/* Custom "elderly" theme — WCAG AAA high-contrast colors */
+/* Custom "elderly" theme — WCAG AAA high-contrast, warm palette optimized for aging vision */
 @plugin "daisyui/theme" {
   name: 'elderly';
   default: true;
   prefersdark: false;
   color-scheme: light;
 
-  /* High-contrast green primary on light background */
-  --color-base-100: oklch(0.98 0.01 145);
-  --color-base-200: oklch(0.95 0.02 145);
-  --color-base-300: oklch(0.9 0.03 145);
-  --color-base-content: oklch(0.15 0.02 145);
+  /* Warm cream/ivory backgrounds — reduces glare, better perceived by aging eyes */
+  --color-base-100: oklch(0.98 0.015 75);
+  --color-base-200: oklch(0.94 0.02 75);
+  --color-base-300: oklch(0.89 0.025 75);
+  --color-base-content: oklch(0.15 0.02 50);
 
-  --color-primary: oklch(0.4 0.15 155);
-  --color-primary-content: oklch(0.98 0.01 145);
+  /* Deep teal primary — distinct from call-green, warm-shifted for lens yellowing */
+  --color-primary: oklch(0.38 0.08 230);
+  --color-primary-content: oklch(0.98 0.01 75);
 
-  --color-secondary: oklch(0.45 0.1 250);
-  --color-secondary-content: oklch(0.98 0.01 250);
+  /* Rich plum secondary — high chroma so it won't appear gray to aging eyes */
+  --color-secondary: oklch(0.42 0.14 310);
+  --color-secondary-content: oklch(0.98 0.01 310);
 
-  --color-accent: oklch(0.5 0.12 80);
-  --color-accent-content: oklch(0.98 0.01 80);
+  /* Warm amber accent — best perceived color family for elderly */
+  --color-accent: oklch(0.52 0.14 55);
+  --color-accent-content: oklch(0.98 0.01 55);
 
-  --color-neutral: oklch(0.3 0.02 250);
-  --color-neutral-content: oklch(0.98 0.01 250);
+  --color-neutral: oklch(0.3 0.015 60);
+  --color-neutral-content: oklch(0.98 0.01 60);
 
-  --color-info: oklch(0.5 0.12 250);
-  --color-info-content: oklch(0.98 0.01 250);
+  /* Saturated deep blue — must overcome lens yellowing */
+  --color-info: oklch(0.45 0.15 255);
+  --color-info-content: oklch(0.98 0.01 255);
 
-  --color-success: oklch(0.45 0.15 155);
+  /* Deep green — reserved for call/answer/go semantics */
+  --color-success: oklch(0.42 0.12 155);
   --color-success-content: oklch(0.98 0.01 155);
 
-  --color-warning: oklch(0.55 0.15 80);
-  --color-warning-content: oklch(0.15 0.02 80);
+  /* Dark amber warning — warm, highly visible */
+  --color-warning: oklch(0.55 0.15 70);
+  --color-warning-content: oklch(0.15 0.02 70);
 
+  /* Deep red — universally understood danger/decline */
   --color-error: oklch(0.45 0.18 25);
   --color-error-content: oklch(0.98 0.01 25);
 
@@ -57,8 +64,8 @@
   .file-input:focus,
   .select:focus {
     outline: none;
-    box-shadow: 0 0 0 3px oklch(0.4 0.15 155 / 0.2);
-    border-color: oklch(0.4 0.15 155);
+    box-shadow: 0 0 0 3px oklch(0.38 0.08 230 / 0.25);
+    border-color: oklch(0.38 0.08 230);
   }
 }
 
