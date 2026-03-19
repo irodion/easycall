@@ -4,26 +4,28 @@ import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
 import { RoleSelector } from './RoleSelector';
+import { OnboardingFlow } from './OnboardingFlow';
 
 interface AuthGuardProps {
   requiredRole: 'elderly' | 'caregiver';
   children?: ReactNode;
 }
 
-type AuthState = 'loading' | 'no-role' | 'correct-role' | 'wrong-role';
+type AuthState = 'loading' | 'no-role' | 'onboarding' | 'correct-role' | 'wrong-role';
 
 export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
   const [authState, setAuthState] = useState<AuthState>('loading');
+  const [user, setUser] = useState<{ uid: string; role: 'elderly' | 'caregiver' } | null>(null);
 
   useEffect(() => {
     let unsubDoc: (() => void) | undefined;
 
-    const unsubAuth = onAuthStateChanged(auth, async (user) => {
+    const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       // Clean up previous Firestore listener when auth state changes
       unsubDoc?.();
       unsubDoc = undefined;
 
-      if (!user) {
+      if (!firebaseUser) {
         try {
           await signInAnonymously(auth);
           setAuthState('loading'); // will re-trigger on next auth change
@@ -35,16 +37,26 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
 
       // Listen reactively so role changes (e.g. from RoleSelector) are picked up
       unsubDoc = onSnapshot(
-        doc(db, 'users', user.uid),
+        doc(db, 'users', firebaseUser.uid),
         (snap) => {
-          const role = snap.data()?.['role'];
+          const data = snap.data();
+          const role = data?.['role'];
           // Only accept known roles; malformed values fall through to no-role
           if (role !== 'elderly' && role !== 'caregiver') {
             setAuthState('no-role');
+            setUser(null);
           } else if (role === requiredRole) {
-            setAuthState('correct-role');
+            const onboardingComplete = data?.['onboardingComplete'] === true;
+            if (!onboardingComplete) {
+              setUser({ uid: firebaseUser.uid, role });
+              setAuthState('onboarding');
+            } else {
+              setAuthState('correct-role');
+              setUser(null);
+            }
           } else {
             setAuthState('wrong-role');
+            setUser(null);
           }
         },
         () => {
@@ -72,6 +84,18 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
 
   if (authState === 'no-role') {
     return <RoleSelector />;
+  }
+
+  if (authState === 'onboarding' && user) {
+    return (
+      <OnboardingFlow
+        user={user}
+        onComplete={() => {
+          setAuthState('correct-role');
+          setUser(null);
+        }}
+      />
+    );
   }
 
   if (authState === 'wrong-role') {

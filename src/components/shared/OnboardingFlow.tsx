@@ -7,10 +7,13 @@ import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { PermissionCheck } from '@/components/elderly/PermissionCheck';
 import { PairingCodeDisplay } from '@/components/shared/PairingCodeDisplay';
 import { PairElderlyUser } from '@/components/caregiver/PairElderlyUser';
-import type { EasyCallUser } from '@/types/user';
+interface OnboardingUser {
+  uid: string;
+  role: 'elderly' | 'caregiver';
+}
 
 interface OnboardingFlowProps {
-  user: EasyCallUser;
+  user: OnboardingUser;
   onComplete: () => void;
 }
 

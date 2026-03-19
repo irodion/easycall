@@ -12,13 +12,14 @@
     "somethingWentWrong": "משהו השתבש"
   },
   "home": {
-    "title": "אנשי הקשר שלך",
+    "title": "אנשי קשר",
     "history": "היסטוריה",
     "settings": "הגדרות",
     "noContacts": "אין אנשי קשר עדיין",
     "noContactsHint": "מטפל יכול להוסיף אנשי קשר עבורך",
     "callContact": "התקשר ל{{name}}",
-    "tapToCall": "הקש/י להתקשר"
+    "tapToCall": "הקש/י להתקשר",
+    "navigation": "ניווט"
   },
   "call": {
     "contactNotFound": "איש קשר לא נמצא",
@@ -40,7 +41,9 @@
     "pairingCode": "קוד צימוד",
     "addContact": "הוסף איש קשר",
     "language": "שפה",
-    "saveError": "שמירת ההגדרות נכשלה. אנא נסה שוב."
+    "saveError": "שמירת ההגדרות נכשלה. אנא נסה שוב.",
+    "reviewSetup": "סקירת מדריך ההגדרה",
+    "installApp": "התקן אפליקציה"
   },
   "permissions": {
     "checking": "בודק הרשאות מצלמה ומיקרופון",
