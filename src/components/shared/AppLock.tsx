@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { Icon } from '@/components/shared/Icon';
 
+const DIGIT_BTN_CLASS =
+  'btn bg-base-200 hover:bg-base-300 min-h-14 min-w-14 text-[length:var(--text-display)] font-bold';
+const UTILITY_BTN_CLASS =
+  'btn bg-base-200/60 hover:bg-base-300 min-h-14 min-w-14 text-[length:var(--text-body)]';
+
 interface AppLockProps {
   isLocked: boolean;
   failedAttempts: number;
@@ -105,7 +110,7 @@ export function AppLock({
           <button
             key={d}
             type="button"
-            className="btn btn-ghost min-h-14 min-w-14 text-[length:var(--text-display)] font-bold"
+            className={DIGIT_BTN_CLASS}
             onClick={() => handleDigit(d)}
             disabled={isCoolingDown || submitting}
             aria-label={d}
@@ -115,7 +120,7 @@ export function AppLock({
         ))}
         <button
           type="button"
-          className="btn btn-ghost min-h-14 min-w-14 text-[length:var(--text-body)]"
+          className={UTILITY_BTN_CLASS}
           onClick={handleClear}
           disabled={isCoolingDown || submitting}
           aria-label={t('appLock.clear')}
@@ -124,7 +129,7 @@ export function AppLock({
         </button>
         <button
           type="button"
-          className="btn btn-ghost min-h-14 min-w-14 text-[length:var(--text-display)] font-bold"
+          className={DIGIT_BTN_CLASS}
           onClick={() => handleDigit('0')}
           disabled={isCoolingDown || submitting}
           aria-label="0"
@@ -133,7 +138,7 @@ export function AppLock({
         </button>
         <button
           type="button"
-          className="btn btn-ghost min-h-14 min-w-14 text-[length:var(--text-body)]"
+          className={UTILITY_BTN_CLASS}
           onClick={handleBackspace}
           disabled={isCoolingDown || submitting}
           aria-label={t('appLock.backspace')}

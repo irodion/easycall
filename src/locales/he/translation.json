@@ -17,7 +17,8 @@
     "settings": "הגדרות",
     "noContacts": "אין אנשי קשר עדיין",
     "noContactsHint": "מטפל יכול להוסיף אנשי קשר עבורך",
-    "callContact": "התקשר ל{{name}}"
+    "callContact": "התקשר ל{{name}}",
+    "tapToCall": "הקש/י להתקשר"
   },
   "call": {
     "contactNotFound": "איש קשר לא נמצא",

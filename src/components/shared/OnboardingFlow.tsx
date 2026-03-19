@@ -53,11 +53,11 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
               ? t('onboarding.elderlyDescription')
               : t('onboarding.caregiverDescription')}
           </p>
-          <div className="flex gap-[var(--space-sm)] w-full max-w-xs">
-            <EasyCallButton size="large" onClick={nextStep}>
+          <div className="flex flex-col gap-[var(--space-sm)] w-full max-w-xs">
+            <EasyCallButton size="large" onClick={nextStep} className="w-full">
               {t('common.next')}
             </EasyCallButton>
-            <EasyCallButton variant="secondary" size="large" onClick={nextStep}>
+            <EasyCallButton variant="secondary" size="large" onClick={nextStep} className="w-full">
               {t('common.skip')}
             </EasyCallButton>
           </div>
@@ -73,7 +73,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
             {t('onboarding.cameraMicHint')}
           </p>
           <PermissionCheck onReady={nextStep} />
-          <EasyCallButton variant="secondary" size="large" onClick={nextStep}>
+          <EasyCallButton variant="secondary" size="large" onClick={nextStep} className="w-full max-w-xs">
             {t('common.skip')}
           </EasyCallButton>
         </div>
@@ -89,6 +89,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
           </p>
           <EasyCallButton
             size="large"
+            className="w-full max-w-xs"
             onClick={async () => {
               try {
                 await requestPermission();
@@ -100,7 +101,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
           >
             {t('common.next')}
           </EasyCallButton>
-          <EasyCallButton variant="secondary" size="large" onClick={nextStep}>
+          <EasyCallButton variant="secondary" size="large" onClick={nextStep} className="w-full max-w-xs">
             {t('common.skip')}
           </EasyCallButton>
         </div>
@@ -123,7 +124,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
               {error}
             </p>
           )}
-          <EasyCallButton size="large" disabled={isSubmitting} onClick={() => void handleFinish()}>
+          <EasyCallButton size="large" disabled={isSubmitting} onClick={() => void handleFinish()} className="w-full max-w-xs">
             {isSubmitting ? t('common.saving') : t('onboarding.done')}
           </EasyCallButton>
           <EasyCallButton
@@ -131,6 +132,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
             size="large"
             disabled={isSubmitting}
             onClick={() => void handleFinish()}
+            className="w-full max-w-xs"
           >
             {t('common.skip')}
           </EasyCallButton>

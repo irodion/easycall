@@ -16,6 +16,7 @@ import type { ConnectionQuality } from '@/components/shared/connectionQualitySty
 import type { JitsiMeetExternalAPI } from '@/types/jitsi';
 
 const WEAK_SIGNAL_BANNER_DURATION_MS = 5000;
+const CONTROLS_SAFE_AREA_STYLE = { paddingBottom: 'max(1.5rem, var(--safe-bottom, 0px))' };
 
 interface CallScreenProps {
   setInCall?: (inCall: boolean) => void;
@@ -264,9 +265,11 @@ export function CallScreen({ setInCall }: CallScreenProps) {
     <div className="h-screen bg-black flex flex-col relative">
       {loading && (
         <div className="absolute inset-0 bg-base-100 flex items-center justify-center z-10">
-          <div role="status" aria-label={t('call.connecting')}>
+          <div role="status" className="flex flex-col items-center gap-4">
             <span className="loading loading-spinner loading-lg text-primary" aria-hidden="true" />
-            <span className="sr-only">{t('call.connectingWith', { name: contact.name })}</span>
+            <EasyCallText as="p" variant="body" className="text-base-content">
+              {t('call.connectingWith', { name: contact.name })}
+            </EasyCallText>
           </div>
         </div>
       )}
@@ -301,7 +304,10 @@ export function CallScreen({ setInCall }: CallScreenProps) {
       />
 
       {/* Overlay call controls */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center gap-6">
+      <div
+        className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center gap-6"
+        style={CONTROLS_SAFE_AREA_STYLE}
+      >
         <EasyCallButton
           variant="secondary"
           size="large"

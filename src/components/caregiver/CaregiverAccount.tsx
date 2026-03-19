@@ -140,7 +140,7 @@ export function CaregiverAccount() {
 
           <Link
             to="/caregiver"
-            className="btn btn-ghost touch-target-min min-h-14 font-bold text-[length:var(--text-button)]"
+            className="btn bg-base-200 hover:bg-base-300 touch-target-min min-h-14 min-w-14 font-bold text-[length:var(--text-button)]"
           >
             {t('caregiverAccount.backToDashboard')}
           </Link>

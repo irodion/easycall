@@ -60,6 +60,11 @@
     font-family: var(--font-family);
   }
 
+  /* Prevent accidental pull-to-refresh in standalone PWA mode */
+  html, body {
+    overscroll-behavior-y: contain;
+  }
+
   .input:focus,
   .file-input:focus,
   .select:focus {

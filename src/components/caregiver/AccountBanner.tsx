@@ -35,7 +35,7 @@ export function AccountBanner() {
         </Link>
         <button
           type="button"
-          className="btn btn-ghost min-h-14 min-w-14"
+          className="btn btn-outline btn-sm min-h-14 min-w-14"
           onClick={handleDismiss}
           aria-label={t('accountBanner.dismiss')}
         >

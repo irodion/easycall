@@ -34,6 +34,12 @@
   --font-weight-bold: 700;
   --line-height: 1.6;
 
+  /* Safe-area insets for edge-to-edge PWA on modern Android/iOS */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
   /* Borders */
   --radius-sm: 12px;
   --radius-md: 16px;
