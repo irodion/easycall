@@ -36,10 +36,8 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   const handleReviewSetup = async () => {
     try {
       await updateDoc(doc(db, 'users', userId), { onboardingComplete: false });
-      // Navigate to trigger AuthGuard to show onboarding
+      // AuthGuard's onSnapshot will reactively detect the change and show OnboardingFlow
       void navigate('/elderly');
-      // Reload so AuthGuard re-evaluates onboardingComplete
-      window.location.reload();
     } catch {
       setSaveError(t('settings.saveError'));
     }

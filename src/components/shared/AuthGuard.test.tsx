@@ -177,7 +177,7 @@ describe('AuthGuard', () => {
 
     // Simulate Firestore doc update with role set
     await act(async () => {
-      snapshotCallback!({ data: () => ({ role: 'elderly' }) });
+      snapshotCallback!({ data: () => ({ role: 'elderly', onboardingComplete: true }) });
     });
 
     // Should now show protected content without page reload
