@@ -83,10 +83,14 @@
     "title": "Панель помощника",
     "linkUser": "Привязать пользователя",
     "lastSeen": "Последний раз: {{time}}",
-    "manageContacts": "Управление контактами"
+    "manageContacts": "Управление контактами",
+    "backToDashboard": "Назад к панели",
+    "noLinkedUsers": "Пока нет привязанных пользователей",
+    "noLinkedUsersHint": "Нажмите \"Привязать пользователя\" для соединения с устройством члена семьи."
   },
   "manageContacts": {
     "title": "Управление контактами",
+    "titleFor": "Контакты {{name}}",
     "addContact": "+ Добавить контакт",
     "contactName": "Имя контакта",
     "namePlaceholder": "Имя контакта",
@@ -118,7 +122,8 @@
     "pinMismatchError": "PIN-коды не совпадают",
     "pinSaveError": "Не удалось сохранить PIN. Пожалуйста, попробуйте снова.",
     "savePin": "Сохранить PIN",
-    "language": "Язык"
+    "language": "Язык",
+    "settingsFor": "Настройки {{name}}"
   },
   "presence": {
     "online": "В сети",
@@ -180,7 +185,8 @@
     "generatingCode": "Генерация кода",
     "pairingCodeLabel": "Код сопряжения: {{code}}",
     "expiresIn": "Истекает через {{time}}",
-    "getNewCode": "Получить новый код"
+    "getNewCode": "Получить новый код",
+    "generateError": "Не удалось сгенерировать код. Пожалуйста, попробуйте снова."
   },
   "pairElderly": {
     "enterCode": "Введите 6-значный код, показанный на экране пожилого пользователя:",

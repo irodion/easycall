@@ -86,10 +86,14 @@
     "title": "Caregiver Dashboard",
     "linkUser": "Link Elderly User",
     "lastSeen": "Last seen: {{time}}",
-    "manageContacts": "Manage Contacts"
+    "manageContacts": "Manage Contacts",
+    "backToDashboard": "Back to Dashboard",
+    "noLinkedUsers": "No linked users yet",
+    "noLinkedUsersHint": "Tap \"Link Elderly User\" to pair with a family member's device."
   },
   "manageContacts": {
     "title": "Manage Contacts",
+    "titleFor": "Contacts for {{name}}",
     "addContact": "+ Add Contact",
     "contactName": "Contact name",
     "namePlaceholder": "Contact name",
@@ -122,7 +126,8 @@
     "pinSaveError": "Failed to save PIN. Please try again.",
     "savePin": "Save PIN",
     "language": "Language",
-    "loadError": "Unable to load settings. Check permissions and try again."
+    "loadError": "Unable to load settings. Check permissions and try again.",
+    "settingsFor": "Settings for {{name}}"
   },
   "onboarding": {
     "welcome": "Welcome to EasyCall",
@@ -143,7 +148,8 @@
     "generatingCode": "Generating code",
     "pairingCodeLabel": "Pairing code: {{code}}",
     "expiresIn": "Expires in {{time}}",
-    "getNewCode": "Get new code"
+    "getNewCode": "Get new code",
+    "generateError": "Failed to generate code. Please try again."
   },
   "pairElderly": {
     "enterCode": "Enter the 6-digit code shown on the elderly user's screen:",

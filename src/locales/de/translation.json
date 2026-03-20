@@ -83,10 +83,14 @@
     "title": "Betreuer-Dashboard",
     "linkUser": "Älteren Benutzer verknüpfen",
     "lastSeen": "Zuletzt gesehen: {{time}}",
-    "manageContacts": "Kontakte verwalten"
+    "manageContacts": "Kontakte verwalten",
+    "backToDashboard": "Zurück zum Dashboard",
+    "noLinkedUsers": "Noch keine verknüpften Benutzer",
+    "noLinkedUsersHint": "Tippen Sie auf \"Älteren Benutzer verknüpfen\" um sich mit dem Gerät eines Familienmitglieds zu verbinden."
   },
   "manageContacts": {
     "title": "Kontakte verwalten",
+    "titleFor": "Kontakte von {{name}}",
     "addContact": "+ Kontakt hinzufügen",
     "contactName": "Kontaktname",
     "namePlaceholder": "Kontaktname",
@@ -118,7 +122,8 @@
     "pinMismatchError": "PINs stimmen nicht überein",
     "pinSaveError": "PIN konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "savePin": "PIN speichern",
-    "language": "Sprache"
+    "language": "Sprache",
+    "settingsFor": "Einstellungen für {{name}}"
   },
   "presence": {
     "online": "Online",
@@ -180,7 +185,8 @@
     "generatingCode": "Code wird generiert",
     "pairingCodeLabel": "Kopplungscode: {{code}}",
     "expiresIn": "Läuft ab in {{time}}",
-    "getNewCode": "Neuen Code erhalten"
+    "getNewCode": "Neuen Code erhalten",
+    "generateError": "Code konnte nicht generiert werden. Bitte versuchen Sie es erneut."
   },
   "pairElderly": {
     "enterCode": "Geben Sie den 6-stelligen Code ein, der auf dem Bildschirm des älteren Benutzers angezeigt wird:",

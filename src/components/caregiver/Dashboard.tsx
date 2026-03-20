@@ -110,6 +110,15 @@ export function Dashboard({ userId }: DashboardProps) {
         <div role="status" aria-label={t('common.loading')}>
           <span className="loading loading-spinner loading-lg" />
         </div>
+      ) : linkedUsers.length === 0 ? (
+        <div className="card card-body bg-base-200 text-center gap-3">
+          <EasyCallText as="p" variant="body">
+            {t('dashboard.noLinkedUsers')}
+          </EasyCallText>
+          <EasyCallText as="p" variant="body" className="text-base-content/60">
+            {t('dashboard.noLinkedUsersHint')}
+          </EasyCallText>
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           {linkedUsers.map((user) => {

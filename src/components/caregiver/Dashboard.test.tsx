@@ -58,6 +58,19 @@ describe('Dashboard', () => {
     await screen.findByRole('link', { name: /link elderly user/i });
   });
 
+  it('shows empty state message when no linked users', async () => {
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ linkedElderlyUsers: [] }),
+    });
+
+    const { Dashboard } = await import('./Dashboard');
+    renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+    await screen.findByText(/no linked users yet/i);
+    expect(screen.getByText(/tap.*link elderly user/i)).toBeInTheDocument();
+  });
+
   it('renders a card per linked elderly user', async () => {
     getDoc.mockImplementation((_db: unknown, path: unknown, ...args: unknown[]) => {
       // Return different docs based on what's being fetched

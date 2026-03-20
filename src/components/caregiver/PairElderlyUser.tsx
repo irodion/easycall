@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { validatePairingCode } from '@/services/callSignaling';
+import { BackToDashboard } from '@/components/shared/BackToDashboard';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 
 interface PairElderlyUserProps {
@@ -42,6 +43,7 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-[var(--space-md)]">
+      <BackToDashboard />
       <label htmlFor="pairing-code" className="text-[length:var(--text-body)] font-bold">
         {t('pairElderly.enterCode')}
       </label>
