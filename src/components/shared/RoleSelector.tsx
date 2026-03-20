@@ -25,8 +25,8 @@ export function RoleSelector() {
       return;
     }
 
-    // Block caregiver role while PIN status is still loading or if PIN is required
-    if (role === 'caregiver' && (caregiverPin.loading || (caregiverPin.pinRequired && !caregiverPin.verified))) {
+    // If selecting caregiver and PIN is required but not verified, show prompt
+    if (role === 'caregiver' && caregiverPin.pinRequired && !caregiverPin.verified) {
       setShowPinPrompt(true);
       return;
     }
@@ -47,8 +47,13 @@ export function RoleSelector() {
         );
       }
       void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
-    } catch {
-      setError(t('common.somethingWentWrong'));
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? '';
+      if (code.includes('permission-denied')) {
+        setError(t('registrationLock.closed'));
+      } else {
+        setError(t('common.somethingWentWrong'));
+      }
     } finally {
       setIsSaving(false);
     }
