@@ -19,7 +19,6 @@ vi.mock('@/services/firebase', () => ({ db: {} }));
 vi.mock('@/services/caregiverPinService', () => ({
   CAREGIVER_PIN_REF: 'pin-ref',
   verifyCaregiverPin: (...args: unknown[]) => mockVerifyCaregiverPin(...args),
-  migrateLegacyPinIfNeeded: vi.fn().mockResolvedValue(true),
 }));
 
 import { useCaregiverPin } from '@/hooks/useCaregiverPin';
@@ -49,18 +48,9 @@ describe('useCaregiverPin', () => {
     expect(result.current.loading).toBe(false);
   });
 
-  it('stays loading when no PIN and migration pending', () => {
+  it('auto-verifies when no PIN is set', () => {
     const { result } = renderPinHook();
     act(() => snapshotCallback!({ exists: () => false }));
-    // Migration hasn't resolved yet — stay loading
-    expect(result.current.loading).toBe(true);
-  });
-
-  it('auto-verifies when no PIN after migration completes', async () => {
-    const { result } = renderPinHook();
-    act(() => snapshotCallback!({ exists: () => false }));
-    // Flush migration promise
-    await act(async () => {});
     expect(result.current.pinRequired).toBe(false);
     expect(result.current.verified).toBe(true);
     expect(result.current.loading).toBe(false);
@@ -107,9 +97,8 @@ describe('useCaregiverPin', () => {
 
   it('resets verified when PIN is enabled after being auto-verified', async () => {
     const { result } = renderPinHook();
-    // Start with no PIN — flush migration so it finalizes
+    // Start with no PIN — auto-verified
     act(() => snapshotCallback!({ exists: () => false }));
-    await act(async () => {}); // flush migration
     expect(result.current.verified).toBe(true);
 
     // PIN gets enabled — should reset verified
@@ -125,9 +114,8 @@ describe('useCaregiverPin', () => {
     await act(async () => { await result.current.submitPin('1234'); });
     expect(result.current.verified).toBe(true);
 
-    // PIN removed — flush migration, auto-verifies and clears userVerified ref
+    // PIN removed — auto-verifies and clears userVerified ref
     act(() => snapshotCallback!({ exists: () => false }));
-    await act(async () => {}); // flush migration
     expect(result.current.verified).toBe(true);
 
     // PIN re-enabled — userVerified was cleared, so must re-verify

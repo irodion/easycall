@@ -130,16 +130,8 @@ export const verifyCaregiverPin = onCall({ enforceAppCheck: true }, async (reque
   const callerIp = request.rawRequest?.ip ?? request.rawRequest?.headers['x-forwarded-for']?.toString() ?? 'unknown';
   await checkPinVerifyRateLimit(db, callerIp);
 
-  // Check new location first, then fall back to legacy location for migration
-  let storedHash: string | undefined;
   const pinHashDoc = await db.doc('config/caregiverPinHash').get();
-  if (pinHashDoc.exists) {
-    storedHash = pinHashDoc.data()?.['pinHash'] as string | undefined;
-  } else {
-    // Backward compatibility: check old config/caregiverPin doc
-    const legacyDoc = await db.doc('config/caregiverPin').get();
-    storedHash = legacyDoc.data()?.['pinHash'] as string | undefined;
-  }
+  const storedHash = pinHashDoc.data()?.['pinHash'] as string | undefined;
 
   if (typeof storedHash !== 'string') {
     return { valid: false };
@@ -149,52 +141,6 @@ export const verifyCaregiverPin = onCall({ enforceAppCheck: true }, async (reque
   return { valid };
 });
 
-// ---------------------------------------------------------------------------
-// migrateLegacyPin
-//
-// Auto-migration: moves pinHash from the publicly readable config/caregiverPin
-// to the private config/caregiverPinHash doc, then replaces the public doc with
-// { pinSet: true }. Called by the client when it detects the legacy format.
-// Idempotent — safe to call multiple times.
-// ---------------------------------------------------------------------------
-export const migrateLegacyPin = onCall({ enforceAppCheck: true }, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError('unauthenticated', 'Authentication required.');
-  }
-
-  const db = getFirestore();
-
-  // If the PIN was intentionally removed, don't re-introduce it from legacy data
-  const statusDoc = await db.doc('config/caregiverPinStatus').get();
-  if (statusDoc.exists && statusDoc.data()?.['pinSet'] === false) {
-    return { migrated: false };
-  }
-
-  const publicDoc = await db.doc('config/caregiverPin').get();
-  const publicData = publicDoc.data();
-
-  // Only migrate if legacy pinHash exists in the public doc
-  if (!publicData || typeof publicData['pinHash'] !== 'string') {
-    return { migrated: false };
-  }
-
-  const privateDoc = await db.doc('config/caregiverPinHash').get();
-  const batch = db.batch();
-
-  // Copy hash to private doc (only if not already there)
-  if (!privateDoc.exists || typeof privateDoc.data()?.['pinHash'] !== 'string') {
-    batch.set(db.doc('config/caregiverPinHash'), {
-      pinHash: publicData['pinHash'],
-      setBy: publicData['setBy'] ?? null,
-    });
-  }
-
-  // Write clean status doc (the one clients actually read)
-  batch.set(db.doc('config/caregiverPinStatus'), { pinSet: true });
-
-  await batch.commit();
-  return { migrated: true };
-});
 
 // ---------------------------------------------------------------------------
 // Helper: verify caller is a caregiver via admin SDK (not client-writable role)
@@ -258,8 +204,6 @@ export const setCaregiverPinConfig = onCall({ enforceAppCheck: true }, async (re
     const batch = db.batch();
     batch.set(db.doc('config/caregiverPinHash'), { pinHash: null, setBy: null });
     batch.set(db.doc('config/caregiverPinStatus'), { pinSet: false });
-    // Scrub legacy doc so migrateLegacyPin doesn't reintroduce the old hash
-    batch.set(db.doc('config/caregiverPin'), { pinHash: null, setBy: null });
     await batch.commit();
 
     return { success: true };

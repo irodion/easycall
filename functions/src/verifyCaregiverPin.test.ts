@@ -131,14 +131,4 @@ describe('verifyCaregiverPin Cloud Function', () => {
     const result = await callVerifyPin(mockRequest({ pin: '0000' }));
     expect(result).toEqual({ valid: false });
   });
-
-  it('falls back to legacy config/caregiverPin doc', async () => {
-    const hash = computeHash('4321', 'caregiver-instance');
-    // First call (caregiverPinHash) returns not found, second call (legacy) returns hash
-    mockDocGet
-      .mockResolvedValueOnce({ exists: false, data: () => undefined })
-      .mockResolvedValueOnce({ exists: true, data: () => ({ pinHash: hash }) });
-    const result = await callVerifyPin(mockRequest({ pin: '4321' }));
-    expect(result).toEqual({ valid: true });
-  });
 });

@@ -46,7 +46,6 @@ vi.mock('@/services/registrationLock', () => ({
 vi.mock('@/services/caregiverPinService', () => ({
   CAREGIVER_PIN_REF: 'pin-ref',
   verifyCaregiverPin: vi.fn().mockResolvedValue(true),
-  migrateLegacyPinIfNeeded: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('AuthGuard', () => {

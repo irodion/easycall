@@ -57,23 +57,4 @@ export async function removeCaregiverPin(): Promise<void> {
   await fn({ remove: true });
 }
 
-/**
- * Triggers server-side migration of legacy pinHash from the public config doc
- * to the private config doc. Called once when the hook detects legacy format.
- * Fire-and-forget — errors are silently ignored (migration will retry on next load).
- */
-let migrationSucceeded = false;
-export async function migrateLegacyPinIfNeeded(): Promise<boolean> {
-  if (migrationSucceeded) return true;
-  try {
-    const functions = getFunctions(app);
-    const fn = httpsCallable(functions, 'migrateLegacyPin');
-    await fn({});
-    migrationSucceeded = true;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export { CAREGIVER_PIN_REF };

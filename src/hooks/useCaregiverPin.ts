@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { onSnapshot } from 'firebase/firestore';
-import {
-  CAREGIVER_PIN_REF,
-  verifyCaregiverPin,
-  migrateLegacyPinIfNeeded,
-} from '@/services/caregiverPinService';
+import { CAREGIVER_PIN_REF, verifyCaregiverPin } from '@/services/caregiverPinService';
 import { useSnapshotRetry } from '@/hooks/useSnapshotRetry';
 
 const MAX_ATTEMPTS = 5;
@@ -35,52 +31,24 @@ export function useCaregiverPin(): UseCaregiverPinReturn {
   // Tracks whether the user explicitly verified via submitPin (not auto-verified)
   const userVerified = useRef(false);
 
-  // Subscribe to status doc immediately AND run migration in parallel.
-  // If doc is missing and migration is still pending, stay in loading state.
-  // Once migration resolves, if doc is still missing → no PIN configured.
+  // Listen to config/caregiverPinStatus doc (never contains hash — safe to read)
   const { retryTick, scheduleRetry, resetRetry } = useSnapshotRetry();
-  const migrationDone = useRef(false);
-  const lastSnap = useRef<{ exists: boolean; pinSet: boolean } | null>(null);
 
   useEffect(() => {
-    migrationDone.current = false;
-
-    function applySnap(exists: boolean, pinSet: boolean) {
-      const hasPinSet = exists && pinSet;
-      setPinRequired(hasPinSet);
-      if (!hasPinSet) {
-        setVerified(true);
-        userVerified.current = false;
-      } else if (!userVerified.current) {
-        setVerified(false);
-      }
-      setLoading(false);
-    }
-
-    // Fire migration in parallel — when it resolves (success or failure),
-    // finalize any deferred "no doc" snapshot so we don't stay loading forever.
-    void migrateLegacyPinIfNeeded().finally(() => {
-      migrationDone.current = true;
-      const snap = lastSnap.current;
-      if (snap && !snap.pinSet) {
-        applySnap(snap.exists, snap.pinSet);
-      }
-    });
-
     const unsub = onSnapshot(
       CAREGIVER_PIN_REF,
       (snap) => {
         resetRetry();
-        const exists = snap.exists();
-        const pinSet = exists && snap.data()['pinSet'] === true;
-        lastSnap.current = { exists, pinSet };
-
-        if (pinSet) {
-          applySnap(exists, pinSet);
-        } else if (migrationDone.current) {
-          applySnap(exists, pinSet);
+        const hasPinSet = snap.exists() && snap.data()['pinSet'] === true;
+        setPinRequired(hasPinSet);
+        if (!hasPinSet) {
+          setVerified(true); // No PIN = auto-verified
+          userVerified.current = false;
+        } else if (!userVerified.current) {
+          setVerified(false); // PIN required, not yet verified
         }
-        // else: no PIN but migration pending — stay loading, defer to migration callback
+        // If userVerified.current is true, keep verified=true (user already entered PIN)
+        setLoading(false);
       },
       () => scheduleRetry(),
     );
