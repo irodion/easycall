@@ -46,7 +46,8 @@ function RegistrationLockSection() {
   const handleToggle = async () => {
     setToggling(true);
     try {
-      await setRegistrationLock(isOpen); // isOpen=true → lock; isOpen=false → unlock
+      const shouldLock = isOpen; // Currently open → user wants to close it
+      await setRegistrationLock(shouldLock);
     } catch {
       // Silently fail — the toggle will reflect actual state via onSnapshot
     } finally {

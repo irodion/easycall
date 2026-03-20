@@ -5,10 +5,10 @@ import {
   verifyCaregiverPin,
   migrateLegacyPinIfNeeded,
 } from '@/services/caregiverPinService';
-import { useSnapshotRetry } from './useSnapshotRetry';
+import { useSnapshotRetry } from '@/hooks/useSnapshotRetry';
 
 const MAX_ATTEMPTS = 5;
-const COOLDOWN_SECONDS = 60;
+const COOLDOWN_SECONDS = 300;
 
 export interface UseCaregiverPinReturn {
   /** Whether a caregiver PIN is configured for this instance */
@@ -59,12 +59,18 @@ export function useCaregiverPin(): UseCaregiverPinReturn {
 
     // Fire migration in parallel — when it completes, if we deferred
     // a "no doc" snapshot, finalize it now.
-    void migrateLegacyPinIfNeeded().then(() => {
+    void migrateLegacyPinIfNeeded().then((ok) => {
       migrationDone.current = true;
-      const snap = lastSnap.current;
-      if (snap && !snap.pinSet) {
-        applySnap(snap.exists, snap.pinSet);
+      if (ok) {
+        const snap = lastSnap.current;
+        if (snap && !snap.pinSet) {
+          applySnap(snap.exists, snap.pinSet);
+        }
       }
+      // If migration failed, don't finalize — onSnapshot will handle if doc exists
+    }).catch(() => {
+      migrationDone.current = true;
+      // Don't apply — let onSnapshot handle
     });
 
     const unsub = onSnapshot(

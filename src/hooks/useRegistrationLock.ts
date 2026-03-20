@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { onSnapshot } from 'firebase/firestore';
 import { REGISTRATION_CONFIG_REF } from '@/services/registrationLock';
-import { useSnapshotRetry } from './useSnapshotRetry';
+import { useSnapshotRetry } from '@/hooks/useSnapshotRetry';
 
 export function useRegistrationLock(): { isOpen: boolean; loading: boolean } {
   const [isOpen, setIsOpen] = useState(true);

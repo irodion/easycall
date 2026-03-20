@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, setDoc } from 'firebase/firestore';
-import { db, ensureAuthenticated } from '@/services/firebase';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app, db, ensureAuthenticated } from '@/services/firebase';
 import { useRegistrationLock } from '@/hooks/useRegistrationLock';
 import { useCaregiverPin } from '@/hooks/useCaregiverPin';
 import { CaregiverPinPrompt } from './CaregiverPinPrompt';
@@ -34,11 +35,17 @@ export function RoleSelector() {
     setError(null);
     try {
       const user = await ensureAuthenticated();
-      await setDoc(
-        doc(db, 'users', user.uid),
-        { role, onboardingComplete: false },
-        { merge: true },
-      );
+      if (role === 'caregiver') {
+        const functions = getFunctions(app);
+        const assignRole = httpsCallable(functions, 'assignCaregiverRole');
+        await assignRole();
+      } else {
+        await setDoc(
+          doc(db, 'users', user.uid),
+          { role, onboardingComplete: false },
+          { merge: true },
+        );
+      }
       void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
     } catch {
       setError(t('common.somethingWentWrong'));

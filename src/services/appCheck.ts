@@ -1,6 +1,6 @@
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import type { AppCheck } from 'firebase/app-check';
-import { app } from './firebase';
+import { app } from '@/services/firebase';
 
 declare global {
   var FIREBASE_APPCHECK_DEBUG_TOKEN: boolean | string | undefined;
@@ -20,8 +20,12 @@ export function initAppCheck(): AppCheck | null {
       console.warn(
         'VITE_RECAPTCHA_V3_SITE_KEY not set — App Check disabled. Set it in .env.local for development.',
       );
+      return null;
     }
-    return null;
+    throw new Error(
+      'VITE_RECAPTCHA_V3_SITE_KEY is not set. App Check is required in production. ' +
+      'Set it in your environment variables.',
+    );
   }
 
   // Enable debug token in development (prints token to console on first run;

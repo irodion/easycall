@@ -163,6 +163,13 @@ export const migrateLegacyPin = onCall({ enforceAppCheck: true }, async (request
   }
 
   const db = getFirestore();
+
+  // If the PIN was intentionally removed, don't re-introduce it from legacy data
+  const statusDoc = await db.doc('config/caregiverPinStatus').get();
+  if (statusDoc.exists && statusDoc.data()?.['pinSet'] === false) {
+    return { migrated: false };
+  }
+
   const publicDoc = await db.doc('config/caregiverPin').get();
   const publicData = publicDoc.data();
 
@@ -251,6 +258,8 @@ export const setCaregiverPinConfig = onCall({ enforceAppCheck: true }, async (re
     const batch = db.batch();
     batch.set(db.doc('config/caregiverPinHash'), { pinHash: null, setBy: null });
     batch.set(db.doc('config/caregiverPinStatus'), { pinSet: false });
+    // Scrub legacy doc so migrateLegacyPin doesn't reintroduce the old hash
+    batch.set(db.doc('config/caregiverPin'), { pinHash: null, setBy: null });
     await batch.commit();
 
     return { success: true };
@@ -269,6 +278,39 @@ export const setCaregiverPinConfig = onCall({ enforceAppCheck: true }, async (re
   batch.set(db.doc('config/caregiverPinHash'), { pinHash: hash, setBy: request.auth.uid });
   batch.set(db.doc('config/caregiverPinStatus'), { pinSet: true });
   await batch.commit();
+
+  return { success: true };
+});
+
+// ---------------------------------------------------------------------------
+// assignCaregiverRole
+//
+// Assigns the caregiver role to a user. Client-side Firestore rules only allow
+// creating user docs with role: 'elderly', so caregiver assignment must go
+// through this server-side function. Only sets the role if no role exists yet.
+// ---------------------------------------------------------------------------
+export const assignCaregiverRole = onCall({ enforceAppCheck: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required.');
+  }
+
+  const db = getFirestore();
+  const uid = request.auth.uid;
+
+  // Check registration lock
+  const regDoc = await db.doc('config/registration').get();
+  if (regDoc.exists && regDoc.data()?.['open'] === false) {
+    throw new HttpsError('permission-denied', 'Registration is currently closed.');
+  }
+
+  const userRef = db.doc(`users/${uid}`);
+  const userDoc = await userRef.get();
+
+  if (userDoc.exists && userDoc.data()?.['role']) {
+    throw new HttpsError('already-exists', 'User already has a role assigned.');
+  }
+
+  await userRef.set({ role: 'caregiver', onboardingComplete: false }, { merge: true });
 
   return { success: true };
 });

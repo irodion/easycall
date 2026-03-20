@@ -19,7 +19,7 @@ vi.mock('@/services/registrationLock', () => ({
   REGISTRATION_CONFIG_REF: 'config-ref',
 }));
 
-import { useRegistrationLock } from './useRegistrationLock';
+import { useRegistrationLock } from '@/hooks/useRegistrationLock';
 
 describe('useRegistrationLock', () => {
   beforeEach(() => {

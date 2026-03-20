@@ -3,11 +3,18 @@ import { screen, fireEvent } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 
+const mockCallable = vi.fn().mockResolvedValue({ data: { success: true } });
+
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn().mockReturnValue('doc-ref'),
   setDoc: vi.fn().mockResolvedValue(undefined),
   getFirestore: vi.fn(),
   onSnapshot: vi.fn(() => vi.fn()),
+}));
+
+vi.mock('firebase/functions', () => ({
+  getFunctions: vi.fn(() => 'mock-functions'),
+  httpsCallable: vi.fn(() => mockCallable),
 }));
 
 vi.mock('@/services/firebase', () => ({
@@ -76,17 +83,14 @@ describe('RoleSelector', () => {
     });
   });
 
-  it('clicking caregiver role calls setDoc with role: caregiver', async () => {
-    const { setDoc } = await import('firebase/firestore');
+  it('clicking caregiver role calls assignCaregiverRole Cloud Function', async () => {
+    const { httpsCallable } = await import('firebase/functions');
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
     fireEvent.click(screen.getByRole('button', { name: /family caregiver/i }));
     await vi.waitFor(() => {
-      expect(setDoc).toHaveBeenCalledWith(
-        'doc-ref',
-        expect.objectContaining({ role: 'caregiver', onboardingComplete: false }),
-        expect.objectContaining({ merge: true }),
-      );
+      expect(httpsCallable).toHaveBeenCalledWith(expect.anything(), 'assignCaregiverRole');
+      expect(mockCallable).toHaveBeenCalled();
     });
   });
 

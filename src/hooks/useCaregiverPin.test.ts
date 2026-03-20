@@ -22,7 +22,7 @@ vi.mock('@/services/caregiverPinService', () => ({
   migrateLegacyPinIfNeeded: vi.fn().mockResolvedValue(true),
 }));
 
-import { useCaregiverPin } from './useCaregiverPin';
+import { useCaregiverPin } from '@/hooks/useCaregiverPin';
 
 // onSnapshot is now called synchronously in useEffect (migration is fire-and-forget)
 function renderPinHook() {
@@ -101,7 +101,7 @@ describe('useCaregiverPin', () => {
         await result.current.submitPin('0000');
       });
     }
-    expect(result.current.cooldownRemaining).toBe(60);
+    expect(result.current.cooldownRemaining).toBe(300);
     expect(result.current.failedAttempts).toBe(0);
   });
 
