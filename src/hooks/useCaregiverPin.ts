@@ -93,16 +93,17 @@ export function useCaregiverPin(): UseCaregiverPinReturn {
         return true;
       }
 
-      const newAttempts = failedAttempts + 1;
-      if (newAttempts >= MAX_ATTEMPTS) {
-        setFailedAttempts(0);
-        setCooldownRemaining(COOLDOWN_SECONDS);
-      } else {
-        setFailedAttempts(newAttempts);
-      }
+      setFailedAttempts((prev) => {
+        const next = prev + 1;
+        if (next >= MAX_ATTEMPTS) {
+          setCooldownRemaining(COOLDOWN_SECONDS);
+          return 0;
+        }
+        return next;
+      });
       return false;
     },
-    [failedAttempts],
+    [],
   );
 
   return { pinRequired, verified, failedAttempts, cooldownRemaining, loading, submitPin };

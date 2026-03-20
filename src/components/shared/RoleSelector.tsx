@@ -18,9 +18,8 @@ export function RoleSelector() {
   const { isOpen: registrationOpen, loading: registrationLoading } = useRegistrationLock();
   const caregiverPin = useCaregiverPin();
   const [showPinPrompt, setShowPinPrompt] = useState(false);
-  const [verifiedPin, setVerifiedPin] = useState<string | null>(null);
 
-  const handleSelectRole = async (role: 'elderly' | 'caregiver') => {
+  const handleSelectRole = async (role: 'elderly' | 'caregiver', pin?: string) => {
     if (!registrationOpen) {
       setError(t('registrationLock.closed'));
       return;
@@ -39,7 +38,7 @@ export function RoleSelector() {
       if (role === 'caregiver') {
         const functions = getFunctions(app);
         const assignRole = httpsCallable(functions, 'assignCaregiverRole');
-        await assignRole(verifiedPin ? { pin: verifiedPin } : {});
+        await assignRole(pin ? { pin } : {});
       } else {
         await setDoc(
           doc(db, 'users', user.uid),
@@ -49,6 +48,7 @@ export function RoleSelector() {
       }
       void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
     } catch (err) {
+      console.error('Role selection failed:', err);
       const code = (err as { code?: string }).code ?? '';
       if (code.includes('permission-denied')) {
         setError(t('registrationLock.closed'));
@@ -61,9 +61,8 @@ export function RoleSelector() {
   };
 
   const handlePinVerified = (pin: string) => {
-    setVerifiedPin(pin);
     setShowPinPrompt(false);
-    void handleSelectRole('caregiver');
+    void handleSelectRole('caregiver', pin);
   };
 
   if (showPinPrompt) {
