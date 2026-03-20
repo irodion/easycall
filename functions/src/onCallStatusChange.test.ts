@@ -25,7 +25,10 @@ vi.mock('firebase-admin/firestore', () => {
 });
 
 vi.mock('firebase-functions/v2/https', () => ({
-  onCall: vi.fn((fn) => fn),
+  onCall: vi.fn((...args: unknown[]) => {
+    // Handle both onCall(handler) and onCall(options, handler)
+    return args.length === 2 ? args[1] : args[0];
+  }),
   HttpsError: class HttpsError extends Error {
     constructor(
       public code: string,

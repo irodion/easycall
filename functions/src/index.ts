@@ -5,8 +5,15 @@ import { getFirestore, FieldValue, Timestamp, type Firestore } from 'firebase-ad
 import { getMessaging } from 'firebase-admin/messaging';
 import { initializeApp } from 'firebase-admin/app';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 initializeApp();
+
+function extractData(request: { data: unknown }): Record<string, unknown> {
+  return typeof request.data === 'object' && request.data !== null
+    ? (request.data as Record<string, unknown>)
+    : {};
+}
 
 // ---------------------------------------------------------------------------
 // validatePairingCode
@@ -16,12 +23,262 @@ initializeApp();
 // This is the ONLY path that writes to users/{userId}/caregivers/{uid} —
 // client writes to that subcollection are blocked in firestore.rules.
 // ---------------------------------------------------------------------------
-export const validatePairingCode = onCall(async (request) => {
+// ---------------------------------------------------------------------------
+// Rate limiting — generic sliding-window throttle backed by a Firestore doc
+// at rateLimits/{docKeyPrefix}:{uid}. Exported for testing.
+// ---------------------------------------------------------------------------
+interface RateLimitOptions {
+  docKeyPrefix: string;
+  maxAttempts: number;
+  windowMs: number;
+  errorMessage: string;
+}
+
+export async function checkRateLimit(
+  db: Firestore,
+  uid: string,
+  options: RateLimitOptions,
+): Promise<void> {
+  const rateLimitRef = db.collection('rateLimits').doc(`${options.docKeyPrefix}:${uid}`);
+  const now = Date.now();
+  const windowStart = now - options.windowMs;
+
+  await db.runTransaction(async (txn) => {
+    const snap = await txn.get(rateLimitRef);
+    const data = snap.data();
+    const attempts: number[] = data?.['attempts'] ?? [];
+    const recentAttempts = attempts.filter((ts: number) => ts > windowStart);
+
+    if (recentAttempts.length >= options.maxAttempts) {
+      throw new HttpsError('resource-exhausted', options.errorMessage);
+    }
+
+    recentAttempts.push(now);
+    // Keep only the most recent entries to prevent unbounded array growth
+    const bounded = recentAttempts.slice(-options.maxAttempts);
+    txn.set(rateLimitRef, { attempts: bounded, updatedAt: FieldValue.serverTimestamp() });
+  });
+}
+
+// Convenience wrappers with preset configs
+export function checkPairingCodeRateLimit(db: Firestore, uid: string): Promise<void> {
+  return checkRateLimit(db, uid, {
+    docKeyPrefix: 'pairingCode',
+    maxAttempts: 5,
+    windowMs: 10 * 60 * 1000,
+    errorMessage: 'Too many pairing attempts. Please wait 10 minutes before trying again.',
+  });
+}
+
+/**
+ * Rate limit PIN verification by IP address. IP-based because anonymous auth
+ * allows unlimited UIDs. No global bucket — it would be a DoS vector since
+ * any anonymous user could exhaust it and lock out legitimate caregivers.
+ */
+export async function checkPinVerifyRateLimit(db: Firestore, callerIp: string): Promise<void> {
+  // Sanitize IP for use as Firestore doc ID (replace dots/colons)
+  const sanitizedIp = callerIp.replace(/[.:]/g, '_');
+  await checkRateLimit(db, sanitizedIp, {
+    docKeyPrefix: 'pinVerifyIp',
+    maxAttempts: 5,
+    windowMs: 5 * 60 * 1000,
+    errorMessage: 'Too many PIN attempts. Please wait 5 minutes before trying again.',
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Server-side PIN hashing (mirrors src/utils/pinHash.ts)
+// ---------------------------------------------------------------------------
+const APP_SALT = 'easycall-pin-v1';
+
+function hashPinSync(pin: string, userId?: string): string {
+  return crypto
+    .createHash('sha256')
+    .update(APP_SALT + (userId ?? '') + pin)
+    .digest('hex');
+}
+
+function verifyPinSync(pin: string, storedHash: string, userId?: string): boolean {
+  if (userId) {
+    if (hashPinSync(pin, userId) === storedHash) return true;
+  }
+  // Legacy fallback (unsalted hash)
+  return (
+    crypto.createHash('sha256').update(APP_SALT + pin).digest('hex') === storedHash
+  );
+}
+
+// ---------------------------------------------------------------------------
+// verifyCaregiverPin
+//
+// Server-side PIN verification. Reads the hash from config/caregiverPinHash
+// (not accessible to clients) and compares securely. Rate limited.
+// ---------------------------------------------------------------------------
+export const verifyCaregiverPin = onCall({ enforceAppCheck: true }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Authentication required.');
   }
 
-  const data = typeof request.data === 'object' && request.data !== null ? request.data : {};
+  const data = extractData(request);
+  const { pin } = data as { pin?: unknown };
+
+  if (typeof pin !== 'string' || !/^\d{4,8}$/.test(pin)) {
+    throw new HttpsError('invalid-argument', 'pin must be a 4-8 digit numeric string.');
+  }
+
+  const db = getFirestore();
+  const callerIp = request.rawRequest?.ip ?? request.rawRequest?.headers['x-forwarded-for']?.toString() ?? 'unknown';
+  await checkPinVerifyRateLimit(db, callerIp);
+
+  // Check new location first, then fall back to legacy location for migration
+  let storedHash: string | undefined;
+  const pinHashDoc = await db.doc('config/caregiverPinHash').get();
+  if (pinHashDoc.exists) {
+    storedHash = pinHashDoc.data()?.['pinHash'] as string | undefined;
+  } else {
+    // Backward compatibility: check old config/caregiverPin doc
+    const legacyDoc = await db.doc('config/caregiverPin').get();
+    storedHash = legacyDoc.data()?.['pinHash'] as string | undefined;
+  }
+
+  if (typeof storedHash !== 'string') {
+    return { valid: false };
+  }
+
+  const valid = verifyPinSync(pin, storedHash, 'caregiver-instance');
+  return { valid };
+});
+
+// ---------------------------------------------------------------------------
+// migrateLegacyPin
+//
+// Auto-migration: moves pinHash from the publicly readable config/caregiverPin
+// to the private config/caregiverPinHash doc, then replaces the public doc with
+// { pinSet: true }. Called by the client when it detects the legacy format.
+// Idempotent — safe to call multiple times.
+// ---------------------------------------------------------------------------
+export const migrateLegacyPin = onCall({ enforceAppCheck: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required.');
+  }
+
+  const db = getFirestore();
+  const publicDoc = await db.doc('config/caregiverPin').get();
+  const publicData = publicDoc.data();
+
+  // Only migrate if legacy pinHash exists in the public doc
+  if (!publicData || typeof publicData['pinHash'] !== 'string') {
+    return { migrated: false };
+  }
+
+  const privateDoc = await db.doc('config/caregiverPinHash').get();
+  const batch = db.batch();
+
+  // Copy hash to private doc (only if not already there)
+  if (!privateDoc.exists || typeof privateDoc.data()?.['pinHash'] !== 'string') {
+    batch.set(db.doc('config/caregiverPinHash'), {
+      pinHash: publicData['pinHash'],
+      setBy: publicData['setBy'] ?? null,
+    });
+  }
+
+  // Write clean status doc (the one clients actually read)
+  batch.set(db.doc('config/caregiverPinStatus'), { pinSet: true });
+
+  await batch.commit();
+  return { migrated: true };
+});
+
+// ---------------------------------------------------------------------------
+// Helper: verify caller is a caregiver via admin SDK (not client-writable role)
+// ---------------------------------------------------------------------------
+async function requireCaregiver(db: Firestore, uid: string): Promise<void> {
+  const userDoc = await db.doc(`users/${uid}`).get();
+  if (!userDoc.exists || userDoc.data()?.['role'] !== 'caregiver') {
+    throw new HttpsError('permission-denied', 'Only caregivers can perform this action.');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// setRegistrationLock
+//
+// Toggles registration open/closed. Server-side role verification.
+// ---------------------------------------------------------------------------
+export const setRegistrationLock = onCall({ enforceAppCheck: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required.');
+  }
+
+  const data = extractData(request);
+  const { locked } = data as { locked?: unknown };
+
+  if (typeof locked !== 'boolean') {
+    throw new HttpsError('invalid-argument', 'locked must be a boolean.');
+  }
+
+  const db = getFirestore();
+  await requireCaregiver(db, request.auth.uid);
+
+  await db.doc('config/registration').set({
+    open: !locked,
+    lockedBy: locked ? request.auth.uid : null,
+    lockedAt: locked ? FieldValue.serverTimestamp() : null,
+  });
+
+  return { success: true };
+});
+
+// ---------------------------------------------------------------------------
+// setCaregiverPinConfig
+//
+// Sets or removes the caregiver PIN. Server-side role verification.
+// Writes to both config/caregiverPin (public flag) and config/caregiverPinHash
+// (private hash) atomically.
+// ---------------------------------------------------------------------------
+export const setCaregiverPinConfig = onCall({ enforceAppCheck: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required.');
+  }
+
+  const data = extractData(request);
+  const { pin, remove } = data as { pin?: unknown; remove?: unknown };
+
+  if (remove === true) {
+    // Remove PIN
+    const db = getFirestore();
+    await requireCaregiver(db, request.auth.uid);
+
+    const batch = db.batch();
+    batch.set(db.doc('config/caregiverPinHash'), { pinHash: null, setBy: null });
+    batch.set(db.doc('config/caregiverPinStatus'), { pinSet: false });
+    await batch.commit();
+
+    return { success: true };
+  }
+
+  // Set PIN
+  if (typeof pin !== 'string' || !/^\d{4,8}$/.test(pin)) {
+    throw new HttpsError('invalid-argument', 'pin must be a 4-8 digit numeric string.');
+  }
+
+  const db = getFirestore();
+  await requireCaregiver(db, request.auth.uid);
+
+  const hash = hashPinSync(pin, 'caregiver-instance');
+  const batch = db.batch();
+  batch.set(db.doc('config/caregiverPinHash'), { pinHash: hash, setBy: request.auth.uid });
+  batch.set(db.doc('config/caregiverPinStatus'), { pinSet: true });
+  await batch.commit();
+
+  return { success: true };
+});
+
+export const validatePairingCode = onCall({ enforceAppCheck: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required.');
+  }
+
+  const data = extractData(request);
   const { code } = data as { code?: unknown };
 
   if (typeof code !== 'string' || !/^\d{6}$/.test(code)) {
@@ -30,6 +287,10 @@ export const validatePairingCode = onCall(async (request) => {
 
   const caregiverUid = request.auth.uid;
   const db = getFirestore();
+
+  // Rate limit: max 5 attempts per 10-minute window
+  await checkPairingCodeRateLimit(db, caregiverUid);
+
   const codeRef = db.collection('pairingCodes').doc(code);
 
   return db.runTransaction(async (txn) => {
@@ -80,7 +341,7 @@ export const validatePairingCode = onCall(async (request) => {
 // P0-2: moderator is boolean false — never a string.
 // P0-3: room ownership is verified via a collectionGroup query before signing.
 // ---------------------------------------------------------------------------
-export const generateJitsiJwt = onCall(async (request) => {
+export const generateJitsiJwt = onCall({ enforceAppCheck: true }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Authentication required.');
   }

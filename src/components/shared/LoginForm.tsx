@@ -41,6 +41,7 @@ export function LoginForm() {
 
     try {
       await signInCaregiverEmail(email, password);
+      // Navigate to caregiver dashboard — AuthGuard will enforce PIN if required
       void navigate('/caregiver');
     } catch (err) {
       setState('error');

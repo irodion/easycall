@@ -3,6 +3,8 @@ import { Outlet, Navigate } from 'react-router';
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
+import { useCaregiverPin } from '@/hooks/useCaregiverPin';
+import { CaregiverPinPrompt } from './CaregiverPinPrompt';
 import { RoleSelector } from './RoleSelector';
 import { OnboardingFlow } from './OnboardingFlow';
 
@@ -103,6 +105,38 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
     return <Navigate to={redirectPath} replace />;
   }
 
-  // correct-role: render children or Outlet
+  // correct-role: for caregiver routes, enforce PIN if configured
+  if (requiredRole === 'caregiver') {
+    return <CaregiverPinGate>{children ? <>{children}</> : <Outlet />}</CaregiverPinGate>;
+  }
+
   return children ? <>{children}</> : <Outlet />;
+}
+
+function CaregiverPinGate({ children }: { children: ReactNode }) {
+  const caregiverPin = useCaregiverPin();
+
+  if (caregiverPin.loading) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div role="status" aria-label="Loading">
+          <span className="loading loading-spinner loading-lg text-primary" />
+          <span className="sr-only">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (caregiverPin.pinRequired && !caregiverPin.verified) {
+    return (
+      <CaregiverPinPrompt
+        caregiverPin={caregiverPin}
+        onVerified={() => {
+          // verified state is managed by useCaregiverPin hook via submitPin()
+        }}
+      />
+    );
+  }
+
+  return <>{children}</>;
 }

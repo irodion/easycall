@@ -151,7 +151,8 @@
     "linkAccount": "Link Account",
     "invalidCode": "Invalid or expired code. Please check and try again.",
     "codeExpired": "This code has expired. Please generate a new one.",
-    "codeAlreadyUsed": "This code has already been used."
+    "codeAlreadyUsed": "This code has already been used.",
+    "tooManyAttempts": "Too many attempts. Please wait 10 minutes before trying again."
   },
   "incomingCall": {
     "isCalling": "{{name}} is calling",
@@ -255,6 +256,33 @@
     "inCall": "In a call",
     "offline": "Offline",
     "lastSeen": "Last seen {{time}}"
+  },
+  "registrationLock": {
+    "title": "Registration",
+    "openDescription": "New users can currently register. Close registration to prevent new sign-ups.",
+    "closedDescription": "Registration is closed. Only existing users can access the app.",
+    "closeRegistration": "Close Registration",
+    "openRegistration": "Open Registration",
+    "closed": "Registration is closed.",
+    "closedMessage": "This app is not accepting new users. If you are a family member, ask your caregiver to open registration."
+  },
+  "caregiverPin": {
+    "title": "Caregiver PIN",
+    "enabledDescription": "A PIN is required to access caregiver features. You can change or remove it below.",
+    "disabledDescription": "Set a PIN to protect caregiver access. Share it only with family members.",
+    "setPin": "Set PIN",
+    "newPin": "New PIN",
+    "confirmPin": "Confirm PIN",
+    "pinPlaceholder": "4-digit PIN",
+    "confirmPinPlaceholder": "Confirm PIN",
+    "pinLengthError": "PIN must be exactly 4 digits.",
+    "pinMismatchError": "PINs do not match.",
+    "savePin": "Save PIN",
+    "saveError": "Failed to save PIN. Please try again.",
+    "saveSuccess": "Caregiver PIN saved successfully.",
+    "removePin": "Remove PIN",
+    "removeError": "Failed to remove PIN. Please try again.",
+    "enterPin": "Enter Caregiver PIN"
   },
   "roleSelector": {
     "notSignedIn": "Not signed in. Please try again.",

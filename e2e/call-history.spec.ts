@@ -233,7 +233,7 @@ test.describe('Call History (emulators)', () => {
   test('navigating from HomeScreen to call history and back works', async ({ page }) => {
     await page.goto('/elderly');
 
-    await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 15000 });
     await page.getByRole('button', { name: /call history/i }).click();
 
     await expect(page).toHaveURL(/\/elderly\/history/, { timeout: 10000 });
@@ -242,6 +242,6 @@ test.describe('Call History (emulators)', () => {
     await page.getByRole('button', { name: /back to contacts/i }).click();
 
     await expect(page).toHaveURL(/\/elderly$/, { timeout: 10000 });
-    await expect(page.getByText('Your Contacts')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible();
   });
 });

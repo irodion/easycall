@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, ensureAuthenticated } from '@/services/firebase';
+import { useRegistrationLock } from '@/hooks/useRegistrationLock';
+import { useCaregiverPin } from '@/hooks/useCaregiverPin';
+import { CaregiverPinPrompt } from './CaregiverPinPrompt';
 import { EasyCallButton } from './EasyCallButton';
 import { EasyCallText } from './EasyCallText';
 
@@ -11,8 +14,22 @@ export function RoleSelector() {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isOpen: registrationOpen, loading: registrationLoading } = useRegistrationLock();
+  const caregiverPin = useCaregiverPin();
+  const [showPinPrompt, setShowPinPrompt] = useState(false);
 
   const handleSelectRole = async (role: 'elderly' | 'caregiver') => {
+    if (!registrationOpen) {
+      setError(t('registrationLock.closed'));
+      return;
+    }
+
+    // Block caregiver role while PIN status is still loading or if PIN is required
+    if (role === 'caregiver' && (caregiverPin.loading || (caregiverPin.pinRequired && !caregiverPin.verified))) {
+      setShowPinPrompt(true);
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
     try {
@@ -30,6 +47,15 @@ export function RoleSelector() {
     }
   };
 
+  const handlePinVerified = () => {
+    setShowPinPrompt(false);
+    void handleSelectRole('caregiver');
+  };
+
+  if (showPinPrompt) {
+    return <CaregiverPinPrompt caregiverPin={caregiverPin} onVerified={handlePinVerified} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-base-200/50 to-base-100 flex flex-col items-center justify-center gap-8 p-8">
       <EasyCallText as="h1" variant="heading" className="text-center">
@@ -42,6 +68,13 @@ export function RoleSelector() {
           </EasyCallText>
         </div>
       )}
+      {!registrationLoading && !registrationOpen && (
+        <div role="alert" className="alert alert-warning w-full max-w-sm">
+          <EasyCallText as="span" variant="body">
+            {t('registrationLock.closedMessage')}
+          </EasyCallText>
+        </div>
+      )}
       <div className="flex flex-col gap-4 w-full max-w-sm">
         <EasyCallButton
           size="default"
@@ -49,7 +82,7 @@ export function RoleSelector() {
           onClick={() => {
             void handleSelectRole('elderly');
           }}
-          disabled={isSaving}
+          disabled={isSaving || registrationLoading || !registrationOpen}
           aria-label={t('roleSelector.elderlyUser')}
         >
           {t('roleSelector.elderlyUser')}
@@ -60,7 +93,7 @@ export function RoleSelector() {
           onClick={() => {
             void handleSelectRole('caregiver');
           }}
-          disabled={isSaving}
+          disabled={isSaving || registrationLoading || !registrationOpen || caregiverPin.loading}
           aria-label={t('roleSelector.caregiver')}
         >
           {t('roleSelector.caregiver')}

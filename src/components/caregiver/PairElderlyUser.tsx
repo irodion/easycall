@@ -24,7 +24,9 @@ export function PairElderlyUser({ onSuccess }: PairElderlyUserProps) {
     } catch (err) {
       const code = (err as { code?: string })?.code ?? '';
       let message: string;
-      if (code.includes('not-found') || code.includes('internal')) {
+      if (code.includes('resource-exhausted')) {
+        message = t('pairElderly.tooManyAttempts');
+      } else if (code.includes('not-found') || code.includes('internal')) {
         message = t('pairElderly.invalidCode');
       } else if (code.includes('deadline-exceeded')) {
         message = t('pairElderly.codeExpired');

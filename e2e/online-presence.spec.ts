@@ -274,7 +274,7 @@ test.describe('Online Presence Indicators', () => {
     );
 
     await page.goto('/elderly');
-    await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 10_000 });
 
     // Poll RTDB until usePresence hook writes 'online' (avoids fixed wait)
     await expect

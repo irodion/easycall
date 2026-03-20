@@ -10,6 +10,7 @@ vi.mock('react-router', async () => {
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
+
 const mockSignIn = vi.fn();
 vi.mock('@/services/caregiverAuth', () => ({
   signInCaregiverEmail: (...args: unknown[]) => mockSignIn(...args),

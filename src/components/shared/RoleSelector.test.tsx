@@ -7,12 +7,38 @@ vi.mock('firebase/firestore', () => ({
   doc: vi.fn().mockReturnValue('doc-ref'),
   setDoc: vi.fn().mockResolvedValue(undefined),
   getFirestore: vi.fn(),
+  onSnapshot: vi.fn(() => vi.fn()),
 }));
 
 vi.mock('@/services/firebase', () => ({
   db: {},
   app: {},
   ensureAuthenticated: vi.fn().mockResolvedValue({ uid: 'user-1' }),
+}));
+
+vi.mock('@/hooks/useRegistrationLock', () => ({
+  useRegistrationLock: vi.fn(() => ({ isOpen: true, loading: false })),
+}));
+
+vi.mock('@/hooks/useCaregiverPin', () => ({
+  useCaregiverPin: vi.fn(() => ({
+    pinRequired: false,
+    verified: true,
+    failedAttempts: 0,
+    cooldownRemaining: 0,
+    loading: false,
+    submitPin: vi.fn().mockResolvedValue(true),
+  })),
+}));
+
+vi.mock('@/services/registrationLock', () => ({
+  REGISTRATION_CONFIG_REF: 'config-ref',
+}));
+
+vi.mock('@/services/caregiverPinService', () => ({
+  CAREGIVER_PIN_REF: 'pin-ref',
+  verifyCaregiverPin: vi.fn().mockResolvedValue(true),
+  migrateLegacyPinIfNeeded: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('RoleSelector', () => {

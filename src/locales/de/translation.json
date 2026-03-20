@@ -126,6 +126,33 @@
     "offline": "Offline",
     "lastSeen": "Zuletzt gesehen {{time}}"
   },
+  "registrationLock": {
+    "title": "Registrierung",
+    "openDescription": "Neue Benutzer können sich registrieren. Schließen Sie die Registrierung, um neue Anmeldungen zu verhindern.",
+    "closedDescription": "Die Registrierung ist geschlossen. Nur bestehende Benutzer können auf die App zugreifen.",
+    "closeRegistration": "Registrierung schließen",
+    "openRegistration": "Registrierung öffnen",
+    "closed": "Die Registrierung ist geschlossen.",
+    "closedMessage": "Diese App nimmt keine neuen Benutzer an. Wenn Sie ein Familienmitglied sind, bitten Sie Ihren Betreuer, die Registrierung zu öffnen."
+  },
+  "caregiverPin": {
+    "title": "Betreuer-PIN",
+    "enabledDescription": "Für den Zugang zu Betreuer-Funktionen ist eine PIN erforderlich. Sie können sie ändern oder entfernen.",
+    "disabledDescription": "Legen Sie eine PIN fest, um den Betreuer-Zugang zu schützen. Teilen Sie sie nur mit Familienmitgliedern.",
+    "setPin": "PIN festlegen",
+    "newPin": "Neue PIN",
+    "confirmPin": "PIN bestätigen",
+    "pinPlaceholder": "4-stellige PIN",
+    "confirmPinPlaceholder": "PIN bestätigen",
+    "pinLengthError": "Die PIN muss genau 4 Ziffern haben.",
+    "pinMismatchError": "Die PINs stimmen nicht überein.",
+    "savePin": "PIN speichern",
+    "saveError": "PIN konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "saveSuccess": "Betreuer-PIN erfolgreich gespeichert.",
+    "removePin": "PIN entfernen",
+    "removeError": "PIN konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
+    "enterPin": "Betreuer-PIN eingeben"
+  },
   "roleSelector": {
     "notSignedIn": "Nicht angemeldet. Bitte versuchen Sie es erneut.",
     "saveFailed": "Rolle konnte nicht gespeichert werden: {{error}}",
@@ -158,7 +185,8 @@
   "pairElderly": {
     "enterCode": "Geben Sie den 6-stelligen Code ein, der auf dem Bildschirm des älteren Benutzers angezeigt wird:",
     "linking": "Verknüpfung...",
-    "linkAccount": "Konto verknüpfen"
+    "linkAccount": "Konto verknüpfen",
+    "tooManyAttempts": "Zu viele Versuche. Bitte warten Sie 10 Minuten und versuchen Sie es erneut."
   },
   "incomingCall": {
     "isCalling": "{{name}} ruft an",
