@@ -132,7 +132,7 @@ function CaregiverPinGate({ children }: { children: ReactNode }) {
       <CaregiverPinPrompt
         caregiverPin={caregiverPin}
         onVerified={() => {
-          // verified state is managed by useCaregiverPin hook via submitPin()
+          // PIN not needed here — verified state is managed by the hook
         }}
       />
     );

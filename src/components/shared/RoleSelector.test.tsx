@@ -137,6 +137,38 @@ describe('RoleSelector', () => {
     });
   });
 
+  it('disables buttons when registration is closed', async () => {
+    const { useRegistrationLock } = await import('@/hooks/useRegistrationLock');
+    vi.mocked(useRegistrationLock).mockReturnValue({ isOpen: false, loading: false });
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+
+    expect(screen.getByRole('button', { name: /elderly user/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeDisabled();
+    expect(screen.getByText(/not accepting new users/i)).toBeInTheDocument();
+  });
+
+  it('disables caregiver button when PIN status is loading', async () => {
+    const { useCaregiverPin } = await import('@/hooks/useCaregiverPin');
+    vi.mocked(useCaregiverPin).mockReturnValue({
+      pinRequired: false,
+      verified: false,
+      failedAttempts: 0,
+      cooldownRemaining: 0,
+      loading: true,
+      submitPin: vi.fn().mockResolvedValue(true),
+    });
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+
+    // Caregiver button disabled due to PIN loading
+    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeDisabled();
+    // Elderly button also disabled via registration loading check — but that's from the
+    // top-level mock. The key assertion is the caregiver button is disabled.
+  });
+
   it('passes vitest-axe', async () => {
     const { RoleSelector } = await import('./RoleSelector');
     const { container } = renderWithProviders(<RoleSelector />);

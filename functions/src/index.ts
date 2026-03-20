@@ -247,6 +247,22 @@ export const assignCaregiverRole = onCall({ enforceAppCheck: true }, async (requ
     throw new HttpsError('permission-denied', 'Registration is currently closed.');
   }
 
+  // Verify caregiver PIN if one is configured
+  const pinHashDoc = await db.doc('config/caregiverPinHash').get();
+  const storedHash = pinHashDoc.data()?.['pinHash'] as string | undefined;
+  if (typeof storedHash === 'string') {
+    const data = extractData(request);
+    const { pin } = data as { pin?: unknown };
+    if (typeof pin !== 'string' || !/^\d{4,8}$/.test(pin)) {
+      throw new HttpsError('invalid-argument', 'Caregiver PIN is required.');
+    }
+    const callerIp = request.rawRequest?.ip ?? request.rawRequest?.headers['x-forwarded-for']?.toString() ?? 'unknown';
+    await checkPinVerifyRateLimit(db, callerIp);
+    if (!verifyPinSync(pin, storedHash, 'caregiver-instance')) {
+      throw new HttpsError('permission-denied', 'Incorrect PIN.');
+    }
+  }
+
   const userRef = db.doc(`users/${uid}`);
   const userDoc = await userRef.get();
 

@@ -3,7 +3,7 @@ import type { UseCaregiverPinReturn } from '@/hooks/useCaregiverPin';
 
 interface CaregiverPinPromptProps {
   caregiverPin: UseCaregiverPinReturn;
-  onVerified: () => void;
+  onVerified: (pin: string) => void;
 }
 
 export function CaregiverPinPrompt({ caregiverPin, onVerified }: CaregiverPinPromptProps) {
@@ -14,7 +14,7 @@ export function CaregiverPinPrompt({ caregiverPin, onVerified }: CaregiverPinPro
       cooldownRemaining={caregiverPin.cooldownRemaining}
       onPinSubmit={async (pin) => {
         const ok = await caregiverPin.submitPin(pin);
-        if (ok) onVerified();
+        if (ok) onVerified(pin);
         return ok;
       }}
     >

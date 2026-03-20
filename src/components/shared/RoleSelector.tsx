@@ -18,6 +18,7 @@ export function RoleSelector() {
   const { isOpen: registrationOpen, loading: registrationLoading } = useRegistrationLock();
   const caregiverPin = useCaregiverPin();
   const [showPinPrompt, setShowPinPrompt] = useState(false);
+  const [verifiedPin, setVerifiedPin] = useState<string | null>(null);
 
   const handleSelectRole = async (role: 'elderly' | 'caregiver') => {
     if (!registrationOpen) {
@@ -38,7 +39,7 @@ export function RoleSelector() {
       if (role === 'caregiver') {
         const functions = getFunctions(app);
         const assignRole = httpsCallable(functions, 'assignCaregiverRole');
-        await assignRole();
+        await assignRole(verifiedPin ? { pin: verifiedPin } : {});
       } else {
         await setDoc(
           doc(db, 'users', user.uid),
@@ -59,7 +60,8 @@ export function RoleSelector() {
     }
   };
 
-  const handlePinVerified = () => {
+  const handlePinVerified = (pin: string) => {
+    setVerifiedPin(pin);
     setShowPinPrompt(false);
     void handleSelectRole('caregiver');
   };

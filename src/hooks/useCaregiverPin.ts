@@ -78,7 +78,14 @@ export function useCaregiverPin(): UseCaregiverPinReturn {
     async (pin: string): Promise<boolean> => {
       if (cooldownActive.current) return false;
 
-      const correct = await verifyCaregiverPin(pin);
+      let correct: boolean;
+      try {
+        correct = await verifyCaregiverPin(pin);
+      } catch {
+        // Network error, rate limit, App Check failure — treat as failed attempt
+        correct = false;
+      }
+
       if (correct) {
         userVerified.current = true;
         setVerified(true);
