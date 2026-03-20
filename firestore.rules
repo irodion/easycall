@@ -7,9 +7,47 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/users/$(elderlyUserId)/caregivers/$(caregiverUid));
     }
 
+    // Registration lock: readable by any authenticated user.
+    // Writes go through Cloud Functions (admin SDK).
+    match /config/registration {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // PIN status flag: readable (only { pinSet: boolean }, no secrets).
+    // Written by Cloud Functions only.
+    match /config/caregiverPinStatus {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // PIN hash and legacy PIN doc: NO client access at all.
+    // Server-only via admin SDK.
+    match /config/caregiverPin {
+      allow read, write: if false;
+    }
+    match /config/caregiverPinHash {
+      allow read, write: if false;
+    }
+
+    // Rate limit counters: written exclusively by Cloud Functions (admin SDK).
+    match /rateLimits/{docId} {
+      allow read, write: if false;
+    }
+
     match /users/{userId} {
-      // Users can read/write their own profile
-      allow read, write: if request.auth.uid == userId;
+      // Users can read their own profile
+      allow read: if request.auth.uid == userId;
+      // Users can update their own profile but cannot change their role once set
+      allow update: if request.auth.uid == userId
+        && (!('role' in resource.data) || request.resource.data.role == resource.data.role);
+      allow delete: if request.auth.uid == userId;
+      // New user creation requires registration to be open and role must be 'elderly'.
+      // Caregiver role assignment goes through the assignCaregiverRole Cloud Function.
+      allow create: if request.auth.uid == userId
+        && request.resource.data.role == 'elderly'
+        && (!exists(/databases/$(database)/documents/config/registration)
+            || get(/databases/$(database)/documents/config/registration).data.open == true);
 
       // Contacts: owner or linked caregiver
       match /contacts/{contactId} {

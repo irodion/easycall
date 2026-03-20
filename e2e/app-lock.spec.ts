@@ -167,7 +167,7 @@ test.describe('App Lock (emulators)', () => {
     await expect(page.getByRole('dialog', { name: /app lock screen/i })).not.toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 10_000 });
 
     await ctx.close();
   });
@@ -307,7 +307,7 @@ test.describe('App Lock (emulators)', () => {
     await page.goto('/elderly');
 
     // Should go straight to HomeScreen with no lock
-    await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole('dialog', { name: /app lock screen/i })).not.toBeVisible();
 
     await ctx.close();

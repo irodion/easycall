@@ -126,6 +126,33 @@
     "offline": "Desconectado",
     "lastSeen": "Última vez {{time}}"
   },
+  "registrationLock": {
+    "title": "Registro",
+    "openDescription": "Los nuevos usuarios pueden registrarse. Cierra el registro para evitar nuevas inscripciones.",
+    "closedDescription": "El registro está cerrado. Solo los usuarios existentes pueden acceder.",
+    "closeRegistration": "Cerrar registro",
+    "openRegistration": "Abrir registro",
+    "closed": "El registro está cerrado.",
+    "closedMessage": "Esta aplicación no acepta nuevos usuarios. Si eres un familiar, pide a tu cuidador que abra el registro."
+  },
+  "caregiverPin": {
+    "title": "PIN del cuidador",
+    "enabledDescription": "Se requiere un PIN para acceder a las funciones de cuidador. Puedes cambiarlo o eliminarlo.",
+    "disabledDescription": "Establece un PIN para proteger el acceso de cuidador. Compártelo solo con familiares.",
+    "setPin": "Establecer PIN",
+    "newPin": "Nuevo PIN",
+    "confirmPin": "Confirmar PIN",
+    "pinPlaceholder": "PIN de 4 dígitos",
+    "confirmPinPlaceholder": "Confirmar PIN",
+    "pinLengthError": "El PIN debe tener exactamente 4 dígitos.",
+    "pinMismatchError": "Los PINs no coinciden.",
+    "savePin": "Guardar PIN",
+    "saveError": "Error al guardar el PIN. Inténtalo de nuevo.",
+    "saveSuccess": "PIN del cuidador guardado correctamente.",
+    "removePin": "Eliminar PIN",
+    "removeError": "Error al eliminar el PIN. Inténtalo de nuevo.",
+    "enterPin": "Ingresa el PIN del cuidador"
+  },
   "roleSelector": {
     "notSignedIn": "No ha iniciado sesión. Por favor inténtelo de nuevo.",
     "saveFailed": "Error al guardar el rol: {{error}}",
@@ -158,7 +185,8 @@
   "pairElderly": {
     "enterCode": "Ingrese el código de 6 dígitos que aparece en la pantalla del usuario mayor:",
     "linking": "Vinculando...",
-    "linkAccount": "Vincular Cuenta"
+    "linkAccount": "Vincular Cuenta",
+    "tooManyAttempts": "Demasiados intentos. Espere 10 minutos antes de intentar de nuevo."
   },
   "incomingCall": {
     "isCalling": "{{name}} está llamando",

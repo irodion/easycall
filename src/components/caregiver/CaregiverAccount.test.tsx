@@ -18,11 +18,45 @@ const mockAuth = {
   },
 };
 
+vi.mock('firebase/firestore', () => ({
+  doc: vi.fn().mockReturnValue('doc-ref'),
+  getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
+  onSnapshot: vi.fn(() => vi.fn()),
+}));
+
 vi.mock('@/services/firebase', () => ({
   auth: mockAuth,
   db: {},
   app: {},
 }));
+
+vi.mock('@/hooks/useRegistrationLock', () => ({
+  useRegistrationLock: vi.fn(() => ({ isOpen: true, loading: false })),
+}));
+
+vi.mock('@/services/registrationLock', () => ({
+  REGISTRATION_CONFIG_REF: 'config-ref',
+  setRegistrationLock: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('@/hooks/useCaregiverPin', () => ({
+  useCaregiverPin: vi.fn(() => ({
+    pinRequired: false,
+    verified: true,
+    failedAttempts: 0,
+    cooldownRemaining: 0,
+    loading: false,
+    submitPin: vi.fn().mockResolvedValue(true),
+  })),
+}));
+
+vi.mock('@/services/caregiverPinService', () => ({
+  CAREGIVER_PIN_REF: 'pin-ref',
+  setCaregiverPin: vi.fn().mockResolvedValue(undefined),
+  removeCaregiverPin: vi.fn().mockResolvedValue(undefined),
+  verifyCaregiverPin: vi.fn().mockResolvedValue(true),
+}));
+
 
 describe('CaregiverAccount', () => {
   beforeEach(() => {

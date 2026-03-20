@@ -3,6 +3,10 @@ import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { auth } from '@/services/firebase';
 import { linkCaregiverEmail, sendCaregiverPasswordReset } from '@/services/caregiverAuth';
+import { useRegistrationLock } from '@/hooks/useRegistrationLock';
+import { setRegistrationLock } from '@/services/registrationLock';
+import { setCaregiverPin, removeCaregiverPin } from '@/services/caregiverPinService';
+import { useCaregiverPin } from '@/hooks/useCaregiverPin';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 
@@ -32,6 +36,201 @@ function getLinkErrorMessage(error: unknown, t: (key: string) => string): string
     default:
       return t('caregiverAccount.genericError');
   }
+}
+
+function RegistrationLockSection() {
+  const { t } = useTranslation();
+  const { isOpen, loading } = useRegistrationLock();
+  const [toggling, setToggling] = useState(false);
+
+  const handleToggle = async () => {
+    setToggling(true);
+    try {
+      const shouldLock = isOpen; // Currently open → user wants to close it
+      await setRegistrationLock(shouldLock);
+    } catch {
+      // Silently fail — the toggle will reflect actual state via onSnapshot
+    } finally {
+      setToggling(false);
+    }
+  };
+
+  return (
+    <div className="card bg-base-200 w-full max-w-sm">
+      <div className="card-body gap-3">
+        <EasyCallText as="h2" variant="button" className="font-bold">
+          {t('registrationLock.title')}
+        </EasyCallText>
+        <EasyCallText as="p" variant="body">
+          {isOpen
+            ? t('registrationLock.openDescription')
+            : t('registrationLock.closedDescription')}
+        </EasyCallText>
+        <EasyCallButton
+          size="default"
+          variant={isOpen ? 'danger' : 'secondary'}
+          onClick={() => void handleToggle()}
+          disabled={loading || toggling}
+        >
+          {toggling
+            ? t('common.saving')
+            : isOpen
+              ? t('registrationLock.closeRegistration')
+              : t('registrationLock.openRegistration')}
+        </EasyCallButton>
+      </div>
+    </div>
+  );
+}
+
+function CaregiverPinSection() {
+  const { t } = useTranslation();
+  const { pinRequired: hasPin } = useCaregiverPin();
+  const [pin, setPin] = useState('');
+  const [pinConfirm, setPinConfirm] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleSavePin = async () => {
+    setPinError(null);
+    setSuccess(false);
+
+    if (pin.length !== 4) {
+      setPinError(t('caregiverPin.pinLengthError'));
+      return;
+    }
+    if (pin !== pinConfirm) {
+      setPinError(t('caregiverPin.pinMismatchError'));
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await setCaregiverPin(pin);
+      setPin('');
+      setPinConfirm('');
+      setSuccess(true);
+    } catch {
+      setPinError(t('caregiverPin.saveError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemovePin = async () => {
+    setSaving(true);
+    try {
+      await removeCaregiverPin();
+      setSuccess(false);
+    } catch {
+      setPinError(t('caregiverPin.removeError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="card bg-base-200 w-full max-w-sm">
+      <div className="card-body gap-3">
+        <EasyCallText as="h2" variant="button" className="font-bold">
+          {t('caregiverPin.title')}
+        </EasyCallText>
+        <EasyCallText as="p" variant="body">
+          {hasPin
+            ? t('caregiverPin.enabledDescription')
+            : t('caregiverPin.disabledDescription')}
+        </EasyCallText>
+
+        {pinError && (
+          <div role="alert" className="alert alert-error">
+            <EasyCallText as="span" variant="body">
+              {pinError}
+            </EasyCallText>
+          </div>
+        )}
+
+        {success && (
+          <div role="status" className="alert alert-success">
+            <EasyCallText as="span" variant="body">
+              {t('caregiverPin.saveSuccess')}
+            </EasyCallText>
+          </div>
+        )}
+
+        <div className="form-control">
+          <label htmlFor="caregiver-pin" className="label">
+            <EasyCallText as="span" variant="body" className="font-semibold">
+              {hasPin ? t('caregiverPin.newPin') : t('caregiverPin.setPin')}
+            </EasyCallText>
+          </label>
+          <input
+            id="caregiver-pin"
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            pattern="[0-9]{4}"
+            className="input input-bordered w-full min-h-14"
+            placeholder={t('caregiverPin.pinPlaceholder')}
+            value={pin}
+            onChange={(e) => { setPin(e.target.value.replace(/\D/g, '')); setPinError(null); }}
+          />
+        </div>
+
+        <div className="form-control">
+          <label htmlFor="caregiver-pin-confirm" className="label">
+            <EasyCallText as="span" variant="body" className="font-semibold">
+              {t('caregiverPin.confirmPin')}
+            </EasyCallText>
+          </label>
+          <input
+            id="caregiver-pin-confirm"
+            type="password"
+            inputMode="numeric"
+            maxLength={4}
+            pattern="[0-9]{4}"
+            className="input input-bordered w-full min-h-14"
+            placeholder={t('caregiverPin.confirmPinPlaceholder')}
+            value={pinConfirm}
+            onChange={(e) => { setPinConfirm(e.target.value.replace(/\D/g, '')); setPinError(null); }}
+          />
+        </div>
+
+        <EasyCallButton
+          size="default"
+          variant="primary"
+          onClick={() => void handleSavePin()}
+          disabled={saving || pin.length < 4}
+        >
+          {saving ? t('common.saving') : t('caregiverPin.savePin')}
+        </EasyCallButton>
+
+        {hasPin && (
+          <EasyCallButton
+            size="default"
+            variant="danger"
+            onClick={() => void handleRemovePin()}
+            disabled={saving}
+          >
+            {t('caregiverPin.removePin')}
+          </EasyCallButton>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SecuritySettings() {
+  return (
+    <>
+      <div className="w-full max-w-sm mt-4">
+        <RegistrationLockSection />
+      </div>
+      <div className="w-full max-w-sm mt-4">
+        <CaregiverPinSection />
+      </div>
+    </>
+  );
 }
 
 export function CaregiverAccount() {
@@ -145,6 +344,8 @@ export function CaregiverAccount() {
             {t('caregiverAccount.backToDashboard')}
           </Link>
         </div>
+
+        <SecuritySettings />
       </div>
     );
   }
@@ -240,6 +441,8 @@ export function CaregiverAccount() {
       >
         {t('caregiverAccount.backToDashboard')}
       </Link>
+
+      <SecuritySettings />
     </div>
   );
 }

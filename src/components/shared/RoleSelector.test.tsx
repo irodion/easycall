@@ -3,16 +3,48 @@ import { screen, fireEvent } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 
+const mockCallable = vi.fn().mockResolvedValue({ data: { success: true } });
+
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn().mockReturnValue('doc-ref'),
   setDoc: vi.fn().mockResolvedValue(undefined),
   getFirestore: vi.fn(),
+  onSnapshot: vi.fn(() => vi.fn()),
+}));
+
+vi.mock('firebase/functions', () => ({
+  getFunctions: vi.fn(() => 'mock-functions'),
+  httpsCallable: vi.fn(() => mockCallable),
 }));
 
 vi.mock('@/services/firebase', () => ({
   db: {},
   app: {},
   ensureAuthenticated: vi.fn().mockResolvedValue({ uid: 'user-1' }),
+}));
+
+vi.mock('@/hooks/useRegistrationLock', () => ({
+  useRegistrationLock: vi.fn(() => ({ isOpen: true, loading: false })),
+}));
+
+vi.mock('@/hooks/useCaregiverPin', () => ({
+  useCaregiverPin: vi.fn(() => ({
+    pinRequired: false,
+    verified: true,
+    failedAttempts: 0,
+    cooldownRemaining: 0,
+    loading: false,
+    submitPin: vi.fn().mockResolvedValue(true),
+  })),
+}));
+
+vi.mock('@/services/registrationLock', () => ({
+  REGISTRATION_CONFIG_REF: 'config-ref',
+}));
+
+vi.mock('@/services/caregiverPinService', () => ({
+  CAREGIVER_PIN_REF: 'pin-ref',
+  verifyCaregiverPin: vi.fn().mockResolvedValue(true),
 }));
 
 describe('RoleSelector', () => {
@@ -50,17 +82,14 @@ describe('RoleSelector', () => {
     });
   });
 
-  it('clicking caregiver role calls setDoc with role: caregiver', async () => {
-    const { setDoc } = await import('firebase/firestore');
+  it('clicking caregiver role calls assignCaregiverRole Cloud Function', async () => {
+    const { httpsCallable } = await import('firebase/functions');
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
     fireEvent.click(screen.getByRole('button', { name: /family caregiver/i }));
     await vi.waitFor(() => {
-      expect(setDoc).toHaveBeenCalledWith(
-        'doc-ref',
-        expect.objectContaining({ role: 'caregiver', onboardingComplete: false }),
-        expect.objectContaining({ merge: true }),
-      );
+      expect(httpsCallable).toHaveBeenCalledWith(expect.anything(), 'assignCaregiverRole');
+      expect(mockCallable).toHaveBeenCalled();
     });
   });
 
@@ -106,6 +135,38 @@ describe('RoleSelector', () => {
     await vi.waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
     });
+  });
+
+  it('disables buttons when registration is closed', async () => {
+    const { useRegistrationLock } = await import('@/hooks/useRegistrationLock');
+    vi.mocked(useRegistrationLock).mockReturnValue({ isOpen: false, loading: false });
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+
+    expect(screen.getByRole('button', { name: /elderly user/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeDisabled();
+    expect(screen.getByText(/not accepting new users/i)).toBeInTheDocument();
+  });
+
+  it('disables caregiver button when PIN status is loading', async () => {
+    const { useCaregiverPin } = await import('@/hooks/useCaregiverPin');
+    vi.mocked(useCaregiverPin).mockReturnValue({
+      pinRequired: false,
+      verified: false,
+      failedAttempts: 0,
+      cooldownRemaining: 0,
+      loading: true,
+      submitPin: vi.fn().mockResolvedValue(true),
+    });
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+
+    // Caregiver button disabled due to PIN loading
+    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeDisabled();
+    // Elderly button also disabled via registration loading check — but that's from the
+    // top-level mock. The key assertion is the caregiver button is disabled.
   });
 
   it('passes vitest-axe', async () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { screen, act } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
@@ -22,6 +22,30 @@ vi.mock('@/services/firebase', () => ({
   db: {},
   app: {},
   ensureAuthenticated: vi.fn().mockResolvedValue({ uid: 'user-1' }),
+}));
+
+vi.mock('@/hooks/useRegistrationLock', () => ({
+  useRegistrationLock: vi.fn(() => ({ isOpen: true, loading: false })),
+}));
+
+vi.mock('@/hooks/useCaregiverPin', () => ({
+  useCaregiverPin: vi.fn(() => ({
+    pinRequired: false,
+    verified: true,
+    failedAttempts: 0,
+    cooldownRemaining: 0,
+    loading: false,
+    submitPin: vi.fn().mockResolvedValue(true),
+  })),
+}));
+
+vi.mock('@/services/registrationLock', () => ({
+  REGISTRATION_CONFIG_REF: 'config-ref',
+}));
+
+vi.mock('@/services/caregiverPinService', () => ({
+  CAREGIVER_PIN_REF: 'pin-ref',
+  verifyCaregiverPin: vi.fn().mockResolvedValue(true),
 }));
 
 describe('AuthGuard', () => {
@@ -182,6 +206,124 @@ describe('AuthGuard', () => {
 
     // Should now show protected content without page reload
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
+  });
+
+  it('shows PIN prompt for caregiver routes when PIN is required and not verified', async () => {
+    // Override useCaregiverPin mock for this test
+    const { useCaregiverPin } = await import('@/hooks/useCaregiverPin');
+    (useCaregiverPin as Mock).mockReturnValue({
+      pinRequired: true,
+      verified: false,
+      failedAttempts: 0,
+      cooldownRemaining: 0,
+      loading: false,
+      submitPin: vi.fn().mockResolvedValue(true),
+    });
+
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'caregiver', onboardingComplete: true }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="caregiver">
+          <div>Caregiver Dashboard</div>
+        </AuthGuard>,
+      );
+    });
+
+    // PIN prompt (AppLock dialog) should be visible, content should NOT
+    expect(screen.getByRole('dialog', { name: /app lock/i })).toBeInTheDocument();
+    expect(screen.queryByText('Caregiver Dashboard')).not.toBeInTheDocument();
+  });
+
+  it('does NOT show PIN prompt for elderly routes even when PIN is required', async () => {
+    const { useCaregiverPin } = await import('@/hooks/useCaregiverPin');
+    (useCaregiverPin as Mock).mockReturnValue({
+      pinRequired: true,
+      verified: false,
+      failedAttempts: 0,
+      cooldownRemaining: 0,
+      loading: false,
+      submitPin: vi.fn().mockResolvedValue(true),
+    });
+
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'elderly', onboardingComplete: true }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="elderly">
+          <div>Elderly Content</div>
+        </AuthGuard>,
+      );
+    });
+
+    // Elderly routes should render content directly — no PIN gate
+    expect(screen.getByText('Elderly Content')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: /app lock/i })).not.toBeInTheDocument();
+  });
+
+  it('renders caregiver content when PIN is required and already verified', async () => {
+    const { useCaregiverPin } = await import('@/hooks/useCaregiverPin');
+    (useCaregiverPin as Mock).mockReturnValue({
+      pinRequired: true,
+      verified: true,
+      failedAttempts: 0,
+      cooldownRemaining: 0,
+      loading: false,
+      submitPin: vi.fn().mockResolvedValue(true),
+    });
+
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'caregiver', onboardingComplete: true }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="caregiver">
+          <div>Caregiver Dashboard</div>
+        </AuthGuard>,
+      );
+    });
+
+    // PIN already verified — content should render
+    expect(screen.getByText('Caregiver Dashboard')).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: /app lock/i })).not.toBeInTheDocument();
   });
 
   it('passes vitest-axe while loading', async () => {

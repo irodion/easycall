@@ -171,7 +171,7 @@ test.describe('i18n — Language switching (emulators)', () => {
 
   test('app renders in English by default', async ({ page }) => {
     await page.goto('/elderly');
-    await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 15000 });
     // html lang attribute should be 'en'
     const lang = await page.locator('html').getAttribute('lang');
     expect(lang).toBe('en');
@@ -179,7 +179,7 @@ test.describe('i18n — Language switching (emulators)', () => {
 
   test('changing language to Spanish updates UI strings', async ({ page }) => {
     await page.goto('/elderly');
-    await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 15000 });
 
     // Navigate to settings
     await page.getByRole('button', { name: /settings/i }).click();
@@ -199,7 +199,7 @@ test.describe('i18n — Language switching (emulators)', () => {
     });
 
     await page.goto('/elderly');
-    await expect(page.getByText('אנשי הקשר שלך')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'אנשי קשר' })).toBeVisible({ timeout: 15000 });
 
     const dir = await page.locator('html').getAttribute('dir');
     expect(dir).toBe('rtl');
@@ -216,11 +216,11 @@ test.describe('i18n — Language switching (emulators)', () => {
 
     await page.goto('/elderly');
     // Spanish bundle loads lazily — the title should eventually appear in Spanish
-    await expect(page.getByText('Sus Contactos')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Contactos' })).toBeVisible({ timeout: 15000 });
 
     // Reload — language should persist from Firestore
     await page.reload();
-    await expect(page.getByText('Sus Contactos')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Contactos' })).toBeVisible({ timeout: 15000 });
   });
 
   test('Russian language renders correctly', async ({ page }) => {
@@ -229,7 +229,7 @@ test.describe('i18n — Language switching (emulators)', () => {
     });
 
     await page.goto('/elderly');
-    await expect(page.getByText('Ваши контакты')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Контакты' })).toBeVisible({ timeout: 15000 });
 
     const lang = await page.locator('html').getAttribute('lang');
     expect(lang).toBe('ru');

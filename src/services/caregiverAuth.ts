@@ -5,7 +5,7 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { auth, db } from '@/services/firebase';
 
 /**
  * Links an email/password credential to the current anonymous user.

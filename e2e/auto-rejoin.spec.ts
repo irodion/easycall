@@ -200,7 +200,7 @@ test.describe('Auto-Rejoin on Disconnect (emulators)', () => {
     await page.getByRole('button', { name: /dismiss/i }).click();
 
     await expect(page.getByText(/Return to call with Alice\?/)).not.toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('Your Contacts')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible();
   });
 
   test('no rejoin prompt when active call is older than 5 minutes', async ({ page }) => {
@@ -215,13 +215,13 @@ test.describe('Auto-Rejoin on Disconnect (emulators)', () => {
     });
 
     await page.goto('/elderly');
-    await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(/Return to call with/)).not.toBeVisible({ timeout: 3000 });
   });
 
   test('no rejoin prompt when no activeCall document exists', async ({ page }) => {
     await page.goto('/elderly');
-    await expect(page.getByText('Your Contacts')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(/Return to call with/)).not.toBeVisible({ timeout: 3000 });
   });
 });

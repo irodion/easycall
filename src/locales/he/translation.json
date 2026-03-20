@@ -126,6 +126,33 @@
     "offline": "לא מחובר",
     "lastSeen": "נראה לאחרונה {{time}}"
   },
+  "registrationLock": {
+    "title": "הרשמה",
+    "openDescription": "משתמשים חדשים יכולים להירשם. סגור הרשמה כדי למנוע הרשמות חדשות.",
+    "closedDescription": "ההרשמה סגורה. רק משתמשים קיימים יכולים לגשת לאפליקציה.",
+    "closeRegistration": "סגור הרשמה",
+    "openRegistration": "פתח הרשמה",
+    "closed": "ההרשמה סגורה.",
+    "closedMessage": "אפליקציה זו אינה מקבלת משתמשים חדשים. אם אתה בן משפחה, בקש מהמטפל לפתוח את ההרשמה."
+  },
+  "caregiverPin": {
+    "title": "קוד PIN למטפל",
+    "enabledDescription": "נדרש קוד PIN לגישה לתכונות המטפל. ניתן לשנות או להסיר אותו.",
+    "disabledDescription": "הגדר קוד PIN להגנה על גישת המטפל. שתף רק עם בני משפחה.",
+    "setPin": "הגדר PIN",
+    "newPin": "PIN חדש",
+    "confirmPin": "אישור PIN",
+    "pinPlaceholder": "PIN בן 4 ספרות",
+    "confirmPinPlaceholder": "אישור PIN",
+    "pinLengthError": "ה-PIN חייב להיות בן 4 ספרות בדיוק.",
+    "pinMismatchError": "קודי ה-PIN אינם תואמים.",
+    "savePin": "שמור PIN",
+    "saveError": "שמירת ה-PIN נכשלה. נסה שוב.",
+    "saveSuccess": "קוד PIN למטפל נשמר בהצלחה.",
+    "removePin": "הסר PIN",
+    "removeError": "הסרת ה-PIN נכשלה. נסה שוב.",
+    "enterPin": "הזן את קוד ה-PIN למטפל"
+  },
   "roleSelector": {
     "notSignedIn": "לא מחובר. אנא נסה שוב.",
     "saveFailed": "שמירת התפקיד נכשלה: {{error}}",
@@ -158,7 +185,8 @@
   "pairElderly": {
     "enterCode": "הזן את הקוד בן 6 הספרות המוצג על מסך המשתמש המבוגר:",
     "linking": "מקשר...",
-    "linkAccount": "קשר חשבון"
+    "linkAccount": "קשר חשבון",
+    "tooManyAttempts": "יותר מדי ניסיונות. אנא המתן 10 דקות לפני ניסיון נוסף."
   },
   "incomingCall": {
     "isCalling": "{{name}} מתקשר",
