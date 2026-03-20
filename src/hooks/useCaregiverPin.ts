@@ -57,20 +57,14 @@ export function useCaregiverPin(): UseCaregiverPinReturn {
       setLoading(false);
     }
 
-    // Fire migration in parallel — when it completes, if we deferred
-    // a "no doc" snapshot, finalize it now.
-    void migrateLegacyPinIfNeeded().then((ok) => {
+    // Fire migration in parallel — when it resolves (success or failure),
+    // finalize any deferred "no doc" snapshot so we don't stay loading forever.
+    void migrateLegacyPinIfNeeded().finally(() => {
       migrationDone.current = true;
-      if (ok) {
-        const snap = lastSnap.current;
-        if (snap && !snap.pinSet) {
-          applySnap(snap.exists, snap.pinSet);
-        }
+      const snap = lastSnap.current;
+      if (snap && !snap.pinSet) {
+        applySnap(snap.exists, snap.pinSet);
       }
-      // If migration failed, don't finalize — onSnapshot will handle if doc exists
-    }).catch(() => {
-      migrationDone.current = true;
-      // Don't apply — let onSnapshot handle
     });
 
     const unsub = onSnapshot(
