@@ -179,8 +179,6 @@ export const setRegistrationLock = onCall({ enforceAppCheck: true }, async (requ
 
   await db.doc('config/registration').set({
     open: !locked,
-    lockedBy: locked ? request.auth.uid : null,
-    lockedAt: locked ? FieldValue.serverTimestamp() : null,
   });
 
   return { success: true };
