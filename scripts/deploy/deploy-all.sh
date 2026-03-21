@@ -32,15 +32,15 @@ echo -e "${BLUE}╔════════════════════�
 echo -e "${BLUE}║     EasyCall Production Deploy       ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════╝${NC}"
 
-# Step 1: Validate environment
-header "Step 1/5: Validating environment"
-bash "$SCRIPT_DIR/validate-env.sh"
-ok "Environment validated"
-
-# Step 2: Install dependencies
-header "Step 2/5: Installing dependencies"
+# Step 1: Install dependencies
+header "Step 1/5: Installing dependencies"
 pnpm install --frozen-lockfile
 ok "Root dependencies installed"
+
+# Step 2: Validate environment
+header "Step 2/5: Validating environment"
+bash "$SCRIPT_DIR/validate-env.sh"
+ok "Environment validated"
 
 # Step 3: Quality checks
 if [ "$SKIP_TESTS" = false ]; then
