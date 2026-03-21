@@ -61,5 +61,32 @@ if [ "$SA_KEY" != "skip" ] && [ -n "$SA_KEY" ]; then
   ok "Set FIREBASE_SERVICE_ACCOUNT_KEY"
 fi
 
+# JAAS secrets for Cloud Functions (from functions/.env or manual input)
+echo ""
+echo -e "${YELLOW}JaaS secrets for Cloud Functions (from https://jaas.8x8.vc/#/apikeys):${NC}"
+if [ -f "functions/.env" ]; then
+  for var in JAAS_APP_ID JAAS_KEY_ID JAAS_PRIVATE_KEY; do
+    val=$(grep "${var}=" functions/.env 2>/dev/null | cut -d= -f2- || true)
+    if [ -n "$val" ]; then
+      gh secret set "$var" --body "$val"
+      ok "Set $var (from functions/.env)"
+    else
+      read -p "  $var (or 'skip'): " manual_val
+      if [ "$manual_val" != "skip" ] && [ -n "$manual_val" ]; then
+        gh secret set "$var" --body "$manual_val"
+        ok "Set $var"
+      fi
+    fi
+  done
+else
+  for var in JAAS_APP_ID JAAS_KEY_ID JAAS_PRIVATE_KEY; do
+    read -p "  $var (or 'skip'): " manual_val
+    if [ "$manual_val" != "skip" ] && [ -n "$manual_val" ]; then
+      gh secret set "$var" --body "$manual_val"
+      ok "Set $var"
+    fi
+  done
+fi
+
 echo ""
 echo -e "${GREEN}GitHub secrets configured! Verify with: gh secret list${NC}"
