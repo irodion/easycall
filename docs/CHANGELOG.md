@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Project scaffolding with Vite + React + TypeScript
-- Tailwind CSS v4 + DaisyUI v5 with custom high-contrast member theme
+- Tailwind CSS v4 + DaisyUI v5 with custom high-contrast accessibility theme
 - PWA support via vite-plugin-pwa with manifest and service worker
 - Vitest + Testing Library test setup
 - ESLint (flat config) + Prettier configuration

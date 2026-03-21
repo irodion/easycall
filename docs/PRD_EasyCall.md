@@ -230,7 +230,7 @@ npx prettier
 
 **AD-4: Pre-generated deterministic room IDs.** Each member-contact pair has a pre-computed unique Jitsi room ID stored in Firestore (e.g., `easycall-rose-alex-a7f3x`). No room creation API is needed. Both parties join the same pre-known room. This eliminates an entire class of "wrong room" errors.
 
-**AD-5: Firestore real-time listeners for call signaling.** When Alex calls the member, a document is written to `users/{memberId}/incomingCall/current`. The member's app has an `onSnapshot` listener that fires in <1 second, triggering the ringtone and full-screen answer UI. This is simpler, cheaper, and more reliable than building a custom WebSocket server.
+**AD-5: Firestore real-time listeners for call signaling.** When Alex calls the member, a document is written to `users/{elderlyUserId}/incomingCall/current`. The member's app has an `onSnapshot` listener that fires in <1 second, triggering the ringtone and full-screen answer UI. This is simpler, cheaper, and more reliable than building a custom WebSocket server.
 
 **AD-6: Cloudflare Pages for hosting.** Unlimited bandwidth (critical for unpredictable video-app usage patterns), global CDN, free HTTPS, GitHub auto-deploy. Superior to Vercel/Netlify for this use case due to zero bandwidth caps on the free tier.
 

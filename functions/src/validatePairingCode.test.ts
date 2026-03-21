@@ -82,7 +82,7 @@ describe('validatePairingCode Cloud Function', () => {
   });
 
   it('rejects invalid code format (non-6-digit)', async () => {
-    // Admin role check must pass first
+    // Format validation runs before role check, but mock is still needed for setup
     mockDocGet.mockResolvedValue({ exists: true, data: () => ({ role: 'caregiver' }) });
 
     await expect(callValidate({ auth: { uid: 'cg1' }, data: { code: '12345' } })).rejects.toThrow(
