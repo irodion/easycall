@@ -23,6 +23,14 @@ vi.mock('@/services/firebase', () => ({
   app: {},
 }));
 
+vi.mock('virtual:pwa-register/react', () => ({
+  useRegisterSW: () => ({
+    needRefresh: [false, vi.fn()],
+    offlineReady: [false, vi.fn()],
+    updateServiceWorker: vi.fn(),
+  }),
+}));
+
 vi.mock('@/hooks/useActiveCall', () => ({
   useActiveCall: () => ({ activeCall: null, dismiss: vi.fn() }),
 }));

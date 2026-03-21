@@ -11,6 +11,7 @@ import { IncomingCallScreen } from '@/components/elderly/IncomingCallScreen';
 import { useIncomingCall } from '@/hooks/useIncomingCall';
 import { usePresence } from '@/hooks/usePresence';
 import { useAppLock } from '@/hooks/useAppLock';
+import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate';
 import { HomeScreen } from '@/components/elderly/HomeScreen';
 import { SettingsScreen } from '@/components/elderly/SettingsScreen';
 import { AddContact } from '@/components/elderly/AddContact';
@@ -100,6 +101,7 @@ function AuthenticatedApp() {
 
   useIncomingCall(userId);
   const { setInCall } = usePresence(userId);
+  useServiceWorkerUpdate();
 
   const lockState = useAppLock({ settings, userId });
 

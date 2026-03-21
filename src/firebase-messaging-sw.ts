@@ -6,6 +6,11 @@ import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
 declare let self: ServiceWorkerGlobalScope;
 
+// Activate immediately so installed PWAs pick up updates without closing all tabs.
+// The client-side useServiceWorkerUpdate hook defers the page reload until calls end.
+self.skipWaiting();
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
