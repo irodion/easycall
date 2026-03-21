@@ -16,13 +16,20 @@ warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 
 header "Checking required CLI tools"
 
-for cmd in node pnpm firebase gh; do
+for cmd in node pnpm firebase; do
   if command -v "$cmd" &>/dev/null; then
     ok "$cmd ($(command -v "$cmd"))"
   else
     fail "$cmd not found — install it first"
   fi
 done
+
+# gh is optional — only needed for setup-github-secrets.sh
+if command -v gh &>/dev/null; then
+  ok "gh ($(command -v gh))"
+else
+  warn "gh not found — optional, needed only for GitHub secrets setup"
+fi
 
 # Check node version >= 20
 NODE_MAJOR=$(node -v | sed 's/v\([0-9]*\).*/\1/')
