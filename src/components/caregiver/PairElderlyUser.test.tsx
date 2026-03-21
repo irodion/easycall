@@ -18,6 +18,13 @@ describe('PairElderlyUser', () => {
     vi.clearAllMocks();
   });
 
+  it('renders back to dashboard link', () => {
+    renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
+    const backLink = screen.getByRole('link', { name: /back to dashboard/i });
+    expect(backLink).toBeInTheDocument();
+    expect(backLink.getAttribute('href')).toBe('/caregiver');
+  });
+
   it('renders input with inputMode=numeric', () => {
     renderWithProviders(<PairElderlyUser onSuccess={onSuccess} />);
     const input = screen.getByLabelText(/6-digit code/i);

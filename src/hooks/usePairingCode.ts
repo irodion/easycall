@@ -21,6 +21,7 @@ const AUTO_REFRESH_MS = 10 * 60 * 1000;
 
 export function usePairingCode(userId: string | null) {
   const [code, setCode] = useState<string | null>(null);
+  const [error, setError] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(600);
   const refreshRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const countdownRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -47,11 +48,23 @@ export function usePairingCode(userId: string | null) {
 
     async function generateAndSchedule() {
       clearTimeout(refreshRef.current);
-      const newCode = await saveCode(userId!);
-      if (cancelled || !mountedRef.current) return;
-      setCode(newCode);
-      restartCountdown();
-      refreshRef.current = setTimeout(() => void generateAndSchedule(), AUTO_REFRESH_MS);
+      try {
+        const newCode = await saveCode(userId!);
+        if (cancelled || !mountedRef.current) return;
+        setCode(newCode);
+        setError(false);
+        restartCountdown();
+        refreshRef.current = setTimeout(() => void generateAndSchedule(), AUTO_REFRESH_MS);
+      } catch (err) {
+        if (cancelled || !mountedRef.current) return;
+        console.error('Failed to generate pairing code:', err);
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = undefined;
+        }
+        setCode(null);
+        setError(true);
+      }
     }
 
     void generateAndSchedule();
@@ -72,18 +85,24 @@ export function usePairingCode(userId: string | null) {
       const newCode = await saveCode(currentUserId);
       if (!mountedRef.current) return;
       setCode(newCode);
+      setError(false);
       restartCountdown();
       refreshRef.current = setTimeout(() => void refresh(), AUTO_REFRESH_MS);
     } catch (err) {
       // nosemgrep: no-console-log-sensitive — logs error object, not the code itself
       console.error('Failed to refresh pairing code:', err);
       if (!mountedRef.current) return;
-      // Retry after the normal interval
-      refreshRef.current = setTimeout(() => void refresh(), AUTO_REFRESH_MS);
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = undefined;
+      }
+      // Clear stale code so the error UI shows with a retry button
+      setCode(null);
+      setError(true);
     }
   };
 
   const formattedCountdown = `${String(Math.floor(secondsRemaining / 60)).padStart(2, '0')}:${String(secondsRemaining % 60).padStart(2, '0')}`;
 
-  return { code, secondsRemaining, formattedCountdown, refresh };
+  return { code, error, secondsRemaining, formattedCountdown, refresh };
 }

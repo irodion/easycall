@@ -58,13 +58,10 @@ export function AddContact({ userId }: AddContactProps) {
           const compressed = await compressImage(photoFile);
           photoURL = await blobToDataUrl(compressed);
         } catch {
-          if (blobUrlRef.current) {
-            URL.revokeObjectURL(blobUrlRef.current);
-            blobUrlRef.current = null;
-          }
+          // Keep the preview visible so the user sees which photo failed.
+          // They can go back to Step 2 to pick a different photo or proceed without one.
           setError(t('addContact.photoError'));
           setPhotoFile(null);
-          setPhotoPreview(null);
           setIsSaving(false);
           return;
         }

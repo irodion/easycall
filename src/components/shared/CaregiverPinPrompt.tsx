@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { AppLock } from './AppLock';
 import type { UseCaregiverPinReturn } from '@/hooks/useCaregiverPin';
 
@@ -7,6 +8,7 @@ interface CaregiverPinPromptProps {
 }
 
 export function CaregiverPinPrompt({ caregiverPin, onVerified }: CaregiverPinPromptProps) {
+  const { t } = useTranslation();
   return (
     <AppLock
       isLocked={true}
@@ -17,6 +19,7 @@ export function CaregiverPinPrompt({ caregiverPin, onVerified }: CaregiverPinPro
         if (ok) onVerified(pin);
         return ok;
       }}
+      title={t('caregiverPin.enterPin')}
     >
       <div />
     </AppLock>

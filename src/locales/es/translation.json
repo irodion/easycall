@@ -9,7 +9,9 @@
     "saving": "Guardando...",
     "loading": "Cargando...",
     "install": "Instalar",
-    "somethingWentWrong": "Algo salió mal"
+    "somethingWentWrong": "Algo salió mal",
+    "dismiss": "Cerrar",
+    "retry": "Reintentar"
   },
   "home": {
     "title": "Contactos",
@@ -83,10 +85,14 @@
     "title": "Panel del Cuidador",
     "linkUser": "Vincular Usuario Mayor",
     "lastSeen": "Última vez: {{time}}",
-    "manageContacts": "Administrar Contactos"
+    "manageContacts": "Administrar Contactos",
+    "backToDashboard": "Volver al Panel",
+    "noLinkedUsers": "Aún no hay usuarios vinculados",
+    "noLinkedUsersHint": "Toque \"Vincular Usuario Mayor\" para emparejar con el dispositivo de un familiar."
   },
   "manageContacts": {
     "title": "Administrar Contactos",
+    "titleFor": "Contactos de {{name}}",
     "addContact": "+ Agregar Contacto",
     "contactName": "Nombre del contacto",
     "namePlaceholder": "Nombre del contacto",
@@ -118,7 +124,9 @@
     "pinMismatchError": "Los PIN no coinciden",
     "pinSaveError": "Error al guardar el PIN. Por favor inténtelo de nuevo.",
     "savePin": "Guardar PIN",
-    "language": "Idioma"
+    "language": "Idioma",
+    "settingsFor": "Configuración de {{name}}",
+    "loadError": "No se pudieron cargar las configuraciones. Verifique los permisos e inténtelo de nuevo."
   },
   "presence": {
     "online": "En línea",
@@ -180,7 +188,8 @@
     "generatingCode": "Generando código",
     "pairingCodeLabel": "Código de emparejamiento: {{code}}",
     "expiresIn": "Expira en {{time}}",
-    "getNewCode": "Obtener nuevo código"
+    "getNewCode": "Obtener nuevo código",
+    "generateError": "Error al generar el código. Por favor inténtelo de nuevo."
   },
   "pairElderly": {
     "enterCode": "Ingrese el código de 6 dígitos que aparece en la pantalla del usuario mayor:",

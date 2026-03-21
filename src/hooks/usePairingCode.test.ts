@@ -110,24 +110,20 @@ describe('usePairingCode', () => {
     await act(() => vi.advanceTimersByTimeAsync(601_000));
   });
 
-  it('refresh catches error and schedules retry', async () => {
+  it('refresh clears stale code and sets error on failure', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { result } = renderHook(() => usePairingCode('user-1'));
     await act(() => vi.advanceTimersByTimeAsync(0));
 
-    const codeBefore = result.current.code;
+    expect(result.current.code).toMatch(/^\d{6}$/);
 
     mockSetDoc.mockRejectedValueOnce(new Error('Network error'));
     await act(() => result.current.refresh());
 
-    // Code should remain the same (refresh failed)
-    expect(result.current.code).toBe(codeBefore);
+    // Stale code should be cleared so error UI is shown
+    expect(result.current.code).toBeNull();
+    expect(result.current.error).toBe(true);
     expect(consoleSpy).toHaveBeenCalledWith('Failed to refresh pairing code:', expect.any(Error));
-
-    // Verify retry was scheduled — advance by AUTO_REFRESH_MS (10 min)
-    mockSetDoc.mockClear();
-    await act(() => vi.advanceTimersByTimeAsync(10 * 60 * 1000));
-    expect(mockSetDoc).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });

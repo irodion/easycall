@@ -57,6 +57,24 @@ describe('ElderlyUserSettings', () => {
     return result;
   }
 
+  it('renders back to dashboard link', () => {
+    renderAndEmit();
+    const backLink = screen.getByRole('link', { name: /back to dashboard/i });
+    expect(backLink).toBeInTheDocument();
+    expect(backLink.getAttribute('href')).toBe('/caregiver');
+  });
+
+  it('shows identity header with display name', () => {
+    renderWithProviders(<ElderlyUserSettings elderlyUserId="elderly-1" />);
+    act(() => {
+      capturedCallback!({
+        exists: () => true,
+        data: () => ({ displayName: 'Grandma Rose', settings: defaultSettings }),
+      });
+    });
+    expect(screen.getByText(/settings for grandma rose/i)).toBeInTheDocument();
+  });
+
   it('renders current fontSize value from Firestore', () => {
     renderAndEmit();
     expect(screen.getByRole('button', { name: 'Large' })).toBeInTheDocument();

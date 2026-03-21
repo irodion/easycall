@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/services/firebase';
+import { BackToDashboard } from '@/components/shared/BackToDashboard';
 import { useContactStore } from '@/stores/contactStore';
 import { generateRoomId } from '@/utils/generateRoomId';
 import { compressImage, blobToDataUrl } from '@/utils/compressImage';
@@ -19,6 +22,7 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
   const removeContact = useContactStore((s) => s.removeContact);
   const subscribeToContacts = useContactStore((s) => s.subscribeToContacts);
 
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -30,6 +34,24 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
   useEffect(() => {
     return subscribeToContacts(elderlyUserId);
   }, [elderlyUserId, subscribeToContacts]);
+
+  useEffect(() => {
+    let active = true;
+    setDisplayName(null);
+    void getDoc(doc(db, 'users', elderlyUserId))
+      .then((snap) => {
+        if (active && snap.exists()) {
+          const name = snap.data()['displayName'];
+          if (typeof name === 'string') setDisplayName(name);
+        }
+      })
+      .catch(() => {
+        // Silently fall back to generic title if the read fails
+      });
+    return () => {
+      active = false;
+    };
+  }, [elderlyUserId]);
 
   const handleAdd = async () => {
     if (!newName.trim() || isAdding) return;
@@ -92,8 +114,11 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
 
   return (
     <div className="min-h-screen bg-base-100 p-6 flex flex-col gap-6">
+      <BackToDashboard />
       <EasyCallText as="h1" variant="heading">
-        {t('manageContacts.title')}
+        {displayName
+          ? t('manageContacts.titleFor', { name: displayName })
+          : t('manageContacts.title')}
       </EasyCallText>
 
       <EasyCallButton

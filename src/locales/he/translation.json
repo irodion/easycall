@@ -9,7 +9,9 @@
     "saving": "שומר...",
     "loading": "טוען...",
     "install": "התקן",
-    "somethingWentWrong": "משהו השתבש"
+    "somethingWentWrong": "משהו השתבש",
+    "dismiss": "סגור",
+    "retry": "נסה שוב"
   },
   "home": {
     "title": "אנשי קשר",
@@ -83,10 +85,14 @@
     "title": "לוח בקרה למטפל",
     "linkUser": "קשר משתמש מבוגר",
     "lastSeen": "נראה לאחרונה: {{time}}",
-    "manageContacts": "ניהול אנשי קשר"
+    "manageContacts": "ניהול אנשי קשר",
+    "backToDashboard": "חזרה ללוח הבקרה",
+    "noLinkedUsers": "אין משתמשים מקושרים עדיין",
+    "noLinkedUsersHint": "לחצו על \"קשר משתמש מבוגר\" כדי להתאים למכשיר של בן משפחה."
   },
   "manageContacts": {
     "title": "ניהול אנשי קשר",
+    "titleFor": "אנשי קשר של {{name}}",
     "addContact": "+ הוסף איש קשר",
     "contactName": "שם איש קשר",
     "namePlaceholder": "שם איש קשר",
@@ -118,7 +124,9 @@
     "pinMismatchError": "קודי ה-PIN אינם תואמים",
     "pinSaveError": "שמירת ה-PIN נכשלה. אנא נסה שוב.",
     "savePin": "שמור PIN",
-    "language": "שפה"
+    "language": "שפה",
+    "settingsFor": "הגדרות עבור {{name}}",
+    "loadError": "לא ניתן לטעון הגדרות. בדקו הרשאות ונסו שוב."
   },
   "presence": {
     "online": "מחובר",
@@ -180,7 +188,8 @@
     "generatingCode": "יוצר קוד",
     "pairingCodeLabel": "קוד צימוד: {{code}}",
     "expiresIn": "פג תוקף בעוד {{time}}",
-    "getNewCode": "קבל קוד חדש"
+    "getNewCode": "קבל קוד חדש",
+    "generateError": "יצירת הקוד נכשלה. אנא נסה שוב."
   },
   "pairElderly": {
     "enterCode": "הזן את הקוד בן 6 הספרות המוצג על מסך המשתמש המבוגר:",

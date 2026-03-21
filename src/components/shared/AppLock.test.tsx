@@ -29,7 +29,7 @@ describe('AppLock', () => {
         <div data-testid="content">App Content</div>
       </AppLock>,
     );
-    expect(screen.getByRole('dialog', { name: /app lock screen/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /enter pin to unlock/i })).toBeInTheDocument();
     expect(screen.getByText('Enter PIN to unlock')).toBeInTheDocument();
   });
 

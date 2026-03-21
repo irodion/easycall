@@ -244,7 +244,7 @@ describe('AuthGuard', () => {
     });
 
     // PIN prompt (AppLock dialog) should be visible, content should NOT
-    expect(screen.getByRole('dialog', { name: /app lock/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /enter caregiver pin/i })).toBeInTheDocument();
     expect(screen.queryByText('Caregiver Dashboard')).not.toBeInTheDocument();
   });
 
@@ -284,7 +284,7 @@ describe('AuthGuard', () => {
 
     // Elderly routes should render content directly — no PIN gate
     expect(screen.getByText('Elderly Content')).toBeInTheDocument();
-    expect(screen.queryByRole('dialog', { name: /app lock/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: /enter.*pin/i })).not.toBeInTheDocument();
   });
 
   it('renders caregiver content when PIN is required and already verified', async () => {
@@ -323,7 +323,7 @@ describe('AuthGuard', () => {
 
     // PIN already verified — content should render
     expect(screen.getByText('Caregiver Dashboard')).toBeInTheDocument();
-    expect(screen.queryByRole('dialog', { name: /app lock/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: /enter.*pin/i })).not.toBeInTheDocument();
   });
 
   it('passes vitest-axe while loading', async () => {

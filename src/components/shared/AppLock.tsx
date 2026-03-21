@@ -13,6 +13,8 @@ interface AppLockProps {
   failedAttempts: number;
   cooldownRemaining: number;
   onPinSubmit: (pin: string) => Promise<boolean>;
+  /** Optional title override for the lock screen heading */
+  title?: string;
   children: ReactNode;
 }
 
@@ -21,6 +23,7 @@ export function AppLock({
   failedAttempts,
   cooldownRemaining,
   onPinSubmit,
+  title,
   children,
 }: AppLockProps) {
   const { t } = useTranslation();
@@ -69,10 +72,10 @@ export function AppLock({
       ref={dialogRef}
       className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-[var(--space-lg)] bg-base-100 p-[var(--space-md)]"
       role="dialog"
-      aria-label={t('appLock.title')}
+      aria-labelledby="applock-heading"
     >
-      <h1 className="text-[length:var(--text-heading)] font-bold text-center">
-        {t('appLock.enterPin')}
+      <h1 id="applock-heading" className="text-[length:var(--text-heading)] font-bold text-center">
+        {title ?? t('appLock.enterPin')}
       </h1>
 
       {/* PIN dots */}

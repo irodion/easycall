@@ -8,6 +8,7 @@ const mockRefresh = vi.fn();
 vi.mock('@/hooks/usePairingCode', () => ({
   usePairingCode: vi.fn(() => ({
     code: '123456',
+    error: false,
     secondsRemaining: 540,
     formattedCountdown: '09:00',
     refresh: mockRefresh,
@@ -24,9 +25,39 @@ describe('PairingCodeDisplay', () => {
     vi.clearAllMocks();
   });
 
+  it('shows error and retry when generation fails', () => {
+    mockUsePairingCode.mockReturnValue({
+      code: null,
+      error: true,
+      secondsRemaining: 600,
+      formattedCountdown: '10:00',
+      refresh: mockRefresh,
+    });
+
+    renderWithProviders(<PairingCodeDisplay userId="user-1" />);
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+  });
+
+  it('retry button calls refresh on error', async () => {
+    mockUsePairingCode.mockReturnValue({
+      code: null,
+      error: true,
+      secondsRemaining: 600,
+      formattedCountdown: '10:00',
+      refresh: mockRefresh,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<PairingCodeDisplay userId="user-1" />);
+    await user.click(screen.getByRole('button', { name: /retry/i }));
+    expect(mockRefresh).toHaveBeenCalled();
+  });
+
   it('shows loading spinner when code is null', () => {
     mockUsePairingCode.mockReturnValue({
       code: null,
+      error: false,
       secondsRemaining: 600,
       formattedCountdown: '10:00',
       refresh: mockRefresh,
@@ -39,6 +70,7 @@ describe('PairingCodeDisplay', () => {
   it('renders code in large text when code is provided', () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
+      error: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
@@ -51,6 +83,7 @@ describe('PairingCodeDisplay', () => {
   it('renders formatted countdown', () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
+      error: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
@@ -63,6 +96,7 @@ describe('PairingCodeDisplay', () => {
   it('Get new code button calls refresh', async () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
+      error: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
@@ -77,6 +111,7 @@ describe('PairingCodeDisplay', () => {
   it('has aria-label with spaced digits for screen readers', () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
+      error: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
@@ -90,6 +125,7 @@ describe('PairingCodeDisplay', () => {
   it('passes vitest-axe', async () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
+      error: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,

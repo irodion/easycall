@@ -290,6 +290,11 @@ export const validatePairingCode = onCall({ enforceAppCheck: true }, async (requ
   const caregiverUid = request.auth.uid;
   const db = getFirestore();
 
+  // Only users with the caregiver role can redeem pairing codes.
+  // Without this check any authenticated user (anonymous or elderly) could
+  // self-grant caregiver access to another user's account.
+  await requireCaregiver(db, caregiverUid);
+
   // Rate limit: max 5 attempts per 10-minute window
   await checkPairingCodeRateLimit(db, caregiverUid);
 
@@ -330,6 +335,15 @@ export const validatePairingCode = onCall({ enforceAppCheck: true }, async (requ
       linkedAt: FieldValue.serverTimestamp(),
       permissions: ['manage_contacts', 'manage_settings', 'view_history'],
     });
+
+    // Also persist the link on the caregiver's own user doc so the
+    // Dashboard can list all linked elderly users without a collectionGroup query.
+    const caregiverUserRef = db.collection('users').doc(caregiverUid);
+    txn.set(
+      caregiverUserRef,
+      { linkedElderlyUsers: FieldValue.arrayUnion(elderlyUserId) },
+      { merge: true },
+    );
 
     return { elderlyUserId };
   });

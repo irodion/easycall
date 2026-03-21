@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import { db } from '@/services/firebase';
+import { BackToDashboard } from '@/components/shared/BackToDashboard';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
+import { EasyCallText } from '@/components/shared/EasyCallText';
 import { DEFAULT_USER_SETTINGS } from '@/types/user';
 import { hashPin } from '@/utils/pinHash';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
@@ -17,6 +19,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryToken, setRetryToken] = useState(0);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [pendingLockEnabled, setPendingLockEnabled] = useState(false);
   const [pin, setPin] = useState('');
   const [pinConfirm, setPinConfirm] = useState('');
@@ -36,7 +39,10 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
     const unsubscribe = onSnapshot(
       ref,
       (snap) => {
-        const raw = snap.exists() ? ((snap.data()['settings'] as Partial<UserSettings>) ?? {}) : {};
+        const data = snap.exists() ? snap.data() : {};
+        const name = typeof data['displayName'] === 'string' ? data['displayName'] : null;
+        setDisplayName((prev) => (prev === name ? prev : name));
+        const raw = (data['settings'] as Partial<UserSettings>) ?? {};
         const incoming: UserSettings = { ...DEFAULT_USER_SETTINGS, ...raw };
         setLoadError(null);
         setSettings((prev) => {
@@ -65,6 +71,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   if (loadError) {
     return (
       <div className="flex flex-col items-center gap-[var(--space-md)] p-[var(--space-md)]">
+        <BackToDashboard />
         <p role="alert" className="text-error text-[length:var(--text-body)]">
           {loadError}
         </p>
@@ -77,12 +84,15 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
 
   if (!settings) {
     return (
-      <div
-        className="flex justify-center p-[var(--space-md)]"
-        role="status"
-        aria-label={t('common.loading')}
-      >
-        <span className="loading loading-spinner loading-lg" aria-hidden="true" />
+      <div className="flex flex-col p-[var(--space-md)] gap-[var(--space-md)]">
+        <BackToDashboard />
+        <div
+          className="flex justify-center"
+          role="status"
+          aria-label={t('common.loading')}
+        >
+          <span className="loading loading-spinner loading-lg" aria-hidden="true" />
+        </div>
       </div>
     );
   }
@@ -102,6 +112,12 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
 
   return (
     <div className="flex flex-col gap-[var(--space-lg)] p-[var(--space-md)]">
+      <BackToDashboard />
+      {displayName && (
+        <EasyCallText as="h1" variant="heading">
+          {t('elderlySettings.settingsFor', { name: displayName })}
+        </EasyCallText>
+      )}
       <fieldset>
         <legend className="text-[length:var(--text-heading)] font-bold mb-[var(--space-sm)]">
           {t('elderlySettings.fontSize')}

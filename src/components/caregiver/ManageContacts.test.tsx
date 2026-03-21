@@ -29,10 +29,50 @@ vi.mock('@/utils/compressImage', () => ({
   compressImage: vi.fn().mockResolvedValue(new Blob(['img'], { type: 'image/jpeg' })),
 }));
 
+const mockGetDoc = vi.fn().mockResolvedValue({
+  exists: () => true,
+  data: () => ({ displayName: 'Grandma Rose' }),
+});
+
+vi.mock('firebase/firestore', () => ({
+  getFirestore: vi.fn(),
+  collection: vi.fn(),
+  getDocs: vi.fn(),
+  getDoc: (...args: unknown[]) => mockGetDoc(...args),
+  doc: vi.fn(() => 'doc-ref'),
+  query: vi.fn(),
+  where: vi.fn(),
+  orderBy: vi.fn(),
+  onSnapshot: vi.fn((_ref: unknown, cb: unknown) => {
+    if (typeof cb === 'function') cb({ docs: [] });
+    return vi.fn();
+  }),
+  serverTimestamp: vi.fn(),
+  Timestamp: { now: vi.fn() },
+}));
+
+vi.mock('@/services/firebase', () => ({
+  db: {},
+}));
+
 describe('ManageContacts', () => {
   beforeEach(() => {
     mockRemoveContact.mockClear();
     mockAddContact.mockClear();
+  });
+
+  it('renders back to dashboard link', async () => {
+    const { ManageContacts } = await import('./ManageContacts');
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    const backLink = screen.getByRole('link', { name: /back to dashboard/i });
+    expect(backLink).toBeInTheDocument();
+    expect(backLink.getAttribute('href')).toBe('/caregiver');
+  });
+
+  it('shows identity header with elderly user display name', async () => {
+    const { ManageContacts } = await import('./ManageContacts');
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    expect(await screen.findByText(/contacts for grandma rose/i)).toBeInTheDocument();
   });
 
   it('renders list of contacts', async () => {
