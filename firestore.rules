@@ -7,10 +7,11 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/users/$(elderlyUserId)/caregivers/$(caregiverUid));
     }
 
-    // Registration lock: readable by any authenticated user.
+    // Registration lock: readable by anyone (shown on pre-auth role selector).
+    // Only contains { open: boolean } — no sensitive data.
     // Writes go through Cloud Functions (admin SDK).
     match /config/registration {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow write: if false;
     }
 
