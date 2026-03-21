@@ -315,7 +315,7 @@ test.describe('Caregiver identity headers (emulators)', () => {
     await page.goto(`/caregiver/settings/${elderlyUid}`);
 
     // Wait for onSnapshot to deliver settings + displayName
-    await expect(page.getByText(/settings for grandma rose/i)).toBeVisible({
+    await expect(page.getByRole('heading', { name: /settings for grandma rose/i })).toBeVisible({
       timeout: 15_000,
     });
     // Back link should also be visible
@@ -406,6 +406,6 @@ test.describe('Caregiver PIN prompt title (emulators)', () => {
     // The PIN prompt should show with caregiver-specific title
     await expect(page.getByText(/enter caregiver pin/i)).toBeVisible({ timeout: 15_000 });
     // Should NOT show the generic app lock text
-    expect(await page.getByText(/enter pin to unlock/i).count()).toBe(0);
+    await expect(page.getByText(/enter pin to unlock/i)).toHaveCount(0);
   });
 });
