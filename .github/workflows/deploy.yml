@@ -47,6 +47,15 @@ jobs:
       - name: Build functions
         run: cd functions && pnpm run build
 
+      - name: Write functions runtime env
+        run: |
+          printf 'JAAS_APP_ID=%s\nJAAS_KEY_ID=%s\nJAAS_PRIVATE_KEY=%s\n' \
+            "$JAAS_APP_ID" "$JAAS_KEY_ID" "$JAAS_PRIVATE_KEY" > functions/.env
+        env:
+          JAAS_APP_ID: ${{ secrets.JAAS_APP_ID }}
+          JAAS_KEY_ID: ${{ secrets.JAAS_KEY_ID }}
+          JAAS_PRIVATE_KEY: ${{ secrets.JAAS_PRIVATE_KEY }}
+
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@v13.28.0
         with:
