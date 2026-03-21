@@ -19,6 +19,14 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:emulators": "USE_EMULATORS=true playwright test --project=chromium",
+    "deploy:validate": "bash scripts/deploy/validate-env.sh",
+    "deploy:firebase": "bash scripts/deploy/deploy-firebase.sh --all",
+    "deploy:firebase:rules": "bash scripts/deploy/deploy-firebase.sh --rules",
+    "deploy:firebase:functions": "bash scripts/deploy/deploy-firebase.sh --functions",
+    "deploy:firebase:hosting": "bash scripts/deploy/deploy-firebase.sh --hosting",
+    "deploy:all": "bash scripts/deploy/deploy-all.sh",
+    "deploy:dry-run": "bash scripts/deploy/deploy-all.sh --dry-run",
+    "deploy:health": "bash scripts/deploy/health-check.sh",
     "prepare": "if git rev-parse --git-dir > /dev/null 2>&1; then cp scripts/hooks/pre-commit $(git rev-parse --git-dir)/hooks/pre-commit && chmod +x $(git rev-parse --git-dir)/hooks/pre-commit; fi"
   },
   "dependencies": {
