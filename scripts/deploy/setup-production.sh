@@ -77,12 +77,28 @@ header "Step 5: Deploy security rules"
 firebase deploy --only firestore:rules,firestore:indexes,database --project "$PROJECT_ID"
 ok "Security rules deployed"
 
-header "Step 6: Deploy Cloud Functions"
+header "Step 6: Configure JaaS (Jitsi) secrets for Cloud Functions"
+echo "  Cloud Functions need JaaS credentials to generate Jitsi meeting tokens."
+echo "  Get these from: https://jaas.8x8.vc/#/apikeys"
+echo ""
+if [ -f "functions/.env" ] && grep -q "JAAS_APP_ID=" functions/.env; then
+  ok "functions/.env already exists with JAAS config"
+else
+  read -p "  JAAS_APP_ID: " JAAS_APP_ID
+  read -p "  JAAS_KEY_ID: " JAAS_KEY_ID
+  echo "  JAAS_PRIVATE_KEY: paste the private key, replacing newlines with \\n"
+  read -p "  > " JAAS_PRIVATE_KEY
+  printf 'JAAS_APP_ID=%s\nJAAS_KEY_ID=%s\nJAAS_PRIVATE_KEY=%s\n' \
+    "$JAAS_APP_ID" "$JAAS_KEY_ID" "$JAAS_PRIVATE_KEY" > functions/.env
+  ok "functions/.env created"
+fi
+
+header "Step 7: Deploy Cloud Functions"
 (cd functions && pnpm install --frozen-lockfile)
 firebase deploy --only functions --project "$PROJECT_ID"
 ok "Cloud Functions deployed"
 
-header "Step 7: Get Firebase config for .env.production"
+header "Step 8: Get Firebase config for .env.production"
 echo ""
 echo "  Run the following to get your web app config:"
 echo "  firebase apps:sdkconfig web --project $PROJECT_ID"
@@ -96,7 +112,7 @@ if firebase apps:list --project "$PROJECT_ID" 2>/dev/null | grep -q "WEB"; then
   firebase apps:sdkconfig web --project "$PROJECT_ID" 2>/dev/null || true
 fi
 
-header "Step 8: GitHub Secrets Setup"
+header "Step 9: GitHub Secrets Setup"
 echo "  Set these secrets in your GitHub repo (Settings → Secrets → Actions):"
 echo ""
 echo "  Firebase/App secrets (from Firebase Console):"
