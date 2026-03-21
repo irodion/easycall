@@ -337,7 +337,7 @@ test.describe('Caregiver PIN prompt title (emulators)', () => {
     const user = await createEmulatorUser();
 
     // Seed config docs for PIN and open registration
-    await Promise.all([
+    const configSeeds = await Promise.all([
       fetch(
         `${FIRESTORE_EMULATOR}/v1/projects/${PROJECT_ID}/databases/(default)/documents/config/caregiverPinStatus`,
         {
@@ -372,6 +372,9 @@ test.describe('Caregiver PIN prompt title (emulators)', () => {
         },
       ),
     ]);
+    for (const res of configSeeds) {
+      if (!res.ok) throw new Error(`Config seed failed: ${res.url} ${res.status}`);
+    }
 
     // Intercept auth so the user is pre-authenticated
     await page.route('**/accounts:signUp**', (route) =>
