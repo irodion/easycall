@@ -283,7 +283,10 @@ export function CallScreen({ setInCall }: CallScreenProps) {
       )}
 
       {!loading && !callEnded && (
-        <ConnectionQualityIndicator quality={connectionQuality} className="absolute top-4 start-4 z-10" />
+        <ConnectionQualityIndicator
+          quality={connectionQuality}
+          className="absolute top-4 start-4 z-10"
+        />
       )}
 
       {showWeakSignalBanner && !callEnded && !loading && (

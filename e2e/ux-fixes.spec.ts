@@ -306,9 +306,9 @@ test.describe('Caregiver identity headers (emulators)', () => {
 
     // Caregiver can read the elderly user doc (via isCaregiverOf rule),
     // so the heading should include the seeded display name
-    await expect(
-      page.getByRole('heading', { name: /contacts for grandma rose/i }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /contacts for grandma rose/i })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test('settings page shows elderly user name in heading', async ({ page }) => {
@@ -389,10 +389,9 @@ test.describe('Caregiver PIN prompt title (emulators)', () => {
     // signInAnonymously). Without this, the RoleSelector page can't read
     // config docs because Firestore rules require request.auth != null.
     // Register the response waiter BEFORE navigation to avoid missing the response
-    const authResponse = page.waitForResponse(
-      (res) => res.url().includes('accounts:signUp'),
-      { timeout: 15_000 },
-    );
+    const authResponse = page.waitForResponse((res) => res.url().includes('accounts:signUp'), {
+      timeout: 15_000,
+    });
     await page.goto('/elderly');
     await authResponse;
 

@@ -57,20 +57,28 @@ describe('useRegistrationLock', () => {
     expect(result.current.loading).toBe(true);
 
     // Multiple retries — still loading, never gives up
-    act(() => { vi.advanceTimersByTime(1000); });
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
     act(() => errorCallback!());
     expect(result.current.loading).toBe(true);
 
-    act(() => { vi.advanceTimersByTime(2000); });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
     act(() => errorCallback!());
     expect(result.current.loading).toBe(true);
 
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     act(() => errorCallback!());
     expect(result.current.loading).toBe(true);
 
     // Eventually succeeds
-    act(() => { vi.advanceTimersByTime(4000); });
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
     act(() => snapshotCallback!({ exists: () => true, data: () => ({ open: false }) }));
     expect(result.current.isOpen).toBe(false);
     expect(result.current.loading).toBe(false);

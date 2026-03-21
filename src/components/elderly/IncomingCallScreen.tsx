@@ -56,6 +56,7 @@ export function IncomingCallScreen() {
       await declineCall(incomingCall.elderlyUserId);
     } catch {
       // Log but still clear — user intent is to dismiss
+      // nosemgrep: no-console-log-sensitive — logs static error message, no user data
       console.error('Failed to decline call');
     }
     clearIncomingCall();

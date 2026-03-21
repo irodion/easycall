@@ -61,7 +61,8 @@
   }
 
   /* Prevent accidental pull-to-refresh in standalone PWA mode */
-  html, body {
+  html,
+  body {
     overscroll-behavior-y: contain;
   }
 

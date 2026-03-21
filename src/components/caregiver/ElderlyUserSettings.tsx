@@ -86,11 +86,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
     return (
       <div className="flex flex-col p-[var(--space-md)] gap-[var(--space-md)]">
         <BackToDashboard />
-        <div
-          className="flex justify-center"
-          role="status"
-          aria-label={t('common.loading')}
-        >
+        <div className="flex justify-center" role="status" aria-label={t('common.loading')}>
           <span className="loading loading-spinner loading-lg" aria-hidden="true" />
         </div>
       </div>

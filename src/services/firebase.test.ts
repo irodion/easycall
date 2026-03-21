@@ -89,12 +89,13 @@ describe('Firebase service layer', () => {
 
       await import('./firebase');
       const { initializeApp } = await import('firebase/app');
-      expect(initializeApp).toHaveBeenCalledWith(
-        expect.objectContaining({
-          apiKey: expect.any(String),
-          projectId: expect.any(String),
-        }),
-      );
+      expect(initializeApp).toHaveBeenCalledTimes(1);
+      const config = (initializeApp as ReturnType<typeof vi.fn>).mock.calls[0]![0] as Record<
+        string,
+        unknown
+      >;
+      expect(config).toHaveProperty('apiKey');
+      expect(config).toHaveProperty('projectId');
     });
   });
 

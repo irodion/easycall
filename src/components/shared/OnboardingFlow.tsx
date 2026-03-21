@@ -76,7 +76,12 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
             {t('onboarding.cameraMicHint')}
           </p>
           <PermissionCheck onReady={nextStep} />
-          <EasyCallButton variant="secondary" size="large" onClick={nextStep} className="w-full max-w-xs">
+          <EasyCallButton
+            variant="secondary"
+            size="large"
+            onClick={nextStep}
+            className="w-full max-w-xs"
+          >
             {t('common.skip')}
           </EasyCallButton>
         </div>
@@ -104,7 +109,12 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
           >
             {t('common.next')}
           </EasyCallButton>
-          <EasyCallButton variant="secondary" size="large" onClick={nextStep} className="w-full max-w-xs">
+          <EasyCallButton
+            variant="secondary"
+            size="large"
+            onClick={nextStep}
+            className="w-full max-w-xs"
+          >
             {t('common.skip')}
           </EasyCallButton>
         </div>
@@ -127,7 +137,12 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
               {error}
             </p>
           )}
-          <EasyCallButton size="large" disabled={isSubmitting} onClick={() => void handleFinish()} className="w-full max-w-xs">
+          <EasyCallButton
+            size="large"
+            disabled={isSubmitting}
+            onClick={() => void handleFinish()}
+            className="w-full max-w-xs"
+          >
             {isSubmitting ? t('common.saving') : t('onboarding.done')}
           </EasyCallButton>
           <EasyCallButton

@@ -62,9 +62,7 @@ function RegistrationLockSection() {
           {t('registrationLock.title')}
         </EasyCallText>
         <EasyCallText as="p" variant="body">
-          {isOpen
-            ? t('registrationLock.openDescription')
-            : t('registrationLock.closedDescription')}
+          {isOpen ? t('registrationLock.openDescription') : t('registrationLock.closedDescription')}
         </EasyCallText>
         <EasyCallButton
           size="default"
@@ -137,9 +135,7 @@ function CaregiverPinSection() {
           {t('caregiverPin.title')}
         </EasyCallText>
         <EasyCallText as="p" variant="body">
-          {hasPin
-            ? t('caregiverPin.enabledDescription')
-            : t('caregiverPin.disabledDescription')}
+          {hasPin ? t('caregiverPin.enabledDescription') : t('caregiverPin.disabledDescription')}
         </EasyCallText>
 
         {pinError && (
@@ -173,7 +169,10 @@ function CaregiverPinSection() {
             className="input input-bordered w-full min-h-14"
             placeholder={t('caregiverPin.pinPlaceholder')}
             value={pin}
-            onChange={(e) => { setPin(e.target.value.replace(/\D/g, '')); setPinError(null); }}
+            onChange={(e) => {
+              setPin(e.target.value.replace(/\D/g, ''));
+              setPinError(null);
+            }}
           />
         </div>
 
@@ -192,7 +191,10 @@ function CaregiverPinSection() {
             className="input input-bordered w-full min-h-14"
             placeholder={t('caregiverPin.confirmPinPlaceholder')}
             value={pinConfirm}
-            onChange={(e) => { setPinConfirm(e.target.value.replace(/\D/g, '')); setPinError(null); }}
+            onChange={(e) => {
+              setPinConfirm(e.target.value.replace(/\D/g, ''));
+              setPinError(null);
+            }}
           />
         </div>
 

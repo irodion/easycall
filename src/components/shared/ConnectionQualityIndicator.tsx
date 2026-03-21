@@ -19,7 +19,10 @@ const BARS = [
   { x: 16, y: 2, height: 20 },
 ];
 
-export function ConnectionQualityIndicator({ quality, className }: ConnectionQualityIndicatorProps) {
+export function ConnectionQualityIndicator({
+  quality,
+  className,
+}: ConnectionQualityIndicatorProps) {
   const { t } = useTranslation();
 
   if (quality === null) return null;

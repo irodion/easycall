@@ -17,6 +17,7 @@ export function initAppCheck(): AppCheck | null {
   const siteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
   if (!siteKey) {
     if (import.meta.env.DEV) {
+      // nosemgrep: no-console-log-sensitive — logs static config guidance, no secrets
       console.warn(
         'VITE_RECAPTCHA_V3_SITE_KEY not set — App Check disabled. Set it in .env.local for development.',
       );
@@ -24,7 +25,7 @@ export function initAppCheck(): AppCheck | null {
     }
     throw new Error(
       'VITE_RECAPTCHA_V3_SITE_KEY is not set. App Check is required in production. ' +
-      'Set it in your environment variables.',
+        'Set it in your environment variables.',
     );
   }
 

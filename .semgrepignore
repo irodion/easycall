@@ -4,6 +4,9 @@
 src/test/
 e2e/
 
+# Manual test scripts — local emulator tools, not production code
+scripts/manual-test/
+
 # Build output
 dist/
 dev-dist/

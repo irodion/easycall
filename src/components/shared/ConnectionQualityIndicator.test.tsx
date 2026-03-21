@@ -87,9 +87,7 @@ describe('ConnectionQualityIndicator', () => {
   it.each<ConnectionQuality>(['good', 'fair', 'poor'])(
     'passes vitest-axe for %s',
     async (quality) => {
-      const { container } = renderWithProviders(
-        <ConnectionQualityIndicator quality={quality} />,
-      );
+      const { container } = renderWithProviders(<ConnectionQualityIndicator quality={quality} />);
       expect(await axe(container)).toHaveNoViolations();
     },
   );

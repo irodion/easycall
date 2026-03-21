@@ -9,6 +9,7 @@ export function generateCode(): string {
 async function saveCode(userId: string): Promise<string> {
   const newCode = generateCode();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  // nosemgrep: no-unvalidated-firestore-input — all values are generated/typed, Firestore rules enforce schema
   await setDoc(doc(db, 'pairingCodes', newCode), {
     elderlyUserId: userId,
     expiresAt,
@@ -57,6 +58,7 @@ export function usePairingCode(userId: string | null) {
         refreshRef.current = setTimeout(() => void generateAndSchedule(), AUTO_REFRESH_MS);
       } catch (err) {
         if (cancelled || !mountedRef.current) return;
+        // nosemgrep: no-console-log-sensitive — logs error object, not the pairing code
         console.error('Failed to generate pairing code:', err);
         if (countdownRef.current) {
           clearInterval(countdownRef.current);

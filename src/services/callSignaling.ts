@@ -26,6 +26,7 @@ interface InitiateCallParams {
 export async function initiateCall(params: InitiateCallParams): Promise<void> {
   const { elderlyUserId, callerId, callerName, callerPhotoURL, jitsiRoomId } = params;
   const ref = incomingCallRef(elderlyUserId);
+  // nosemgrep: no-unvalidated-firestore-input — params are typed, Firestore rules enforce schema
   await setDoc(ref, {
     callerId,
     callerName,

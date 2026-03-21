@@ -111,7 +111,9 @@ describe('useCaregiverPin', () => {
     mockVerifyCaregiverPin.mockResolvedValue(true);
     const { result } = renderPinHook();
     act(() => snapshotCallback!({ exists: () => true, data: () => ({ pinSet: true }) }));
-    await act(async () => { await result.current.submitPin('1234'); });
+    await act(async () => {
+      await result.current.submitPin('1234');
+    });
     expect(result.current.verified).toBe(true);
 
     // PIN removed — auto-verifies and clears userVerified ref
@@ -127,7 +129,9 @@ describe('useCaregiverPin', () => {
     mockVerifyCaregiverPin.mockResolvedValue(true);
     const { result } = renderPinHook();
     act(() => snapshotCallback!({ exists: () => true, data: () => ({ pinSet: true }) }));
-    await act(async () => { await result.current.submitPin('1234'); });
+    await act(async () => {
+      await result.current.submitPin('1234');
+    });
     expect(result.current.verified).toBe(true);
 
     // Same snapshot re-fires (e.g. Firestore reconnection) — should stay verified
@@ -145,16 +149,22 @@ describe('useCaregiverPin', () => {
     expect(result.current.verified).toBe(false);
 
     // Multiple retries — still loading, never gives up
-    act(() => { vi.advanceTimersByTime(1000); });
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
     act(() => errorCallback!());
     expect(result.current.loading).toBe(true);
 
-    act(() => { vi.advanceTimersByTime(2000); });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
     act(() => errorCallback!());
     expect(result.current.loading).toBe(true);
 
     // Eventually succeeds
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     act(() => snapshotCallback!({ exists: () => true, data: () => ({ pinSet: true }) }));
     expect(result.current.pinRequired).toBe(true);
     expect(result.current.loading).toBe(false);

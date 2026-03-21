@@ -165,9 +165,11 @@ async function emitConnectionQuality(
 ): Promise<void> {
   await page.evaluate(
     ({ quality, local }) => {
-      const instance = (window as unknown as Record<string, unknown>).__jitsiMockInstance as {
-        _listeners: Map<string, Array<(data: unknown) => void>>;
-      } | undefined;
+      const instance = (window as unknown as Record<string, unknown>).__jitsiMockInstance as
+        | {
+            _listeners: Map<string, Array<(data: unknown) => void>>;
+          }
+        | undefined;
       if (!instance) throw new Error('Jitsi mock instance not found on window');
       const fns = instance._listeners.get('connectionQuality') || [];
       fns.forEach((fn) => fn({ local, quality }));

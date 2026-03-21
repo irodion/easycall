@@ -25,6 +25,7 @@ export async function setActiveCall(
   userId: string,
   data: Omit<ActiveCallData, 'status'>,
 ): Promise<void> {
+  // nosemgrep: no-unvalidated-firestore-input — data is typed ActiveCallData, validated by Firestore rules
   await setDoc(activeCallRef(userId), { ...data, status: 'active' });
 }
 

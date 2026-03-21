@@ -40,6 +40,7 @@ export function RoleSelector() {
         const assignRole = httpsCallable(functions, 'assignCaregiverRole');
         await assignRole(pin ? { pin } : {});
       } else {
+        // nosemgrep: no-unvalidated-firestore-input — role is from a typed union, not user input
         await setDoc(
           doc(db, 'users', user.uid),
           { role, onboardingComplete: false },
@@ -48,6 +49,7 @@ export function RoleSelector() {
       }
       void navigate(role === 'elderly' ? '/elderly' : '/caregiver');
     } catch (err) {
+      // nosemgrep: no-console-log-sensitive — logs error object, not credentials
       console.error('Role selection failed:', err);
       const code = (err as { code?: string }).code ?? '';
       if (code.includes('permission-denied')) {

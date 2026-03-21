@@ -20,6 +20,31 @@ else
   exit 1
 fi
 
+STAGED_FILES=$(git diff --cached --name-only -z --diff-filter=ACMR)
+if [ -n "$STAGED_FILES" ]; then
+  echo "Checking formatting..."
+
+  # Only stash if there are unstaged changes to tracked files.
+  # This prevents conflicts with new untracked files during stash pop.
+  HAS_UNSTAGED=$(git diff --name-only | head -1)
+  STASHED=1
+  if [ -n "$HAS_UNSTAGED" ]; then
+    git stash push --keep-index --quiet --message "pre-commit: unstaged changes" 2>/dev/null
+    STASHED=$?
+  fi
+
+  # Use NUL-delimited paths for space-safe handling.
+  # --ignore-unknown lets Prettier skip non-supported files.
+  echo "$STAGED_FILES" | xargs -0 npx prettier --write --ignore-unknown
+  echo "$STAGED_FILES" | xargs -0 git add
+
+  if [ "$STASHED" -eq 0 ]; then
+    git stash pop --quiet 2>/dev/null || true
+  fi
+
+  echo "Formatting applied."
+fi
+
 if git diff --cached --name-only | grep -qE '^(pnpm-lock\.yaml|package\.json)$'; then
   echo ""
   echo "⚠ Dependencies changed — run 'pnpm security:deps' to check for vulnerabilities."

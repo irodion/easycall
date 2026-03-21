@@ -256,7 +256,9 @@ describe('CallScreen', () => {
     await renderLoaded('/call-room/easycall-alice-abc123');
     // Should find the contact and create the Jitsi API (not show "contact not found")
     expect(lastApiInstance).not.toBeNull();
-    expect(lastApiInstance?.options?.roomName).toBe('vpaas-magic-cookie-test123/easycall-alice-abc123');
+    expect(lastApiInstance?.options?.roomName).toBe(
+      'vpaas-magic-cookie-test123/easycall-alice-abc123',
+    );
   });
 
   it('subscribes to contacts on mount', async () => {
@@ -371,16 +373,12 @@ describe('CallScreen', () => {
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
-    it(
-      'passes axe with connection indicator visible',
-      async () => {
-        const { container } = await renderLoaded();
-        await act(async () => {
-          lastApiInstance?._emit('connectionQuality', { local: true, quality: 50 });
-        });
-        expect(await axe(container)).toHaveNoViolations();
-      },
-      10000,
-    );
+    it('passes axe with connection indicator visible', async () => {
+      const { container } = await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 50 });
+      });
+      expect(await axe(container)).toHaveNoViolations();
+    }, 10000);
   });
 });

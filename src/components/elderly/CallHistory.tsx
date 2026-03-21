@@ -148,7 +148,17 @@ export function CallHistory({ userId }: CallHistoryProps) {
         aria-label={t('callHistory.backToContacts')}
         className="mt-auto pt-4 min-h-14 min-w-14 px-5 py-3 bg-base-200 text-base-content font-bold text-[length:var(--text-body)] rounded-2xl active:scale-95 transition-transform flex items-center justify-center gap-2 w-full"
       >
-        <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <svg
+          width={22}
+          height={22}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
         {t('common.back')}

@@ -53,19 +53,20 @@ vi.mock('firebase-admin/firestore', () => ({
     runTransaction: mockRunTransaction,
     collectionGroup: vi.fn(() => ({ where: vi.fn(() => ({ get: vi.fn() })) })),
   })),
-  FieldValue: { serverTimestamp: vi.fn(() => 'server-ts'), arrayUnion: vi.fn((...vals: unknown[]) => ({ _arrayUnion: vals })) },
+  FieldValue: {
+    serverTimestamp: vi.fn(() => 'server-ts'),
+    arrayUnion: vi.fn((...vals: unknown[]) => ({ _arrayUnion: vals })),
+  },
   Timestamp: { now: vi.fn() },
 }));
 
 import { validatePairingCode } from './index.js';
 
 // The onCall mock extracts the handler; cast for direct invocation
-const callValidate = validatePairingCode as unknown as (
-  request: {
-    auth: { uid: string } | null;
-    data: unknown;
-  },
-) => Promise<{ elderlyUserId: string }>;
+const callValidate = validatePairingCode as unknown as (request: {
+  auth: { uid: string } | null;
+  data: unknown;
+}) => Promise<{ elderlyUserId: string }>;
 
 describe('validatePairingCode Cloud Function', () => {
   beforeEach(() => {
@@ -84,17 +85,17 @@ describe('validatePairingCode Cloud Function', () => {
     // Caregiver role check must pass first
     mockDocGet.mockResolvedValue({ exists: true, data: () => ({ role: 'caregiver' }) });
 
-    await expect(
-      callValidate({ auth: { uid: 'cg1' }, data: { code: '12345' } }),
-    ).rejects.toThrow('code must be a 6-digit numeric string.');
+    await expect(callValidate({ auth: { uid: 'cg1' }, data: { code: '12345' } })).rejects.toThrow(
+      'code must be a 6-digit numeric string.',
+    );
   });
 
   it('rejects non-numeric code', async () => {
     mockDocGet.mockResolvedValue({ exists: true, data: () => ({ role: 'caregiver' }) });
 
-    await expect(
-      callValidate({ auth: { uid: 'cg1' }, data: { code: 'abcdef' } }),
-    ).rejects.toThrow('code must be a 6-digit numeric string.');
+    await expect(callValidate({ auth: { uid: 'cg1' }, data: { code: 'abcdef' } })).rejects.toThrow(
+      'code must be a 6-digit numeric string.',
+    );
   });
 
   describe('role enforcement (P0 fix)', () => {
@@ -152,7 +153,11 @@ describe('validatePairingCode Cloud Function', () => {
     it('rejects already-used pairing code', async () => {
       mockTxnGet.mockResolvedValue({
         exists: true,
-        data: () => ({ used: true, elderlyUserId: 'e1', expiresAt: { toDate: () => new Date(Date.now() + 60000) } }),
+        data: () => ({
+          used: true,
+          elderlyUserId: 'e1',
+          expiresAt: { toDate: () => new Date(Date.now() + 60000) },
+        }),
       });
 
       await expect(
@@ -163,7 +168,11 @@ describe('validatePairingCode Cloud Function', () => {
     it('rejects expired pairing code', async () => {
       mockTxnGet.mockResolvedValue({
         exists: true,
-        data: () => ({ used: false, elderlyUserId: 'e1', expiresAt: { toDate: () => new Date(Date.now() - 60000) } }),
+        data: () => ({
+          used: false,
+          elderlyUserId: 'e1',
+          expiresAt: { toDate: () => new Date(Date.now() - 60000) },
+        }),
       });
 
       await expect(
@@ -174,7 +183,11 @@ describe('validatePairingCode Cloud Function', () => {
     it('rejects self-pairing', async () => {
       mockTxnGet.mockResolvedValue({
         exists: true,
-        data: () => ({ used: false, elderlyUserId: 'cg1', expiresAt: { toDate: () => new Date(Date.now() + 60000) } }),
+        data: () => ({
+          used: false,
+          elderlyUserId: 'cg1',
+          expiresAt: { toDate: () => new Date(Date.now() + 60000) },
+        }),
       });
 
       await expect(
@@ -185,7 +198,11 @@ describe('validatePairingCode Cloud Function', () => {
     it('succeeds for valid caregiver with valid code', async () => {
       mockTxnGet.mockResolvedValue({
         exists: true,
-        data: () => ({ used: false, elderlyUserId: 'elderly-1', expiresAt: { toDate: () => new Date(Date.now() + 60000) } }),
+        data: () => ({
+          used: false,
+          elderlyUserId: 'elderly-1',
+          expiresAt: { toDate: () => new Date(Date.now() + 60000) },
+        }),
       });
 
       const result = await callValidate({ auth: { uid: 'cg1' }, data: { code: '123456' } });
@@ -198,7 +215,11 @@ describe('validatePairingCode Cloud Function', () => {
     it('writes linkedElderlyUsers to caregiver user doc', async () => {
       mockTxnGet.mockResolvedValue({
         exists: true,
-        data: () => ({ used: false, elderlyUserId: 'elderly-1', expiresAt: { toDate: () => new Date(Date.now() + 60000) } }),
+        data: () => ({
+          used: false,
+          elderlyUserId: 'elderly-1',
+          expiresAt: { toDate: () => new Date(Date.now() + 60000) },
+        }),
       });
 
       await callValidate({ auth: { uid: 'cg1' }, data: { code: '123456' } });

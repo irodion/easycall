@@ -104,7 +104,10 @@ function verifyPinSync(pin: string, storedHash: string, userId?: string): boolea
   }
   // Legacy fallback (unsalted hash)
   return (
-    crypto.createHash('sha256').update(APP_SALT + pin).digest('hex') === storedHash
+    crypto
+      .createHash('sha256')
+      .update(APP_SALT + pin)
+      .digest('hex') === storedHash
   );
 }
 
@@ -127,7 +130,10 @@ export const verifyCaregiverPin = onCall({ enforceAppCheck: true }, async (reque
   }
 
   const db = getFirestore();
-  const callerIp = request.rawRequest?.ip ?? request.rawRequest?.headers['x-forwarded-for']?.toString() ?? 'unknown';
+  const callerIp =
+    request.rawRequest?.ip ??
+    request.rawRequest?.headers['x-forwarded-for']?.toString() ??
+    'unknown';
   await checkPinVerifyRateLimit(db, callerIp);
 
   const pinHashDoc = await db.doc('config/caregiverPinHash').get();
@@ -140,7 +146,6 @@ export const verifyCaregiverPin = onCall({ enforceAppCheck: true }, async (reque
   const valid = verifyPinSync(pin, storedHash, 'caregiver-instance');
   return { valid };
 });
-
 
 // ---------------------------------------------------------------------------
 // Helper: verify caller is a caregiver via admin SDK (not client-writable role)
@@ -256,7 +261,10 @@ export const assignCaregiverRole = onCall({ enforceAppCheck: true }, async (requ
     if (typeof pin !== 'string' || !/^\d{4,8}$/.test(pin)) {
       throw new HttpsError('invalid-argument', 'Caregiver PIN is required.');
     }
-    const callerIp = request.rawRequest?.ip ?? request.rawRequest?.headers['x-forwarded-for']?.toString() ?? 'unknown';
+    const callerIp =
+      request.rawRequest?.ip ??
+      request.rawRequest?.headers['x-forwarded-for']?.toString() ??
+      'unknown';
     await checkPinVerifyRateLimit(db, callerIp);
     if (!verifyPinSync(pin, storedHash, 'caregiver-instance')) {
       throw new HttpsError('permission-denied', 'Incorrect PIN.');
