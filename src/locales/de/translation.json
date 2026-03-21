@@ -18,7 +18,7 @@
     "history": "Verlauf",
     "settings": "Einstellungen",
     "noContacts": "Noch keine Kontakte",
-    "noContactsHint": "Ein Betreuer kann Kontakte für Sie hinzufügen",
+    "noContactsHint": "Ein Administrator kann Kontakte für Sie hinzufügen",
     "callContact": "{{name}} anrufen",
     "tapToCall": "Zum Anrufen tippen",
     "navigation": "Navigation"
@@ -82,13 +82,13 @@
     "loadError": "Weitere Anrufe konnten nicht geladen werden. Bitte versuchen Sie es erneut."
   },
   "dashboard": {
-    "title": "Betreuer-Dashboard",
-    "linkUser": "Älteren Benutzer verknüpfen",
+    "title": "Admin-Dashboard",
+    "linkUser": "Mitglied verknüpfen",
     "lastSeen": "Zuletzt gesehen: {{time}}",
     "manageContacts": "Kontakte verwalten",
     "backToDashboard": "Zurück zum Dashboard",
-    "noLinkedUsers": "Noch keine verknüpften Benutzer",
-    "noLinkedUsersHint": "Tippen Sie auf \"Älteren Benutzer verknüpfen\" um sich mit dem Gerät eines Familienmitglieds zu verbinden."
+    "noLinkedUsers": "Noch keine verknüpften Mitglieder",
+    "noLinkedUsersHint": "Tippen Sie auf \"Mitglied verknüpfen\" um sich mit dem Gerät eines Mitglieds zu verbinden."
   },
   "manageContacts": {
     "title": "Kontakte verwalten",
@@ -141,12 +141,12 @@
     "closeRegistration": "Registrierung schließen",
     "openRegistration": "Registrierung öffnen",
     "closed": "Die Registrierung ist geschlossen.",
-    "closedMessage": "Diese App nimmt keine neuen Benutzer an. Wenn Sie ein Familienmitglied sind, bitten Sie Ihren Betreuer, die Registrierung zu öffnen."
+    "closedMessage": "Diese App nimmt keine neuen Benutzer an. Wenn Sie Zugang benötigen, bitten Sie Ihren Administrator, die Registrierung zu öffnen."
   },
   "caregiverPin": {
-    "title": "Betreuer-PIN",
-    "enabledDescription": "Für den Zugang zu Betreuer-Funktionen ist eine PIN erforderlich. Sie können sie ändern oder entfernen.",
-    "disabledDescription": "Legen Sie eine PIN fest, um den Betreuer-Zugang zu schützen. Teilen Sie sie nur mit Familienmitgliedern.",
+    "title": "Admin-PIN",
+    "enabledDescription": "Für den Zugang zu Admin-Funktionen ist eine PIN erforderlich. Sie können sie ändern oder entfernen.",
+    "disabledDescription": "Legen Sie eine PIN fest, um den Admin-Zugang zu schützen. Teilen Sie sie nur mit vertrauenswürdigen Personen.",
     "setPin": "PIN festlegen",
     "newPin": "Neue PIN",
     "confirmPin": "PIN bestätigen",
@@ -156,29 +156,29 @@
     "pinMismatchError": "Die PINs stimmen nicht überein.",
     "savePin": "PIN speichern",
     "saveError": "PIN konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
-    "saveSuccess": "Betreuer-PIN erfolgreich gespeichert.",
+    "saveSuccess": "Admin-PIN erfolgreich gespeichert.",
     "removePin": "PIN entfernen",
     "removeError": "PIN konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
-    "enterPin": "Betreuer-PIN eingeben"
+    "enterPin": "Admin-PIN eingeben"
   },
   "roleSelector": {
     "notSignedIn": "Nicht angemeldet. Bitte versuchen Sie es erneut.",
     "saveFailed": "Rolle konnte nicht gespeichert werden: {{error}}",
     "whoAreYou": "Wer sind Sie?",
-    "elderlyUser": "Ich bin ein älterer Benutzer",
-    "caregiver": "Ich bin ein Familienbetreuer",
+    "elderlyUser": "Ich möchte Anrufe tätigen",
+    "caregiver": "Ich möchte Anrufe verwalten",
     "alreadyHaveAccount": "Bereits ein Konto? Anmelden"
   },
   "onboarding": {
     "welcome": "Willkommen bei EasyCall",
-    "elderlyDescription": "Einfache Videoanrufe mit Ihrer Familie. Tippen Sie einfach auf ein Foto, um anzurufen!",
-    "caregiverDescription": "Verwalten Sie Videoanrufe für Ihre älteren Familienmitglieder aus der Ferne.",
+    "elderlyDescription": "Einfache Videoanrufe mit den Menschen, die Ihnen wichtig sind. Tippen Sie einfach auf ein Foto, um anzurufen!",
+    "caregiverDescription": "Richten Sie Videoanrufe für andere ein und verwalten Sie diese aus der Ferne.",
     "cameraMic": "Kamera & Mikrofon",
     "cameraMicHint": "EasyCall benötigt Zugriff auf Ihre Kamera und Ihr Mikrofon für Videoanrufe.",
     "notifications": "Benachrichtigungserlaubnis",
     "notificationsHint": "Erlauben Sie Benachrichtigungen, damit Sie wissen, wenn jemand Sie anruft.",
-    "pairWithCaregiver": "Mit Betreuer koppeln",
-    "linkToElderly": "Mit älterem Benutzer verknüpfen",
+    "pairWithCaregiver": "Mit Administrator koppeln",
+    "linkToElderly": "Mit Mitglied verknüpfen",
     "done": "Fertig",
     "stepOf": "Schritt {{step}} von {{total}}",
     "failedSetup": "Einrichtung fehlgeschlagen. Bitte versuchen Sie es erneut."
@@ -192,7 +192,7 @@
     "generateError": "Code konnte nicht generiert werden. Bitte versuchen Sie es erneut."
   },
   "pairElderly": {
-    "enterCode": "Geben Sie den 6-stelligen Code ein, der auf dem Bildschirm des älteren Benutzers angezeigt wird:",
+    "enterCode": "Geben Sie den 6-stelligen Code ein, der auf dem Bildschirm des Mitglieds angezeigt wird:",
     "linking": "Verknüpfung...",
     "linkAccount": "Konto verknüpfen",
     "tooManyAttempts": "Zu viele Versuche. Bitte warten Sie 10 Minuten und versuchen Sie es erneut."

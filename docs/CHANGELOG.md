@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - Incoming call detection via Firestore `onSnapshot` with 60s stale-call filtering
   - Full-screen IncomingCallScreen overlay with answer/decline and ringtone audio
   - 6-digit pairing code flow with 10-minute TTL and countdown timer
-  - Caregiver PairElderlyUser form with Cloud Function validation
-  - Caregiver ElderlyUserSettings (font size, ringtone volume) with real-time sync
+  - Admin pairing form (`PairElderlyUser`) with Cloud Function validation
+  - Admin settings management (`ElderlyUserSettings`) with real-time sync
   - Multi-step OnboardingFlow with permission requests and role-dependent pairing
   - callStore (Zustand) for incoming call state management
   - callSignaling service (initiateCall, declineCall, validatePairingCode, incomingCallRef)
@@ -48,10 +48,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Project scaffolding with Vite + React + TypeScript
-- Tailwind CSS v4 + DaisyUI v5 with custom "elderly" high-contrast theme
+- Tailwind CSS v4 + DaisyUI v5 with custom high-contrast accessibility theme
 - PWA support via vite-plugin-pwa with manifest and service worker
 - Vitest + Testing Library test setup
 - ESLint (flat config) + Prettier configuration
-- Design token CSS custom properties for elderly-friendly UX
+- Design token CSS custom properties for accessible, low-friction UX
 - Folder structure for components, hooks, stores, services, utils, types
 - Smoke tests for App component and PWA manifest validation

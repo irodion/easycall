@@ -18,7 +18,7 @@
     "history": "History",
     "settings": "Settings",
     "noContacts": "No contacts yet",
-    "noContactsHint": "A caregiver can add contacts for you",
+    "noContactsHint": "An admin can add contacts for you",
     "callContact": "Call {{name}}",
     "tapToCall": "Tap to call",
     "navigation": "Navigation"
@@ -83,13 +83,13 @@
     "loadError": "Failed to load more calls. Please try again."
   },
   "dashboard": {
-    "title": "Caregiver Dashboard",
-    "linkUser": "Link Elderly User",
+    "title": "Admin Dashboard",
+    "linkUser": "Link Member",
     "lastSeen": "Last seen: {{time}}",
     "manageContacts": "Manage Contacts",
     "backToDashboard": "Back to Dashboard",
-    "noLinkedUsers": "No linked users yet",
-    "noLinkedUsersHint": "Tap \"Link Elderly User\" to pair with a family member's device."
+    "noLinkedUsers": "No linked members yet",
+    "noLinkedUsersHint": "Tap \"Link Member\" to pair with a member's device."
   },
   "manageContacts": {
     "title": "Manage Contacts",
@@ -131,14 +131,14 @@
   },
   "onboarding": {
     "welcome": "Welcome to EasyCall",
-    "elderlyDescription": "Simple video calling with your family. Just tap a photo to call!",
-    "caregiverDescription": "Manage video calling for your family members remotely.",
+    "elderlyDescription": "Simple video calling with the people you care about. Just tap a photo to call!",
+    "caregiverDescription": "Set up and manage video calling for others remotely.",
     "cameraMic": "Camera & Microphone",
     "cameraMicHint": "EasyCall needs access to your camera and microphone for video calls.",
     "notifications": "Notification Permission",
     "notificationsHint": "Allow notifications so you know when someone is calling you.",
-    "pairWithCaregiver": "Pair with Caregiver",
-    "linkToElderly": "Link to Elderly User",
+    "pairWithCaregiver": "Pair with Admin",
+    "linkToElderly": "Link to Member",
     "done": "Done",
     "stepOf": "Step {{step}} of {{total}}",
     "failedSetup": "Failed to complete setup. Please try again."
@@ -152,7 +152,7 @@
     "generateError": "Failed to generate code. Please try again."
   },
   "pairElderly": {
-    "enterCode": "Enter the 6-digit code shown on the elderly user's screen:",
+    "enterCode": "Enter the 6-digit code shown on the member's screen:",
     "linking": "Linking...",
     "linkAccount": "Link Account",
     "invalidCode": "Invalid or expired code. Please check and try again.",
@@ -270,12 +270,12 @@
     "closeRegistration": "Close Registration",
     "openRegistration": "Open Registration",
     "closed": "Registration is closed.",
-    "closedMessage": "This app is not accepting new users. If you are a family member, ask your caregiver to open registration."
+    "closedMessage": "This app is not accepting new users. If you need access, ask your admin to open registration."
   },
   "caregiverPin": {
-    "title": "Caregiver PIN",
-    "enabledDescription": "A PIN is required to access caregiver features. You can change or remove it below.",
-    "disabledDescription": "Set a PIN to protect caregiver access. Share it only with family members.",
+    "title": "Admin PIN",
+    "enabledDescription": "A PIN is required to access admin features. You can change or remove it below.",
+    "disabledDescription": "Set a PIN to protect admin access. Share it only with trusted people.",
     "setPin": "Set PIN",
     "newPin": "New PIN",
     "confirmPin": "Confirm PIN",
@@ -285,17 +285,17 @@
     "pinMismatchError": "PINs do not match.",
     "savePin": "Save PIN",
     "saveError": "Failed to save PIN. Please try again.",
-    "saveSuccess": "Caregiver PIN saved successfully.",
+    "saveSuccess": "Admin PIN saved successfully.",
     "removePin": "Remove PIN",
     "removeError": "Failed to remove PIN. Please try again.",
-    "enterPin": "Enter Caregiver PIN"
+    "enterPin": "Enter Admin PIN"
   },
   "roleSelector": {
     "notSignedIn": "Not signed in. Please try again.",
     "saveFailed": "Failed to save role: {{error}}",
     "whoAreYou": "Who are you?",
-    "elderlyUser": "I am an elderly user",
-    "caregiver": "I am a family caregiver",
+    "elderlyUser": "I want to make calls",
+    "caregiver": "I want to manage calls",
     "alreadyHaveAccount": "Already have an account? Sign in"
   }
 }

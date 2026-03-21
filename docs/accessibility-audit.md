@@ -7,7 +7,7 @@
 
 All 22 components pass `vitest-axe` (axe-core) accessibility checks with zero violations. Tests run across 46 test files with 363 total test cases.
 
-**Known limitation:** jsdom reports color-contrast checks as "incomplete" (not "violations") because jsdom doesn't implement `getComputedStyle` for pseudo-elements. Manual verification with browser DevTools confirms WCAG AAA contrast in the "elderly" DaisyUI theme.
+**Known limitation:** jsdom reports color-contrast checks as "incomplete" (not "violations") because jsdom doesn't implement `getComputedStyle` for pseudo-elements. Manual verification with browser DevTools confirms WCAG AAA contrast in the app's high-contrast theme.
 
 ## 2. Landmarks
 
@@ -55,7 +55,7 @@ Focus traps implemented on all 4 dialog-like components using custom `useFocusTr
 
 ## 7. WCAG Compliance
 
-- **WCAG AAA contrast:** DaisyUI "elderly" theme uses oklch high-contrast colors
+- **WCAG AAA contrast:** The app's high-contrast theme uses oklch high-contrast colors
 - **WCAG AA (all other criteria):** Verified via axe-core automated checks
 - **WCAG 2.4.1 (Bypass Blocks):** Skip-to-content link present
 - **WCAG 2.4.3 (Focus Order):** Logical tab order maintained

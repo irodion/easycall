@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * - P1: CaregiverPinPrompt shows distinct title
  * - P2: Dashboard empty state
  * - P2: PairingCodeDisplay error/retry
- * - P3: Identity headers on caregiver sub-pages
+ * - P3: Identity headers on admin sub-pages
  * - Back-to-dashboard navigation
  *
  * PREREQUISITES:
@@ -109,7 +109,7 @@ async function seedUserAsElderly(uid: string, displayName: string): Promise<void
 }
 
 async function seedCaregiverLink(elderlyUid: string, caregiverUid: string): Promise<void> {
-  // Write caregivers subcollection on the elderly user
+  // Write caregivers subcollection on the member user
   const caregiverDocRes = await fetch(
     `${FIRESTORE_EMULATOR}/v1/projects/${PROJECT_ID}/databases/(default)/documents/users/${elderlyUid}/caregivers/${caregiverUid}`,
     {
@@ -134,7 +134,7 @@ async function seedCaregiverLink(elderlyUid: string, caregiverUid: string): Prom
   if (!caregiverDocRes.ok)
     throw new Error(`Failed to seed caregiver link: ${caregiverDocRes.status}`);
 
-  // Update caregiver's linkedElderlyUsers array
+  // Update admin's linkedElderlyUsers array
   const caregiverUserRes = await fetch(
     `${FIRESTORE_EMULATOR}/v1/projects/${PROJECT_ID}/databases/(default)/documents/users/${caregiverUid}?updateMask.fieldPaths=linkedElderlyUsers`,
     {
@@ -176,7 +176,7 @@ test.describe('Dashboard empty state (emulators)', () => {
   test.describe.configure({ mode: 'serial' });
   test.beforeAll(checkEmulators);
 
-  test('shows empty state message when caregiver has no linked users', async ({ page }) => {
+  test('shows empty state message when admin has no linked users', async ({ page }) => {
     await clearEmulators();
 
     const user = await createEmulatorUser();
@@ -192,14 +192,14 @@ test.describe('Dashboard empty state (emulators)', () => {
 
     await page.goto('/caregiver');
 
-    await expect(page.getByText(/no linked users yet/i)).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/tap.*link elderly user/i)).toBeVisible();
-    await expect(page.getByRole('link', { name: /link elderly user/i })).toBeVisible();
+    await expect(page.getByText(/no linked members yet/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/tap.*link member/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: /link member/i })).toBeVisible();
   });
 });
 
 // ---------------------------------------------------------------------------
-// Suite 2: Back-to-dashboard navigation on caregiver sub-pages
+// Suite 2: Back-to-dashboard navigation on admin sub-pages
 // ---------------------------------------------------------------------------
 
 test.describe('Caregiver back navigation (emulators)', () => {
@@ -262,12 +262,12 @@ test.describe('Caregiver back navigation (emulators)', () => {
 
     await page.getByRole('link', { name: /back to dashboard/i }).click({ timeout: 15_000 });
     await expect(page).toHaveURL('/caregiver', { timeout: 10_000 });
-    await expect(page.getByText(/caregiver dashboard/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/admin dashboard/i)).toBeVisible({ timeout: 10_000 });
   });
 });
 
 // ---------------------------------------------------------------------------
-// Suite 3: Identity headers on caregiver sub-pages
+// Suite 3: Identity headers on admin sub-pages
 // ---------------------------------------------------------------------------
 
 test.describe('Caregiver identity headers (emulators)', () => {
@@ -301,17 +301,17 @@ test.describe('Caregiver identity headers (emulators)', () => {
     );
   });
 
-  test('manage contacts shows elderly user name in heading', async ({ page }) => {
+  test('manage contacts shows member name in heading', async ({ page }) => {
     await page.goto(`/caregiver/manage/${elderlyUid}`);
 
-    // Caregiver can read the elderly user doc (via isCaregiverOf rule),
+    // Admin can read the member user doc (via isCaregiverOf rule),
     // so the heading should include the seeded display name
     await expect(page.getByRole('heading', { name: /contacts for grandma rose/i })).toBeVisible({
       timeout: 15_000,
     });
   });
 
-  test('settings page shows elderly user name in heading', async ({ page }) => {
+  test('settings page shows member name in heading', async ({ page }) => {
     await page.goto(`/caregiver/settings/${elderlyUid}`);
 
     // Wait for onSnapshot to deliver settings + displayName
@@ -324,14 +324,14 @@ test.describe('Caregiver identity headers (emulators)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Suite 4: Caregiver PIN prompt shows distinct title
+// Suite 4: Admin PIN prompt shows distinct title
 // ---------------------------------------------------------------------------
 
-test.describe('Caregiver PIN prompt title (emulators)', () => {
+test.describe('Admin PIN prompt title (emulators)', () => {
   test.describe.configure({ mode: 'serial' });
   test.beforeAll(checkEmulators);
 
-  test('PIN prompt shows "Enter Caregiver PIN" not "Enter PIN to unlock"', async ({ page }) => {
+  test('PIN prompt shows "Enter Admin PIN" not "Enter PIN to unlock"', async ({ page }) => {
     await clearEmulators();
 
     const user = await createEmulatorUser();
@@ -399,14 +399,14 @@ test.describe('Caregiver PIN prompt title (emulators)', () => {
     await page.goto('/');
 
     // Wait for role selector buttons to be enabled
-    const caregiverBtn = page.getByRole('button', { name: /caregiver/i });
-    await expect(caregiverBtn).toBeEnabled({ timeout: 15_000 });
+    const adminBtn = page.getByRole('button', { name: /manage calls/i });
+    await expect(adminBtn).toBeEnabled({ timeout: 15_000 });
 
-    // Click caregiver — should show PIN prompt
-    await caregiverBtn.click();
+    // Click admin — should show PIN prompt
+    await adminBtn.click();
 
-    // The PIN prompt should show with caregiver-specific title
-    await expect(page.getByText(/enter caregiver pin/i)).toBeVisible({ timeout: 15_000 });
+    // The PIN prompt should show with admin-specific title
+    await expect(page.getByText(/enter admin pin/i)).toBeVisible({ timeout: 15_000 });
     // Should NOT show the generic app lock text
     await expect(page.getByText(/enter pin to unlock/i)).toHaveCount(0);
   });

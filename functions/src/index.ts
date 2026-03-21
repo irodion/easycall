@@ -18,8 +18,8 @@ function extractData(request: { data: unknown }): Record<string, unknown> {
 // ---------------------------------------------------------------------------
 // validatePairingCode
 //
-// Called by the caregiver app when the user enters a 6-digit pairing code.
-// Atomically validates the code, marks it used, and writes the caregiver link.
+// Called by the admin app when the user enters a 6-digit pairing code.
+// Atomically validates the code, marks it used, and writes the admin link.
 // This is the ONLY path that writes to users/{userId}/caregivers/{uid} —
 // client writes to that subcollection are blocked in firestore.rules.
 // ---------------------------------------------------------------------------
@@ -73,7 +73,7 @@ export function checkPairingCodeRateLimit(db: Firestore, uid: string): Promise<v
 /**
  * Rate limit PIN verification by IP address. IP-based because anonymous auth
  * allows unlimited UIDs. No global bucket — it would be a DoS vector since
- * any anonymous user could exhaust it and lock out legitimate caregivers.
+ * any anonymous user could exhaust it and lock out legitimate admins.
  */
 export async function checkPinVerifyRateLimit(db: Firestore, callerIp: string): Promise<void> {
   // Sanitize IP for use as Firestore doc ID (replace dots/colons)
@@ -148,7 +148,7 @@ export const verifyCaregiverPin = onCall({ enforceAppCheck: true }, async (reque
 });
 
 // ---------------------------------------------------------------------------
-// Helper: verify caller is a caregiver via admin SDK (not client-writable role)
+// Helper: verify caller has admin role via admin SDK (not client-writable role)
 // ---------------------------------------------------------------------------
 async function requireCaregiver(db: Firestore, uid: string): Promise<void> {
   const userDoc = await db.doc(`users/${uid}`).get();
@@ -189,7 +189,7 @@ export const setRegistrationLock = onCall({ enforceAppCheck: true }, async (requ
 // ---------------------------------------------------------------------------
 // setCaregiverPinConfig
 //
-// Sets or removes the caregiver PIN. Server-side role verification.
+// Sets or removes the admin PIN. Server-side role verification.
 // Writes to both config/caregiverPin (public flag) and config/caregiverPinHash
 // (private hash) atomically.
 // ---------------------------------------------------------------------------
@@ -234,8 +234,8 @@ export const setCaregiverPinConfig = onCall({ enforceAppCheck: true }, async (re
 // ---------------------------------------------------------------------------
 // assignCaregiverRole
 //
-// Assigns the caregiver role to a user. Client-side Firestore rules only allow
-// creating user docs with role: 'elderly', so caregiver assignment must go
+// Assigns the admin (caregiver) role to a user. Client-side Firestore rules only allow
+// creating user docs with role: 'elderly', so admin role assignment must go
 // through this server-side function. Only sets the role if no role exists yet.
 // ---------------------------------------------------------------------------
 export const assignCaregiverRole = onCall({ enforceAppCheck: true }, async (request) => {
@@ -252,7 +252,7 @@ export const assignCaregiverRole = onCall({ enforceAppCheck: true }, async (requ
     throw new HttpsError('permission-denied', 'Registration is currently closed.');
   }
 
-  // Verify caregiver PIN if one is configured
+  // Verify admin PIN if one is configured
   const pinHashDoc = await db.doc('config/caregiverPinHash').get();
   const storedHash = pinHashDoc.data()?.['pinHash'] as string | undefined;
   if (typeof storedHash === 'string') {
@@ -298,9 +298,9 @@ export const validatePairingCode = onCall({ enforceAppCheck: true }, async (requ
   const caregiverUid = request.auth.uid;
   const db = getFirestore();
 
-  // Only users with the caregiver role can redeem pairing codes.
-  // Without this check any authenticated user (anonymous or elderly) could
-  // self-grant caregiver access to another user's account.
+  // Only users with the admin role can redeem pairing codes.
+  // Without this check any authenticated user (anonymous or member) could
+  // self-grant admin access to another user's account.
   await requireCaregiver(db, caregiverUid);
 
   // Rate limit: max 5 attempts per 10-minute window
@@ -344,8 +344,8 @@ export const validatePairingCode = onCall({ enforceAppCheck: true }, async (requ
       permissions: ['manage_contacts', 'manage_settings', 'view_history'],
     });
 
-    // Also persist the link on the caregiver's own user doc so the
-    // Dashboard can list all linked elderly users without a collectionGroup query.
+    // Also persist the link on the admin's own user doc so the
+    // Dashboard can list all linked members without a collectionGroup query.
     const caregiverUserRef = db.collection('users').doc(caregiverUid);
     txn.set(
       caregiverUserRef,
@@ -361,7 +361,7 @@ export const validatePairingCode = onCall({ enforceAppCheck: true }, async (requ
 // generateJitsiJwt
 //
 // Issues a JaaS JWT only after verifying the requesting user is a legitimate
-// participant in the room (elderly user, the contact, or a linked caregiver).
+// participant in the room (the member, the contact, or a linked admin).
 // P0-2: moderator is boolean false — never a string.
 // P0-3: room ownership is verified via a collectionGroup query before signing.
 // ---------------------------------------------------------------------------
@@ -464,7 +464,7 @@ export const generateJitsiJwt = onCall({ enforceAppCheck: true }, async (request
 // onIncomingCall
 //
 // Triggers when a caller writes to users/{elderlyUserId}/incomingCall/current.
-// Sends an FCM push notification to all of the elderly user's registered
+// Sends an FCM push notification to all of the member's registered
 // push tokens so their device wakes up when the PWA is backgrounded.
 // ---------------------------------------------------------------------------
 export const onIncomingCall = onDocumentWritten(
@@ -598,7 +598,7 @@ export async function writeCallHistoryForMissedOrDeclined(
 // onCallStatusChange
 //
 // Triggers when incomingCall/current is updated. When the status transitions
-// to 'missed' or 'declined', writes a callHistory entry for the elderly user.
+// to 'missed' or 'declined', writes a callHistory entry for the member.
 // Completed calls are written client-side (CallScreen has accurate duration).
 // ---------------------------------------------------------------------------
 export const onCallStatusChange = onDocumentWritten(

@@ -72,7 +72,7 @@ describe('App', () => {
     render(<App />);
     // The root "/" renders RoleSelector directly (not behind AuthGuard)
     // so we should see the role buttons immediately
-    expect(screen.getByRole('button', { name: /elderly user/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /I want to make calls/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /I want to manage calls/i })).toBeInTheDocument();
   });
 });

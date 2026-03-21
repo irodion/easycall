@@ -18,7 +18,7 @@
     "history": "היסטוריה",
     "settings": "הגדרות",
     "noContacts": "אין אנשי קשר עדיין",
-    "noContactsHint": "מטפל יכול להוסיף אנשי קשר עבורך",
+    "noContactsHint": "מנהל יכול להוסיף אנשי קשר עבורך",
     "callContact": "התקשר ל{{name}}",
     "tapToCall": "הקש/י להתקשר",
     "navigation": "ניווט"
@@ -82,13 +82,13 @@
     "loadError": "טעינת שיחות נוספות נכשלה. אנא נסה שוב."
   },
   "dashboard": {
-    "title": "לוח בקרה למטפל",
-    "linkUser": "קשר משתמש מבוגר",
+    "title": "לוח בקרה למנהל",
+    "linkUser": "קשר חבר",
     "lastSeen": "נראה לאחרונה: {{time}}",
     "manageContacts": "ניהול אנשי קשר",
     "backToDashboard": "חזרה ללוח הבקרה",
-    "noLinkedUsers": "אין משתמשים מקושרים עדיין",
-    "noLinkedUsersHint": "לחצו על \"קשר משתמש מבוגר\" כדי להתאים למכשיר של בן משפחה."
+    "noLinkedUsers": "אין חברים מקושרים עדיין",
+    "noLinkedUsersHint": "לחצו על \"קשר חבר\" כדי להתאים למכשיר של חבר."
   },
   "manageContacts": {
     "title": "ניהול אנשי קשר",
@@ -141,12 +141,12 @@
     "closeRegistration": "סגור הרשמה",
     "openRegistration": "פתח הרשמה",
     "closed": "ההרשמה סגורה.",
-    "closedMessage": "אפליקציה זו אינה מקבלת משתמשים חדשים. אם אתה בן משפחה, בקש מהמטפל לפתוח את ההרשמה."
+    "closedMessage": "אפליקציה זו אינה מקבלת משתמשים חדשים. אם אתה צריך גישה, בקש מהמנהל לפתוח את ההרשמה."
   },
   "caregiverPin": {
-    "title": "קוד PIN למטפל",
-    "enabledDescription": "נדרש קוד PIN לגישה לתכונות המטפל. ניתן לשנות או להסיר אותו.",
-    "disabledDescription": "הגדר קוד PIN להגנה על גישת המטפל. שתף רק עם בני משפחה.",
+    "title": "קוד PIN למנהל",
+    "enabledDescription": "נדרש קוד PIN לגישה לתכונות המנהל. ניתן לשנות או להסיר אותו.",
+    "disabledDescription": "הגדר קוד PIN להגנה על גישת המנהל. שתף רק עם אנשים מהימנים.",
     "setPin": "הגדר PIN",
     "newPin": "PIN חדש",
     "confirmPin": "אישור PIN",
@@ -156,29 +156,29 @@
     "pinMismatchError": "קודי ה-PIN אינם תואמים.",
     "savePin": "שמור PIN",
     "saveError": "שמירת ה-PIN נכשלה. נסה שוב.",
-    "saveSuccess": "קוד PIN למטפל נשמר בהצלחה.",
+    "saveSuccess": "קוד PIN למנהל נשמר בהצלחה.",
     "removePin": "הסר PIN",
     "removeError": "הסרת ה-PIN נכשלה. נסה שוב.",
-    "enterPin": "הזן את קוד ה-PIN למטפל"
+    "enterPin": "הזן את קוד ה-PIN למנהל"
   },
   "roleSelector": {
     "notSignedIn": "לא מחובר. אנא נסה שוב.",
     "saveFailed": "שמירת התפקיד נכשלה: {{error}}",
     "whoAreYou": "מי אתה?",
-    "elderlyUser": "אני משתמש מבוגר",
-    "caregiver": "אני מטפל משפחתי",
+    "elderlyUser": "אני רוצה לבצע שיחות",
+    "caregiver": "אני רוצה לנהל שיחות",
     "alreadyHaveAccount": "כבר יש לך חשבון? התחבר"
   },
   "onboarding": {
     "welcome": "ברוכים הבאים ל-EasyCall",
-    "elderlyDescription": "שיחות וידאו פשוטות עם המשפחה שלך. פשוט הקש על תמונה כדי להתקשר!",
-    "caregiverDescription": "נהל שיחות וידאו עבור בני המשפחה המבוגרים שלך מרחוק.",
+    "elderlyDescription": "שיחות וידאו פשוטות עם האנשים שחשובים לך. פשוט הקש על תמונה כדי להתקשר!",
+    "caregiverDescription": "הגדר ונהל שיחות וידאו עבור אחרים מרחוק.",
     "cameraMic": "מצלמה ומיקרופון",
     "cameraMicHint": "EasyCall צריך גישה למצלמה ולמיקרופון שלך עבור שיחות וידאו.",
     "notifications": "הרשאת התראות",
     "notificationsHint": "אפשר התראות כדי לדעת מתי מישהו מתקשר אליך.",
-    "pairWithCaregiver": "צימוד עם מטפל",
-    "linkToElderly": "קישור למשתמש מבוגר",
+    "pairWithCaregiver": "צימוד עם מנהל",
+    "linkToElderly": "קישור לחבר",
     "done": "סיום",
     "stepOf": "שלב {{step}} מתוך {{total}}",
     "failedSetup": "ההגדרה נכשלה. אנא נסה שוב."
@@ -192,7 +192,7 @@
     "generateError": "יצירת הקוד נכשלה. אנא נסה שוב."
   },
   "pairElderly": {
-    "enterCode": "הזן את הקוד בן 6 הספרות המוצג על מסך המשתמש המבוגר:",
+    "enterCode": "הזן את הקוד בן 6 הספרות המוצג על מסך החבר:",
     "linking": "מקשר...",
     "linkAccount": "קשר חשבון",
     "tooManyAttempts": "יותר מדי ניסיונות. אנא המתן 10 דקות לפני ניסיון נוסף."

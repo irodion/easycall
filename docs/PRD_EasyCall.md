@@ -1,4 +1,4 @@
-# PRD: EasyCall — Elderly-Friendly Video Calling PWA
+# PRD: EasyCall — Simple Personal Call Network PWA
 
 **Version:** 1.0  
 **Last Updated:** 2026-02-21  
@@ -32,7 +32,7 @@
 
 ## 1. Executive Summary
 
-**EasyCall** is a Progressive Web Application (PWA) that wraps Jitsi Meet video calling into an extremely simplified interface designed for elderly users. The core interaction model is: **the elderly user sees large photo-buttons of their contacts and taps one to call.** Everything else — configuration, contact management, settings — is handled either by the elderly user through an intentionally minimal self-management interface, or by a family caregiver through a remote dashboard.
+**EasyCall** is a Progressive Web Application (PWA) that wraps Jitsi Meet video calling into an extremely simplified interface for people who want an easier way to stay in touch. The core interaction model is: **the member sees large photo-buttons for their contacts and taps one to call.** Everything else — configuration, contact management, settings — is handled either by the member through an intentionally minimal self-management interface, or by a trusted admin through a remote dashboard.
 
 The application is **not distributed through App Stores**. It is a PWA installed directly from the browser to the Home Screen, eliminating all app store friction. The video calling infrastructure uses **JaaS (Jitsi as a Service)** for the free tier (≤25 MAU), with a migration path to self-hosted Jitsi on Hetzner (~€5.50/month) if the user base grows. The backend is **Firebase** (Firestore + Auth + Cloud Messaging + Cloud Functions), which operates entirely within the free Spark plan for family-sized deployments.
 
@@ -44,7 +44,7 @@ The application is **not distributed through App Stores**. It is a PWA installed
 
 ## 2. Problem Statement
 
-Current video calling solutions (Jitsi Meet, Google Meet, Zoom, FaceTime) share a common design assumption: the user is comfortable navigating multi-step flows involving room creation, link sharing, lobby screens, permission dialogs, and settings panels. For elderly users — particularly those aged 75+ with limited digital literacy — these flows are overwhelming, error-prone, and anxiety-inducing.
+Current video calling solutions (Jitsi Meet, Google Meet, Zoom, FaceTime) share a common design assumption: the user is comfortable navigating multi-step flows involving room creation, link sharing, lobby screens, permission dialogs, and settings panels. For people with limited digital literacy, reduced confidence with technology, or accessibility needs, these flows are overwhelming, error-prone, and anxiety-inducing.
 
 The specific pain points this product addresses:
 
@@ -52,42 +52,52 @@ The specific pain points this product addresses:
 
 **P2 — Confusing UI during calls.** Jitsi Meet's toolbar has 10+ buttons (chat, reactions, raise hand, screen share, etc.) that are irrelevant and confusing for a simple family call. EasyCall shows only: microphone toggle, camera toggle, and end call.
 
-**P3 — No way for family to set things up remotely.** If grandma gets a new phone, a family member must be physically present to install apps, configure accounts, and add contacts. EasyCall's caregiver pairing flow allows remote setup via a 6-digit code.
+**P3 — No way for family or helpers to set things up remotely.** If the member gets a new phone, a family member or helper often must be physically present to install apps, configure accounts, and add contacts. EasyCall's admin pairing flow allows remote setup via a 6-digit code.
 
-**P4 — Incoming calls don't work.** Jitsi Meet has no concept of "calling someone" — both parties must navigate to the same room. EasyCall implements proper incoming call notifications: when a family member initiates a call, grandma's phone rings with a full-screen alert and a single "Answer" button.
+**P4 — Incoming calls don't work.** Jitsi Meet has no concept of "calling someone" — both parties must navigate to the same room. EasyCall implements proper incoming call notifications: when a contact initiates a call, the member's phone rings with a full-screen alert and a single "Answer" button.
 
-**P5 — App Store distribution is itself a barrier.** Many elderly users cannot navigate the Play Store or App Store. PWA installation from the browser ("Add to Home Screen") can be guided by a caregiver in a single step.
+**P5 — App Store distribution is itself a barrier.** Many users in the target audience cannot comfortably navigate the Play Store or App Store. PWA installation from the browser ("Add to Home Screen") can be guided by an admin in a single step.
 
 ---
 
 ## 3. Target Users & Personas
 
-### Persona 1: The Elderly User ("Grandma Rose")
+### Terminology Glossary
+
+- **Member:** The primary person whose EasyCall experience and call circle are being managed.
+- **Admin:** A trusted person who sets up or manages the member's EasyCall experience.
+- **Contact:** Any person the member can call or receive calls from.
+- **Circle:** The member's personal call network.
+- **Pairing code:** The 6-digit code used to link an admin to a member.
+
+**Implementation note:** The current codebase, Firestore schema, routes, and some component/file names still use legacy identifiers such as `elderly`, `caregiver`, `elderlyUserId`, and `/caregiver`. This PRD uses the glossary above for product language, while preserving implementation identifiers in code snippets and schema references where precision matters.
+
+### Persona 1: The Member ("Rose")
 
 - **Age:** 72–90
 - **Device:** Android smartphone (Samsung Galaxy A-series, Xiaomi Redmi, etc. — mid-range devices are common)
 - **Digital literacy:** Can make phone calls, occasionally uses WhatsApp with help, struggles with anything requiring more than 2 steps
 - **Physical considerations:** Reduced fine motor control (larger touch targets needed), reduced visual acuity (large text, high contrast), possible hearing aid use (audio routing matters)
 - **Emotional state during tech use:** Anxious about "breaking something," embarrassed when confused, avoids exploring unfamiliar UI
-- **Primary need:** See and talk to family members with as little friction as a phone call
-- **Secondary need:** Optionally manage their own contact list (add/remove a family member)
+- **Primary need:** See and talk to important people with as little friction as a phone call
+- **Secondary need:** Optionally manage their own contact list
 
-### Persona 2: The Caregiver ("Alex")
+### Persona 2: The Admin ("Alex")
 
 - **Age:** 30–55
 - **Device:** Any modern smartphone or desktop browser
-- **Digital literacy:** Comfortable with technology, manages family tech
-- **Primary need:** Set up and manage grandma's calling experience remotely — add contacts with photos, adjust settings (font size, theme), monitor that the app is working
-- **Secondary need:** Initiate calls to grandma and receive calls from her
-- **Pain point:** Currently must be physically present to help grandma with tech — wants remote management capability
+- **Digital literacy:** Comfortable with technology, often manages setup for other people
+- **Primary need:** Set up and manage the member's calling experience remotely — add contacts with photos, adjust settings (font size, theme), monitor that the app is working
+- **Secondary need:** Initiate calls to the member and receive calls from them
+- **Pain point:** Currently must often be physically present to help with tech and wants remote management capability
 
 ### Persona 3: The Family Contact ("Sarah")
 
 - **Age:** Any
 - **Device:** Any device with a web browser
-- **Digital literacy:** Variable — may not be a caregiver, just a family member who wants to call grandma
-- **Primary need:** Call grandma by clicking a link or through the app, and receive calls from her
-- **Key constraint:** Must not require account creation or app installation to receive a call from grandma (Jitsi rooms are accessible via URL)
+- **Digital literacy:** Variable — may not be an admin, just a friend or family member who wants to call the member
+- **Primary need:** Call the member by clicking a link or through the app, and receive calls from them
+- **Key constraint:** Must not require account creation or app installation to receive a call from the member (Jitsi rooms are accessible via URL)
 
 ---
 
@@ -152,12 +162,12 @@ npx prettier
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    ELDERLY USER'S PHONE                      │
+│                      MEMBER'S PHONE                          │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │              EasyCall PWA (React + Vite)               │  │
 │  │  ┌─────────────┐  ┌──────────────┐  ┌─────────────┐  │  │
 │  │  │ Home Screen  │  │  Call Screen  │  │  Settings   │  │  │
-│  │  │ (Contact     │  │  (Jitsi      │  │  (Elderly   │  │  │
+│  │  │ (Contact     │  │  (Jitsi      │  │  (Member    │  │  │
 │  │  │  Photo Grid) │  │   IFrame)    │  │   Simple)   │  │  │
 │  │  └──────┬───────┘  └──────┬───────┘  └─────────────┘  │  │
 │  │         │                 │                             │  │
@@ -197,14 +207,14 @@ npx prettier
     └──────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
-│                 CAREGIVER'S DEVICE                            │
+│                    ADMIN'S DEVICE                             │
 │  ┌───────────────────────────────────────────────────────┐  │
-│  │           EasyCall PWA (Caregiver Mode)                │  │
+│  │             EasyCall PWA (Admin Mode)                 │  │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ │  │
-│  │  │  Dashboard   │  │  Manage      │  │  Call        │ │  │
-│  │  │  (Linked     │  │  Contacts    │  │  Grandma    │ │  │
-│  │  │   Elderly    │  │  (Add/Edit/  │  │             │ │  │
-│  │  │   Users)     │  │   Delete)    │  │             │ │  │
+│  │  │  Dashboard   │  │  Manage      │  │  Call       │ │  │
+│  │  │  (Linked     │  │  Contacts    │  │  Member     │ │  │
+│  │  │   Members)   │  │  (Add/Edit/  │  │             │ │  │
+│  │  │              │  │   Delete)    │  │             │ │  │
 │  │  └──────────────┘  └──────────────┘  └─────────────┘ │  │
 │  └───────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
@@ -212,15 +222,15 @@ npx prettier
 
 ### Key Architectural Decisions
 
-**AD-1: Single PWA codebase, role-based views.** The elderly UI and caregiver dashboard live in the same React app. The user's `role` field in Firestore ("elderly" or "caregiver") determines which UI is rendered. This avoids maintaining two separate apps and simplifies deployment.
+**AD-1: Single PWA codebase, role-based views.** The member UI and admin dashboard live in the same React app. The user's `role` field in Firestore (`"elderly"` or `"caregiver"` in the current implementation) determines which UI is rendered. This avoids maintaining two separate apps and simplifies deployment.
 
 **AD-2: Jitsi via IFrame API only.** No lib-jitsi-meet, no React SDK wrapper. The IFrame API provides all necessary control (auto-join, UI hiding, event listening, programmatic mute/unmute) with minimal code surface. The `@jitsi/react-sdk` package adds no meaningful value over raw `JitsiMeetExternalAPI` and introduces an extra dependency.
 
-**AD-3: Firebase Anonymous Auth as default.** The elderly user never creates an account. On first launch, Firebase Anonymous Auth creates an identity silently. The caregiver can optionally link an email for account recovery. This means zero friction at first use.
+**AD-3: Firebase Anonymous Auth as default.** The member never creates an account. On first launch, Firebase Anonymous Auth creates an identity silently. The admin can optionally link an email for account recovery. This means zero friction at first use.
 
-**AD-4: Pre-generated deterministic room IDs.** Each elderly-contact pair has a pre-computed unique Jitsi room ID stored in Firestore (e.g., `easycall-rose-alex-a7f3x`). No room creation API is needed. Both parties join the same pre-known room. This eliminates an entire class of "wrong room" errors.
+**AD-4: Pre-generated deterministic room IDs.** Each member-contact pair has a pre-computed unique Jitsi room ID stored in Firestore (e.g., `easycall-rose-alex-a7f3x`). No room creation API is needed. Both parties join the same pre-known room. This eliminates an entire class of "wrong room" errors.
 
-**AD-5: Firestore real-time listeners for call signaling.** When Alex calls grandma, a document is written to `users/{grandmaId}/incomingCall/current`. Grandma's app has an `onSnapshot` listener that fires in <1 second, triggering the ringtone and full-screen answer UI. This is simpler, cheaper, and more reliable than building a custom WebSocket server.
+**AD-5: Firestore real-time listeners for call signaling.** When Alex calls the member, a document is written to `users/{elderlyUserId}/incomingCall/current`. The member's app has an `onSnapshot` listener that fires in <1 second, triggering the ringtone and full-screen answer UI. This is simpler, cheaper, and more reliable than building a custom WebSocket server.
 
 **AD-6: Cloudflare Pages for hosting.** Unlimited bandwidth (critical for unpredictable video-app usage patterns), global CDN, free HTTPS, GitHub auto-deploy. Superior to Vercel/Netlify for this use case due to zero bandwidth caps on the free tier.
 
@@ -240,7 +250,7 @@ npx prettier
 | UI Components | DaisyUI         | 5.x     | Semantic component classes (`btn`, `card`, `modal`), themeable               |
 | Routing       | React Router    | 7.x     | History-based routing (BrowserRouter — NOT HashRouter for iOS camera compat) |
 | State         | Zustand         | 5.x     | Minimal boilerplate, works with React 19, persists to localStorage           |
-| Forms         | React Hook Form | 7.x     | Lightweight, performant, good for caregiver settings forms                   |
+| Forms         | React Hook Form | 7.x     | Lightweight, performant, good for admin settings forms                       |
 | i18n          | react-i18next   | 15.x    | Standard i18n solution, lazy-loaded language bundles                         |
 
 ### Backend (Firebase)
@@ -286,9 +296,9 @@ npx prettier
 
 ## 7. Feature Specifications
 
-### F1: Elderly Home Screen
+### F1: Member Home Screen
 
-**Description:** The primary screen an elderly user sees after launching the app. Displays pre-configured contacts as large, tappable photo-buttons arranged in a single-column vertical list. Each button shows the contact's face photo and name in large text.
+**Description:** The primary screen a member sees after launching the app. Displays pre-configured contacts as large, tappable photo-buttons arranged in a single-column vertical list. Each button shows the contact's face photo and name in large text.
 
 **User flow:**
 
@@ -305,7 +315,7 @@ npx prettier
 - AC-1.4: Maximum 6 contacts visible with scrolling; if ≤4 contacts, all visible without scrolling on a 5.5" screen.
 - AC-1.5: Tapping a contact navigates to the call screen within 500ms.
 - AC-1.6: If no contacts are configured, display a simple message: "No contacts yet. Ask your family to help set up." with a visible pairing code.
-- AC-1.7: A small gear icon in the top-right corner (≥48×48px touch target) opens elderly-accessible settings.
+- AC-1.7: A small gear icon in the top-right corner (≥48×48px touch target) opens member-accessible settings.
 - AC-1.8: All touch targets meet the 56×56px minimum.
 - AC-1.9: Color contrast meets WCAG AAA (7:1) for all text.
 
@@ -369,7 +379,7 @@ interfaceConfigOverwrite: {
 
 ### F3: Pre-Call Permission Check
 
-**Description:** Before launching the Jitsi IFrame, the app checks that camera and microphone permissions are granted. If not, it displays a friendly, elderly-oriented guide to enabling them.
+**Description:** Before launching the Jitsi IFrame, the app checks that camera and microphone permissions are granted. If not, it displays a friendly, plain-language guide to enabling them.
 
 **User flow:**
 
@@ -390,15 +400,15 @@ interfaceConfigOverwrite: {
 
 ### F4: Incoming Call Notification & Answer Screen
 
-**Description:** When another user initiates a call to an elderly user, the elderly user's phone receives a push notification (if backgrounded) or an in-app full-screen alert (if the PWA is open). The alert shows the caller's name and photo with a single "Answer" button.
+**Description:** When another user initiates a call to a member, the member's phone receives a push notification (if backgrounded) or an in-app full-screen alert (if the PWA is open). The alert shows the caller's name and photo with a single "Answer" button.
 
 **Signaling flow:**
 
 1. Caller writes to `users/{elderlyUserId}/incomingCall/current` in Firestore: `{ callerId, callerName, callerPhotoURL, jitsiRoomId, status: "ringing", timestamp }`.
-2. If the elderly PWA is open: the `onSnapshot` listener fires → full-screen ringing UI appears.
-3. If the elderly PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → elderly user taps notification → PWA opens → reads `incomingCall/current` doc → shows ringing UI.
-4. Elderly user taps "Answer" → navigates to call screen, auto-joins the room.
-5. If elderly user doesn't answer within 60 seconds → caller writes `status: "missed"` → ringing stops → call logged as missed.
+2. If the member PWA is open: the `onSnapshot` listener fires → full-screen ringing UI appears.
+3. If the member PWA is closed: a Cloud Function triggers on the Firestore write → sends FCM push notification → member taps notification → PWA opens → reads `incomingCall/current` doc → shows ringing UI.
+4. Member taps "Answer" → navigates to call screen, auto-joins the room.
+5. If the member doesn't answer within 60 seconds → caller writes `status: "missed"` → ringing stops → call logged as missed.
 
 **Acceptance criteria:**
 
@@ -411,60 +421,60 @@ interfaceConfigOverwrite: {
 - AC-4.7: If the call is missed (60s timeout), the Home Screen shows a "Missed call from [Name]" banner.
 - AC-4.8: Call is logged in `callHistory` regardless of outcome (answered, missed, declined).
 
-### F5: Caregiver Dashboard
+### F5: Admin Dashboard
 
-**Description:** A separate view within the same PWA, accessed by users with the "caregiver" role. Provides full management of linked elderly users' contact lists, settings, and call history.
+**Description:** A separate view within the same PWA, accessed by users with the admin role. Provides full management of linked members' contact lists, settings, and call history.
 
 **Features:**
 
-- View all linked elderly users.
-- Add/edit/remove contacts for each elderly user (name, photo upload, phone number for fallback).
-- Adjust elderly user's settings: font size (normal/large/extra-large), theme (light/dark/high-contrast), ringtone volume.
-- View call history for each elderly user.
-- Initiate a call to the elderly user.
+- View all linked members.
+- Add/edit/remove contacts for each member (name, photo upload, phone number for fallback).
+- Adjust the member's settings: font size (normal/large/extra-large), theme (light/dark/high-contrast), ringtone volume.
+- View call history for each member.
+- Initiate a call to the member.
 - Generate a new pairing code if re-pairing is needed.
 
 **Acceptance criteria:**
 
-- AC-5.1: Caregiver can see a list of all linked elderly users with their last-seen timestamp.
-- AC-5.2: Caregiver can add a new contact with name and photo (upload or camera capture).
-- AC-5.3: Changes sync to the elderly user's device within 5 seconds.
-- AC-5.4: Caregiver can adjust font size setting and the change is reflected on the elderly user's next app open.
-- AC-5.5: Caregiver can view the elderly user's last 30 days of call history.
-- AC-5.6: Caregiver can initiate a call to the elderly user (triggering the incoming call flow).
+- AC-5.1: Admin can see a list of all linked members with their last-seen timestamp.
+- AC-5.2: Admin can add a new contact with name and photo (upload or camera capture).
+- AC-5.3: Changes sync to the member's device within 5 seconds.
+- AC-5.4: Admin can adjust font size setting and the change is reflected on the member's next app open.
+- AC-5.5: Admin can view the member's last 30 days of call history.
+- AC-5.6: Admin can initiate a call to the member (triggering the incoming call flow).
 
-### F6: Caregiver-Elderly Pairing
+### F6: Admin-Member Pairing
 
-**Description:** A 6-digit numeric code mechanism to link a caregiver's account to an elderly user's device.
+**Description:** A 6-digit numeric code mechanism to link an admin's account to a member's device.
 
 **User flow:**
 
-1. Elderly user's app displays a 6-digit code on the Home Screen (when no contacts exist) or in Settings → "Pair with Caregiver."
-2. Code is written to Firestore `pairingCodes/{code}` with the elderly user's ID and a 10-minute TTL.
-3. Caregiver enters the code in their dashboard → "Link Elderly User."
+1. The member's app displays a 6-digit code on the Home Screen (when no contacts exist) or in Settings → "Pair with Admin."
+2. Code is written to Firestore `pairingCodes/{code}` with the member's ID and a 10-minute TTL.
+3. Admin enters the code in their dashboard → "Link Member."
 4. Cloud Function validates the code (not expired, not used), creates the bidirectional link in Firestore.
-5. Both devices receive confirmation. Caregiver can now manage the elderly user's contacts.
+5. Both devices receive confirmation. Admin can now manage the member's contacts.
 
 **Acceptance criteria:**
 
-- AC-6.1: 6-digit code is displayed in ≥48px font on the elderly user's screen.
+- AC-6.1: 6-digit code is displayed in ≥48px font on the member's screen.
 - AC-6.2: Code refreshes automatically every 10 minutes with a visible countdown timer.
-- AC-6.3: Caregiver can enter the code and link is established within 5 seconds.
+- AC-6.3: Admin can enter the code and link is established within 5 seconds.
 - AC-6.4: Expired or already-used codes return a clear error message.
 - AC-6.5: After successful pairing, both devices show confirmation.
-- AC-6.6: An elderly user can be linked to multiple caregivers.
-- AC-6.7: A caregiver can be linked to multiple elderly users.
+- AC-6.6: A member can be linked to multiple admins.
+- AC-6.7: An admin can be linked to multiple members.
 
-### F7: Elderly Self-Management (Simple Mode)
+### F7: Member Self-Management (Simple Mode)
 
-**Description:** An intentionally minimal settings interface for elderly users who want to manage their own contacts without a caregiver. Accessible via the gear icon on the Home Screen.
+**Description:** An intentionally minimal settings interface for members who want to manage their own contacts without an admin. Accessible via the gear icon on the Home Screen.
 
 **Features:**
 
 - Add a contact: enter name (text input with large keyboard), optionally take/select a photo.
 - Remove a contact: long-press on the Home Screen → "Remove" confirmation.
 - Adjust own font size (3 options shown as preview text: A, **A**, **A**).
-- View pairing code for caregiver linking.
+- View pairing code for admin linking.
 
 **Acceptance criteria:**
 
@@ -477,18 +487,18 @@ interfaceConfigOverwrite: {
 
 ### F8: PWA Installation & Onboarding
 
-**Description:** A guided first-launch experience that helps the user (or their caregiver) install the PWA to the Home Screen and grant necessary permissions.
+**Description:** A guided first-launch experience that helps the user (or their admin) install the PWA to the Home Screen and grant necessary permissions.
 
-**User flow (with caregiver present/on-phone):**
+**User flow (with admin present/on-phone):**
 
-1. Caregiver sends the elderly user a URL (e.g., `https://easycall.app`).
-2. Elderly user opens it in Chrome.
+1. Admin sends the member a URL (e.g., `https://easycall.app`).
+2. Member opens it in Chrome.
 3. The app detects first launch → shows a full-screen onboarding flow:
    - Step 1: "Welcome to EasyCall" (large text, friendly illustration).
    - Step 2: "Install this app" → triggers `beforeinstallprompt` on Android → guides user to tap "Add."
    - Step 3: "Allow camera and microphone" → guides through permission grant.
    - Step 4: "Allow notifications" → requests notification permission.
-   - Step 5 (if caregiver is helping): "Share this code with your family" → shows pairing code.
+   - Step 5 (if an admin is helping): "Share this code with your family" → shows pairing code.
 4. Onboarding is marked complete in Firestore → never shown again.
 
 **Acceptance criteria:**
@@ -502,7 +512,7 @@ interfaceConfigOverwrite: {
 
 ### F9: Call History
 
-**Description:** A simple, read-only list of recent calls visible to both the elderly user and the caregiver.
+**Description:** A simple, read-only list of recent calls visible to both the member and the admin.
 
 **Acceptance criteria:**
 
@@ -510,11 +520,11 @@ interfaceConfigOverwrite: {
 - AC-9.2: Each entry shows: contact photo (small), contact name, date/time, duration, and call outcome (completed/missed/declined).
 - AC-9.3: Missed calls are highlighted with a subtle red indicator.
 - AC-9.4: Tapping a call history entry initiates a new call to that contact.
-- AC-9.5: The elderly user's view shows a maximum of 20 entries with a "Show more" button.
+- AC-9.5: The member's view shows a maximum of 20 entries with a "Show more" button.
 
 ### F10: Auto-Rejoin on Disconnect
 
-**Description:** If the elderly user accidentally closes the app or the browser tab during an active call, the app attempts to detect and recover.
+**Description:** If the member accidentally closes the app or the browser tab during an active call, the app attempts to detect and recover.
 
 **Acceptance criteria:**
 
@@ -787,17 +797,17 @@ export function JitsiCall({ roomName, displayName, jwtToken, onCallEnded }: Jits
 
 ### Jitsi IFrame API Events to Handle
 
-| Event                    | Action                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| `videoConferenceJoined`  | Update `incomingCall.status` to "active," start duration timer                        |
-| `videoConferenceLeft`    | Write call history, clean up `incomingCall` doc                                       |
-| `readyToClose`           | Dispose API, navigate to Home Screen                                                  |
-| `participantJoined`      | Show "Connected" indicator, stop ringtone if applicable                               |
-| `participantLeft`        | If alone in room, show "Call ended" → auto-dispose after 5s                           |
-| `audioMuteStatusChanged` | Update mic toggle button state                                                        |
-| `videoMuteStatusChanged` | Update camera toggle button state                                                     |
-| `cameraError`            | Show elderly-friendly error: "Camera problem. Try closing and reopening the app."     |
-| `micError`               | Show elderly-friendly error: "Microphone problem. Try closing and reopening the app." |
+| Event                    | Action                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `videoConferenceJoined`  | Update `incomingCall.status` to "active," start duration timer                      |
+| `videoConferenceLeft`    | Write call history, clean up `incomingCall` doc                                     |
+| `readyToClose`           | Dispose API, navigate to Home Screen                                                |
+| `participantJoined`      | Show "Connected" indicator, stop ringtone if applicable                             |
+| `participantLeft`        | If alone in room, show "Call ended" → auto-dispose after 5s                         |
+| `audioMuteStatusChanged` | Update mic toggle button state                                                      |
+| `videoMuteStatusChanged` | Update camera toggle button state                                                   |
+| `cameraError`            | Show plain-language error: "Camera problem. Try closing and reopening the app."     |
+| `micError`               | Show plain-language error: "Microphone problem. Try closing and reopening the app." |
 
 ---
 
@@ -922,7 +932,7 @@ export function usePushNotifications(userId: string) {
 ### Design Tokens
 
 ```css
-/* Elderly-optimized design tokens */
+/* Member-optimized design tokens */
 :root {
   /* Font sizes (responsive, scale with user preference) */
   --text-body: clamp(18px, 4vw, 22px);
@@ -967,7 +977,7 @@ export function usePushNotifications(userId: string) {
 
 ### Screen Wireframes (ASCII)
 
-**Home Screen (Elderly):**
+**Home Screen (Member):**
 
 ```
 ┌──────────────────────────┐
@@ -998,7 +1008,7 @@ export function usePushNotifications(userId: string) {
 └──────────────────────────┘
 ```
 
-**Call Screen (Elderly):**
+**Call Screen (Member):**
 
 ```
 ┌──────────────────────────┐
@@ -1079,17 +1089,17 @@ export function usePushNotifications(userId: string) {
 
 ### Threat Model
 
-| Threat                                        | Mitigation                                                                                                                                                                   |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unauthorized access to elderly user's account | Firebase Anonymous Auth + optional biometric/PIN lock                                                                                                                        |
-| Stranger initiating a call to elderly user    | Only users with a contact entry (and thus the room ID) can call. Room IDs are unguessable (6 random chars). JaaS JWT authentication prevents room hijacking.                 |
-| Fake incomingCall spam                        | Firestore rules validate `callerId == request.auth.uid` and enforce required fields + `status: "ringing"` on create. Prevents spoofed caller identity and malformed docs.    |
-| Pairing code ownership spoofing               | Firestore rules enforce `elderlyUserId == request.auth.uid` on create, preventing a user from generating pairing codes on behalf of another elderly user.                    |
-| Eavesdropping on calls                        | Jitsi uses SRTP (Secure Real-Time Protocol) encryption for all media streams. JaaS rooms are JWT-authenticated.                                                              |
-| Caregiver privilege abuse                     | Permissions are scoped (manage_contacts, manage_settings, view_history). Elderly user can remove caregivers from settings.                                                   |
-| Push token theft                              | FCM tokens are stored in Firestore with per-user security rules. Only the user and Cloud Functions (admin SDK) can access them.                                              |
-| Pairing code brute force                      | 6-digit codes (1M possibilities) with 10-minute TTL and single-use flag. Rate limiting on the Cloud Function.                                                                |
-| Data breach                                   | Firestore security rules enforce per-user data isolation. No sensitive PII stored (no passwords, no SSN). Photos stored in Firebase Storage with per-user read access rules. |
+| Threat                                  | Mitigation                                                                                                                                                                   |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unauthorized access to member's account | Firebase Anonymous Auth + optional biometric/PIN lock                                                                                                                        |
+| Stranger initiating a call to a member  | Only users with a contact entry (and thus the room ID) can call. Room IDs are unguessable (6 random chars). JaaS JWT authentication prevents room hijacking.                 |
+| Fake incomingCall spam                  | Firestore rules validate `callerId == request.auth.uid` and enforce required fields + `status: "ringing"` on create. Prevents spoofed caller identity and malformed docs.    |
+| Pairing code ownership spoofing         | Firestore rules enforce `elderlyUserId == request.auth.uid` on create, preventing a user from generating pairing codes on behalf of another member.                          |
+| Eavesdropping on calls                  | Jitsi uses SRTP (Secure Real-Time Protocol) encryption for all media streams. JaaS rooms are JWT-authenticated.                                                              |
+| Admin privilege abuse                   | Permissions are scoped (manage_contacts, manage_settings, view_history). Members can remove admins from settings.                                                            |
+| Push token theft                        | FCM tokens are stored in Firestore with per-user security rules. Only the user and Cloud Functions (admin SDK) can access them.                                              |
+| Pairing code brute force                | 6-digit codes (1M possibilities) with 10-minute TTL and single-use flag. Rate limiting on the Cloud Function.                                                                |
+| Data breach                             | Firestore security rules enforce per-user data isolation. No sensitive PII stored (no passwords, no SSN). Photos stored in Firebase Storage with per-user read access rules. |
 
 ### Privacy Considerations
 
@@ -1387,7 +1397,7 @@ Claude Code is the primary AI co-developer for this project. Configure it for ma
 
 ## Project Context
 
-EasyCall is a PWA for elderly video calling using Jitsi. See PRD_EasyCall.md for full specs.
+EasyCall is a PWA for simplified personal video calling using Jitsi. See PRD_EasyCall.md for full specs.
 
 ## Development Approach
 
@@ -1408,8 +1418,8 @@ EasyCall is a PWA for elderly video calling using Jitsi. See PRD_EasyCall.md for
 
 src/
 components/ # React components
-elderly/ # Elderly-facing UI
-caregiver/ # Caregiver dashboard UI
+elderly/ # Member-facing UI (legacy folder name)
+caregiver/ # Admin dashboard UI (legacy folder name)
 shared/ # Shared components (buttons, modals)
 hooks/ # Custom React hooks
 stores/ # Zustand stores
@@ -1507,22 +1517,22 @@ For each task in the backlog:
 6. **Refactor** if needed.
 7. **Run full test suite** + lint: `npm test && npm run lint`.
 8. **Update the task JSON** — set `"done": true`.
-9. **Commit** with conventional commit message: `feat(F1): implement elderly home screen`.
+9. **Commit** with conventional commit message: `feat(F1): implement member home screen`.
 
 ---
 
 ## 16. Risk Register
 
-| ID  | Risk                                             | Probability | Impact | Mitigation                                                                                                                      |
-| --- | ------------------------------------------------ | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| R1  | JaaS free tier discontinued or limits reduced    | Low         | High   | Architecture supports migration to self-hosted Jitsi (4–8 hrs effort). IFrame API code identical — only domain changes.         |
-| R2  | iOS PWA push notifications unreliable            | Medium      | Medium | Primary target is Android. iOS documented as second-class. Caregiver can call elderly user's phone number as fallback.          |
-| R3  | Elderly user unable to complete onboarding alone | High        | Medium | Onboarding designed to require caregiver assistance. Remote pairing flow + phone call guidance.                                 |
-| R4  | Jitsi IFrame API breaking changes                | Low         | High   | Pin Jitsi external API script version. Test against JaaS staging environment before updates.                                    |
-| R5  | Firebase free tier exceeded                      | Very Low    | Low    | Family-sized usage is <1% of free tier limits. Monitoring alerts at 50% usage.                                                  |
-| R6  | WebRTC quality on poor mobile networks           | Medium      | High   | Default 360p resolution, auto-degrade to 180p/audio-only. Connection quality indicator. Plain-language error messages.          |
-| R7  | Developer burnout (solo side project)            | Medium      | High   | MVP scoped to 4–6 weeks. Phases are independently valuable. Claude Code handles boilerplate. Tasks sized for 1–4 hour sessions. |
-| R8  | Camera permissions permanently denied            | Medium      | Medium | Pre-call check with step-by-step recovery guide. Caregiver can assist remotely via phone call.                                  |
+| ID  | Risk                                          | Probability | Impact | Mitigation                                                                                                                      |
+| --- | --------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | JaaS free tier discontinued or limits reduced | Low         | High   | Architecture supports migration to self-hosted Jitsi (4–8 hrs effort). IFrame API code identical — only domain changes.         |
+| R2  | iOS PWA push notifications unreliable         | Medium      | Medium | Primary target is Android. iOS documented as second-class. Admin can call the member's phone number as fallback.                |
+| R3  | Member unable to complete onboarding alone    | High        | Medium | Onboarding designed to support admin assistance. Remote pairing flow + phone call guidance.                                     |
+| R4  | Jitsi IFrame API breaking changes             | Low         | High   | Pin Jitsi external API script version. Test against JaaS staging environment before updates.                                    |
+| R5  | Firebase free tier exceeded                   | Very Low    | Low    | Family-sized usage is <1% of free tier limits. Monitoring alerts at 50% usage.                                                  |
+| R6  | WebRTC quality on poor mobile networks        | Medium      | High   | Default 360p resolution, auto-degrade to 180p/audio-only. Connection quality indicator. Plain-language error messages.          |
+| R7  | Developer burnout (solo side project)         | Medium      | High   | MVP scoped to 4–6 weeks. Phases are independently valuable. Claude Code handles boilerplate. Tasks sized for 1–4 hour sessions. |
+| R8  | Camera permissions permanently denied         | Medium      | Medium | Pre-call check with step-by-step recovery guide. Admin can assist remotely via phone call.                                      |
 
 ---
 
@@ -1540,6 +1550,8 @@ The following JSON represents the complete task backlog. Each task has:
 - `estimated_hours`: Estimated hours for a solo developer (with Claude Code)
 - `dependencies`: Task IDs that must be completed first
 - `done`: Boolean — set to true when task is complete
+
+The backlog below intentionally preserves some current implementation identifiers such as `elderly`, `caregiver`, and `elderlyUserId` where task descriptions refer directly to existing routes, file paths, schema fields, or component names.
 
 ```json
 [

@@ -47,12 +47,12 @@ The app is now at **http://localhost:5173**.
 
 > **Important:** The `VITE_USE_EMULATORS=true` flag connects to local emulators instead of production Firebase.
 
-## Step 3: Seed Test Data for the Elderly User
+## Step 3: Seed Test Data for the Member User
 
-The elderly flow uses **anonymous auth** — the app creates a fresh UID when you first visit. You need to seed data under _that_ UID:
+The member flow uses **anonymous auth** — the app creates a fresh UID when you first visit. You need to seed data under _that_ UID:
 
 1. Open http://localhost:5173
-2. Click **"I need help calling"** (elderly role) — the app signs in anonymously
+2. Click **"I need help calling"** (member role in product language; currently `elderly` in implementation) — the app signs in anonymously
 3. Find your UID in the browser console (DevTools → Console):
    ```js
    (await import('/src/services/firebase.ts')).auth.currentUser.uid;
@@ -63,7 +63,7 @@ The elderly flow uses **anonymous auth** — the app creates a fresh UID when yo
    ```
 5. **Reload the page** — contacts appear
 
-This also creates a caregiver account: `caregiver@test.local` / `test1234`.
+This also creates an admin account: `caregiver@test.local` / `test1234`.
 
 > **Why not just `seed_emulator.py`?** Running without `--elderly-uid` creates auth users with _new_ UIDs, but the app's anonymous sign-in won't use those UIDs. The `--elderly-uid` flag seeds data under your actual browser session's UID.
 
@@ -71,7 +71,7 @@ This also creates a caregiver account: `caregiver@test.local` / `test1234`.
 
 ## Test Flows
 
-### Flow 1: Elderly User — Browse & Navigate
+### Flow 1: Member User — Browse & Navigate
 
 1. Complete Step 3 above (seed with your UID)
 2. You see **HomeScreen** with two contact cards (Alex, Sarah)
@@ -81,7 +81,7 @@ This also creates a caregiver account: `caregiver@test.local` / `test1234`.
 4. Go back, click **"History"** → **CallHistory** screen (empty initially)
 5. Click **"+"** or **"Add Contact"** if visible → **AddContact** screen
 
-### Flow 2: Elderly User — Make a Call
+### Flow 2: Member User — Make a Call
 
 > **Note on Jitsi:** Video calls require a JaaS App ID + JWT. Without `VITE_JAAS_APP_ID` and the `generateJitsiJwt` Cloud Function configured with JaaS keys, the call will fail to load the Jitsi iframe. To test the **call UI flow** (loading state → controls → hangup) without actual video:
 
@@ -114,12 +114,12 @@ This also creates a caregiver account: `caregiver@test.local` / `test1234`.
 
 ### Flow 3: Incoming Call (Simulated)
 
-1. Make sure the elderly user's browser is on `/elderly` (HomeScreen)
+1. Make sure the member user's browser is on `/elderly` (HomeScreen; current route name)
 2. In another terminal:
    ```bash
    python3 scripts/manual-test/simulate_incoming_call.py
    ```
-3. The elderly user's browser should immediately show **IncomingCallScreen** overlay with:
+3. The member user's browser should immediately show **IncomingCallScreen** overlay with:
    - Caller name: "Test Caller"
    - Answer button (green)
    - Decline button (red)
@@ -132,43 +132,43 @@ To cancel without user interaction:
 python3 scripts/manual-test/simulate_incoming_call.py --cancel
 ```
 
-### Flow 4: Caregiver Dashboard
+### Flow 4: Admin Dashboard
 
 1. Open a **second browser** (or incognito window) at http://localhost:5173
-2. Click **"I manage calls for someone"** (caregiver role)
+2. Click **"I manage calls for someone"** (admin role in product language; currently `caregiver` in implementation)
 3. Signs in anonymously → redirects to `/caregiver`
-4. **Dashboard** shows the list of linked elderly users (empty for this anonymous user)
+4. **Dashboard** shows the list of linked members (empty for this anonymous user)
 
-To test with the seeded caregiver account:
+To test with the seeded admin account:
 
 1. Click **"Already have an account? Sign in"** on the RoleSelector
 2. Enter `caregiver@test.local` / `test1234`
-3. Dashboard should show "Grandma Rose" as a linked elderly user
-4. Click **Manage** → **ManageContacts** for that elderly user
-5. Add/remove contacts — changes reflect in the elderly user's HomeScreen in real-time
+3. Dashboard should show "Grandma Rose" as a linked member
+4. Click **Manage** → **ManageContacts** for that member
+5. Add/remove contacts — changes reflect in the member's HomeScreen in real-time
 
-### Flow 5: Caregiver Pairing
+### Flow 5: Admin Pairing
 
-1. In the **elderly user's** browser, go to Settings → you should see a pairing code displayed (or generate one)
+1. In the **member user's** browser, go to Settings → you should see a pairing code displayed (or generate one)
 2. Alternatively, create a pairing code via script:
    ```bash
    python3 scripts/manual-test/create_pairing_code.py
    ```
-3. In the **caregiver's** browser, go to Dashboard → **"Pair New User"**
+3. In the **admin's** browser, go to Dashboard → **"Pair New User"**
 4. Enter the 6-digit code
 5. If using the emulator, the `validatePairingCode` Cloud Function runs locally
-6. On success, the elderly user appears in the caregiver's dashboard
+6. On success, the member appears in the admin dashboard
 
-### Flow 6: Caregiver Account (Email/Password)
+### Flow 6: Admin Account (Email/Password)
 
-1. In caregiver browser, go to Dashboard → **Account**
+1. In admin browser, go to Dashboard → **Account**
 2. Link an email/password to the anonymous account
 3. Test **Forgot Password** flow (emails won't actually send in emulator, but the UI flow works)
 4. Sign out and sign back in with the linked credentials
 
 ### Flow 7: App Lock (PIN)
 
-1. In the elderly user's browser, go to **Settings**
+1. In the member user's browser, go to **Settings**
 2. Enable **App Lock** → set a 4-digit PIN
 3. Reload the page → **AppLock** screen appears
 4. Enter wrong PIN 3 times → cooldown timer activates
@@ -212,7 +212,7 @@ To test an actual two-way video call on your local network:
    VITE_USE_EMULATORS=true pnpm dev --host
    ```
 3. On your phone/tablet, open `http://192.168.1.42:5173`
-4. Phone = elderly user, laptop = caregiver/contact
+4. Phone = member user, laptop = admin/contact
 5. Both join the same Jitsi room → two-way video call
 
 > **Note:** Camera/mic permissions require a secure context. `localhost` is treated as secure, but your local IP address is NOT. You may need to use Chrome flags or mDNS (`.local`) to work around this. Alternatively, use [ngrok](https://ngrok.com/) or [localtunnel](https://localtunnel.me/) to get an HTTPS URL for your dev server.
@@ -229,12 +229,12 @@ To re-seed fresh data, just run `seed_emulator.py` again (it clears first).
 
 ## Troubleshooting
 
-| Problem                          | Solution                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------- |
-| Emulators won't start            | Check Java version (`java -version`, need 21+)                            |
-| "Missing Firebase config" error  | Make sure `VITE_USE_EMULATORS=true` is set                                |
-| Auth emulator connection refused | Verify port 9099 is free                                                  |
-| Contacts not showing             | Check Firestore emulator UI for `users/{uid}/contacts`                    |
-| Incoming call not triggering     | Verify elderly UID matches, check browser console for `onSnapshot` errors |
-| Jitsi won't load                 | Need `VITE_JAAS_APP_ID` in `.env.local` — see Flow 2 Option B             |
-| Camera/mic blocked               | Use `localhost` not `127.0.0.1`; or use HTTPS tunnel                      |
+| Problem                          | Solution                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| Emulators won't start            | Check Java version (`java -version`, need 21+)                           |
+| "Missing Firebase config" error  | Make sure `VITE_USE_EMULATORS=true` is set                               |
+| Auth emulator connection refused | Verify port 9099 is free                                                 |
+| Contacts not showing             | Check Firestore emulator UI for `users/{uid}/contacts`                   |
+| Incoming call not triggering     | Verify member UID matches, check browser console for `onSnapshot` errors |
+| Jitsi won't load                 | Need `VITE_JAAS_APP_ID` in `.env.local` — see Flow 2 Option B            |
+| Camera/mic blocked               | Use `localhost` not `127.0.0.1`; or use HTTPS tunnel                     |
