@@ -297,5 +297,26 @@
     "elderlyUser": "I want to make calls",
     "caregiver": "I want to manage calls",
     "alreadyHaveAccount": "Already have an account? Sign in"
+  },
+  "resetApp": {
+    "resetButton": "Reset App",
+    "confirmMessage": "This will sign you out and remove all app data from this device. This cannot be undone.",
+    "resetting": "Resetting...",
+    "howToRemove": "How to Remove from Device",
+    "removeDescription": "After resetting, you can also remove the app icon from your device:",
+    "ios": {
+      "step1": "Long-press the EasyCall icon on your home screen",
+      "step2": "Tap \"Remove App\" or the minus icon",
+      "step3": "Confirm by tapping \"Delete\""
+    },
+    "android": {
+      "step1": "Long-press the EasyCall icon",
+      "step2": "Tap \"Uninstall\" and confirm"
+    },
+    "desktop": {
+      "step1": "Open EasyCall in your browser",
+      "step2": "Click the menu (three dots) in the address bar",
+      "step3": "Select \"Uninstall EasyCall\" and confirm"
+    }
   }
 }

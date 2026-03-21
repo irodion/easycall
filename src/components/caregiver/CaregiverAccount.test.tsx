@@ -5,6 +5,7 @@ import { renderWithProviders } from '@/test/helpers';
 
 const mockLinkEmail = vi.fn();
 const mockSendReset = vi.fn();
+const mockResetAppData = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('@/services/caregiverAuth', () => ({
   linkCaregiverEmail: (...args: unknown[]) => mockLinkEmail(...args),
@@ -55,6 +56,10 @@ vi.mock('@/services/caregiverPinService', () => ({
   setCaregiverPin: vi.fn().mockResolvedValue(undefined),
   removeCaregiverPin: vi.fn().mockResolvedValue(undefined),
   verifyCaregiverPin: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock('@/utils/resetAppData', () => ({
+  resetAppData: () => mockResetAppData(),
 }));
 
 describe('CaregiverAccount', () => {
@@ -175,6 +180,35 @@ describe('CaregiverAccount', () => {
       expect(link).toHaveAttribute('href', '/caregiver');
     });
 
+    it('renders Reset App button', async () => {
+      const { CaregiverAccount } = await import('./CaregiverAccount');
+      renderWithProviders(<CaregiverAccount />);
+      expect(screen.getByRole('button', { name: /reset app/i })).toBeInTheDocument();
+    });
+
+    it('opens confirm dialog when Reset App clicked', async () => {
+      const { CaregiverAccount } = await import('./CaregiverAccount');
+      renderWithProviders(<CaregiverAccount />);
+      fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('calls resetAppData when confirmed', async () => {
+      const { CaregiverAccount } = await import('./CaregiverAccount');
+      renderWithProviders(<CaregiverAccount />);
+      fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
+      fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
+      await waitFor(() => {
+        expect(mockResetAppData).toHaveBeenCalled();
+      });
+    });
+
+    it('renders UninstallGuide toggle', async () => {
+      const { CaregiverAccount } = await import('./CaregiverAccount');
+      renderWithProviders(<CaregiverAccount />);
+      expect(screen.getByRole('button', { name: /how to remove/i })).toBeInTheDocument();
+    });
+
     it('passes vitest-axe', async () => {
       const { CaregiverAccount } = await import('./CaregiverAccount');
       const { container } = renderWithProviders(<CaregiverAccount />);
@@ -229,6 +263,28 @@ describe('CaregiverAccount', () => {
       renderWithProviders(<CaregiverAccount />);
       const link = screen.getByRole('link', { name: /back to dashboard/i });
       expect(link).toHaveAttribute('href', '/caregiver');
+    });
+
+    it('renders Reset App button in linked state', async () => {
+      const { CaregiverAccount } = await import('./CaregiverAccount');
+      renderWithProviders(<CaregiverAccount />);
+      expect(screen.getByRole('button', { name: /reset app/i })).toBeInTheDocument();
+    });
+
+    it('calls resetAppData when confirmed in linked state', async () => {
+      const { CaregiverAccount } = await import('./CaregiverAccount');
+      renderWithProviders(<CaregiverAccount />);
+      fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
+      fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
+      await waitFor(() => {
+        expect(mockResetAppData).toHaveBeenCalled();
+      });
+    });
+
+    it('renders UninstallGuide in linked state', async () => {
+      const { CaregiverAccount } = await import('./CaregiverAccount');
+      renderWithProviders(<CaregiverAccount />);
+      expect(screen.getByRole('button', { name: /how to remove/i })).toBeInTheDocument();
     });
 
     it('passes vitest-axe', async () => {

@@ -7,7 +7,10 @@ import { EasyCallText } from '@/components/shared/EasyCallText';
 import { Icon } from '@/components/shared/Icon';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import { PairingCodeDisplay } from '@/components/shared/PairingCodeDisplay';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { UninstallGuide } from '@/components/shared/UninstallGuide';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
+import { resetAppData } from '@/utils/resetAppData';
 import type { UserSettings } from '@/types/user';
 
 interface SettingsScreenProps {
@@ -21,6 +24,14 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   const fontLabelId = 'font-size-label';
   const [saveError, setSaveError] = useState<string | null>(null);
   const { canInstall, install } = useInstallPrompt();
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  const handleReset = async () => {
+    setResetting(true);
+    setResetConfirmOpen(false);
+    await resetAppData();
+  };
 
   const saveSettings = async (partial: Partial<UserSettings>) => {
     setSaveError(null);
@@ -143,6 +154,24 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
             {t('settings.installApp')}
           </button>
         )}
+
+        <button
+          type="button"
+          onClick={() => setResetConfirmOpen(true)}
+          disabled={resetting}
+          className="btn btn-error min-h-14 w-full font-bold text-[length:var(--text-body)]"
+        >
+          {resetting ? t('resetApp.resetting') : t('resetApp.resetButton')}
+        </button>
+
+        <UninstallGuide />
+
+        <ConfirmDialog
+          open={resetConfirmOpen}
+          message={t('resetApp.confirmMessage')}
+          onConfirm={() => void handleReset()}
+          onCancel={() => setResetConfirmOpen(false)}
+        />
 
         <Link
           to="/elderly"

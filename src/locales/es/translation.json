@@ -293,5 +293,26 @@
     "message": "Asegure su cuenta para poder iniciar sesión en cualquier dispositivo.",
     "setupEmail": "Configurar correo",
     "dismiss": "Cerrar"
+  },
+  "resetApp": {
+    "resetButton": "Restablecer App",
+    "confirmMessage": "Esto cerrará tu sesión y eliminará todos los datos de la app de este dispositivo. Esta acción no se puede deshacer.",
+    "resetting": "Restableciendo...",
+    "howToRemove": "Cómo eliminar del dispositivo",
+    "removeDescription": "Después de restablecer, también puedes eliminar el ícono de la app de tu dispositivo:",
+    "ios": {
+      "step1": "Mantén presionado el ícono de EasyCall en tu pantalla de inicio",
+      "step2": "Toca \"Eliminar App\" o el ícono de menos",
+      "step3": "Confirma tocando \"Eliminar\""
+    },
+    "android": {
+      "step1": "Mantén presionado el ícono de EasyCall",
+      "step2": "Toca \"Desinstalar\" y confirma"
+    },
+    "desktop": {
+      "step1": "Abre EasyCall en tu navegador",
+      "step2": "Haz clic en el menú (tres puntos) en la barra de direcciones",
+      "step3": "Selecciona \"Desinstalar EasyCall\" y confirma"
+    }
   }
 }
