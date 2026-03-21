@@ -229,12 +229,12 @@ To re-seed fresh data, just run `seed_emulator.py` again (it clears first).
 
 ## Troubleshooting
 
-| Problem                          | Solution                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------- |
-| Emulators won't start            | Check Java version (`java -version`, need 21+)                            |
-| "Missing Firebase config" error  | Make sure `VITE_USE_EMULATORS=true` is set                                |
-| Auth emulator connection refused | Verify port 9099 is free                                                  |
-| Contacts not showing             | Check Firestore emulator UI for `users/{uid}/contacts`                    |
-| Incoming call not triggering     | Verify member UID matches, check browser console for `onSnapshot` errors  |
-| Jitsi won't load                 | Need `VITE_JAAS_APP_ID` in `.env.local` — see Flow 2 Option B             |
-| Camera/mic blocked               | Use `localhost` not `127.0.0.1`; or use HTTPS tunnel                      |
+| Problem                          | Solution                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| Emulators won't start            | Check Java version (`java -version`, need 21+)                           |
+| "Missing Firebase config" error  | Make sure `VITE_USE_EMULATORS=true` is set                               |
+| Auth emulator connection refused | Verify port 9099 is free                                                 |
+| Contacts not showing             | Check Firestore emulator UI for `users/{uid}/contacts`                   |
+| Incoming call not triggering     | Verify member UID matches, check browser console for `onSnapshot` errors |
+| Jitsi won't load                 | Need `VITE_JAAS_APP_ID` in `.env.local` — see Flow 2 Option B            |
+| Camera/mic blocked               | Use `localhost` not `127.0.0.1`; or use HTTPS tunnel                     |

@@ -797,17 +797,17 @@ export function JitsiCall({ roomName, displayName, jwtToken, onCallEnded }: Jits
 
 ### Jitsi IFrame API Events to Handle
 
-| Event                    | Action                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| `videoConferenceJoined`  | Update `incomingCall.status` to "active," start duration timer                        |
-| `videoConferenceLeft`    | Write call history, clean up `incomingCall` doc                                       |
-| `readyToClose`           | Dispose API, navigate to Home Screen                                                  |
-| `participantJoined`      | Show "Connected" indicator, stop ringtone if applicable                               |
-| `participantLeft`        | If alone in room, show "Call ended" → auto-dispose after 5s                           |
-| `audioMuteStatusChanged` | Update mic toggle button state                                                        |
-| `videoMuteStatusChanged` | Update camera toggle button state                                                     |
-| `cameraError`            | Show plain-language error: "Camera problem. Try closing and reopening the app."        |
-| `micError`               | Show plain-language error: "Microphone problem. Try closing and reopening the app."    |
+| Event                    | Action                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `videoConferenceJoined`  | Update `incomingCall.status` to "active," start duration timer                      |
+| `videoConferenceLeft`    | Write call history, clean up `incomingCall` doc                                     |
+| `readyToClose`           | Dispose API, navigate to Home Screen                                                |
+| `participantJoined`      | Show "Connected" indicator, stop ringtone if applicable                             |
+| `participantLeft`        | If alone in room, show "Call ended" → auto-dispose after 5s                         |
+| `audioMuteStatusChanged` | Update mic toggle button state                                                      |
+| `videoMuteStatusChanged` | Update camera toggle button state                                                   |
+| `cameraError`            | Show plain-language error: "Camera problem. Try closing and reopening the app."     |
+| `micError`               | Show plain-language error: "Microphone problem. Try closing and reopening the app." |
 
 ---
 
@@ -1089,17 +1089,17 @@ export function usePushNotifications(userId: string) {
 
 ### Threat Model
 
-| Threat                                        | Mitigation                                                                                                                                                                   |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unauthorized access to member's account       | Firebase Anonymous Auth + optional biometric/PIN lock                                                                                                                        |
-| Stranger initiating a call to a member        | Only users with a contact entry (and thus the room ID) can call. Room IDs are unguessable (6 random chars). JaaS JWT authentication prevents room hijacking.                 |
-| Fake incomingCall spam                        | Firestore rules validate `callerId == request.auth.uid` and enforce required fields + `status: "ringing"` on create. Prevents spoofed caller identity and malformed docs.    |
-| Pairing code ownership spoofing               | Firestore rules enforce `elderlyUserId == request.auth.uid` on create, preventing a user from generating pairing codes on behalf of another member.                          |
-| Eavesdropping on calls                        | Jitsi uses SRTP (Secure Real-Time Protocol) encryption for all media streams. JaaS rooms are JWT-authenticated.                                                              |
-| Admin privilege abuse                         | Permissions are scoped (manage_contacts, manage_settings, view_history). Members can remove admins from settings.                                                            |
-| Push token theft                              | FCM tokens are stored in Firestore with per-user security rules. Only the user and Cloud Functions (admin SDK) can access them.                                              |
-| Pairing code brute force                      | 6-digit codes (1M possibilities) with 10-minute TTL and single-use flag. Rate limiting on the Cloud Function.                                                                |
-| Data breach                                   | Firestore security rules enforce per-user data isolation. No sensitive PII stored (no passwords, no SSN). Photos stored in Firebase Storage with per-user read access rules. |
+| Threat                                  | Mitigation                                                                                                                                                                   |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unauthorized access to member's account | Firebase Anonymous Auth + optional biometric/PIN lock                                                                                                                        |
+| Stranger initiating a call to a member  | Only users with a contact entry (and thus the room ID) can call. Room IDs are unguessable (6 random chars). JaaS JWT authentication prevents room hijacking.                 |
+| Fake incomingCall spam                  | Firestore rules validate `callerId == request.auth.uid` and enforce required fields + `status: "ringing"` on create. Prevents spoofed caller identity and malformed docs.    |
+| Pairing code ownership spoofing         | Firestore rules enforce `elderlyUserId == request.auth.uid` on create, preventing a user from generating pairing codes on behalf of another member.                          |
+| Eavesdropping on calls                  | Jitsi uses SRTP (Secure Real-Time Protocol) encryption for all media streams. JaaS rooms are JWT-authenticated.                                                              |
+| Admin privilege abuse                   | Permissions are scoped (manage_contacts, manage_settings, view_history). Members can remove admins from settings.                                                            |
+| Push token theft                        | FCM tokens are stored in Firestore with per-user security rules. Only the user and Cloud Functions (admin SDK) can access them.                                              |
+| Pairing code brute force                | 6-digit codes (1M possibilities) with 10-minute TTL and single-use flag. Rate limiting on the Cloud Function.                                                                |
+| Data breach                             | Firestore security rules enforce per-user data isolation. No sensitive PII stored (no passwords, no SSN). Photos stored in Firebase Storage with per-user read access rules. |
 
 ### Privacy Considerations
 
@@ -1523,16 +1523,16 @@ For each task in the backlog:
 
 ## 16. Risk Register
 
-| ID  | Risk                                             | Probability | Impact | Mitigation                                                                                                                      |
-| --- | ------------------------------------------------ | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| R1  | JaaS free tier discontinued or limits reduced    | Low         | High   | Architecture supports migration to self-hosted Jitsi (4–8 hrs effort). IFrame API code identical — only domain changes.         |
-| R2  | iOS PWA push notifications unreliable            | Medium      | Medium | Primary target is Android. iOS documented as second-class. Admin can call the member's phone number as fallback.               |
-| R3  | Member unable to complete onboarding alone       | High        | Medium | Onboarding designed to support admin assistance. Remote pairing flow + phone call guidance.                                    |
-| R4  | Jitsi IFrame API breaking changes                | Low         | High   | Pin Jitsi external API script version. Test against JaaS staging environment before updates.                                    |
-| R5  | Firebase free tier exceeded                      | Very Low    | Low    | Family-sized usage is <1% of free tier limits. Monitoring alerts at 50% usage.                                                  |
-| R6  | WebRTC quality on poor mobile networks           | Medium      | High   | Default 360p resolution, auto-degrade to 180p/audio-only. Connection quality indicator. Plain-language error messages.          |
-| R7  | Developer burnout (solo side project)            | Medium      | High   | MVP scoped to 4–6 weeks. Phases are independently valuable. Claude Code handles boilerplate. Tasks sized for 1–4 hour sessions. |
-| R8  | Camera permissions permanently denied            | Medium      | Medium | Pre-call check with step-by-step recovery guide. Admin can assist remotely via phone call.                                      |
+| ID  | Risk                                          | Probability | Impact | Mitigation                                                                                                                      |
+| --- | --------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | JaaS free tier discontinued or limits reduced | Low         | High   | Architecture supports migration to self-hosted Jitsi (4–8 hrs effort). IFrame API code identical — only domain changes.         |
+| R2  | iOS PWA push notifications unreliable         | Medium      | Medium | Primary target is Android. iOS documented as second-class. Admin can call the member's phone number as fallback.                |
+| R3  | Member unable to complete onboarding alone    | High        | Medium | Onboarding designed to support admin assistance. Remote pairing flow + phone call guidance.                                     |
+| R4  | Jitsi IFrame API breaking changes             | Low         | High   | Pin Jitsi external API script version. Test against JaaS staging environment before updates.                                    |
+| R5  | Firebase free tier exceeded                   | Very Low    | Low    | Family-sized usage is <1% of free tier limits. Monitoring alerts at 50% usage.                                                  |
+| R6  | WebRTC quality on poor mobile networks        | Medium      | High   | Default 360p resolution, auto-degrade to 180p/audio-only. Connection quality indicator. Plain-language error messages.          |
+| R7  | Developer burnout (solo side project)         | Medium      | High   | MVP scoped to 4–6 weeks. Phases are independently valuable. Claude Code handles boilerplate. Tasks sized for 1–4 hour sessions. |
+| R8  | Camera permissions permanently denied         | Medium      | Medium | Pre-call check with step-by-step recovery guide. Admin can assist remotely via phone call.                                      |
 
 ---
 

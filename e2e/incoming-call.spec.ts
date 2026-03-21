@@ -94,9 +94,7 @@ test.describe('Incoming Call Flow', () => {
   test.describe.configure({ mode: 'serial' });
   test.beforeAll(checkEmulators);
 
-  test('member sees ringing screen when a call is initiated via Firestore', async ({
-    browser,
-  }) => {
+  test('member sees ringing screen when a call is initiated via Firestore', async ({ browser }) => {
     await clearEmulators();
 
     // 1. Pre-create user in auth emulator
