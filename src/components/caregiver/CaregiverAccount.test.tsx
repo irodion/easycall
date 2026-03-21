@@ -57,7 +57,6 @@ vi.mock('@/services/caregiverPinService', () => ({
   verifyCaregiverPin: vi.fn().mockResolvedValue(true),
 }));
 
-
 describe('CaregiverAccount', () => {
   beforeEach(() => {
     vi.clearAllMocks();

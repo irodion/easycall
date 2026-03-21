@@ -74,37 +74,34 @@ export function useCaregiverPin(): UseCaregiverPinReturn {
     return () => clearInterval(timer);
   }, [cooldownRemaining]);
 
-  const submitPin = useCallback(
-    async (pin: string): Promise<boolean> => {
-      if (cooldownActive.current) return false;
+  const submitPin = useCallback(async (pin: string): Promise<boolean> => {
+    if (cooldownActive.current) return false;
 
-      let correct: boolean;
-      try {
-        correct = await verifyCaregiverPin(pin);
-      } catch {
-        // Network error, rate limit, App Check failure — treat as failed attempt
-        correct = false;
+    let correct: boolean;
+    try {
+      correct = await verifyCaregiverPin(pin);
+    } catch {
+      // Network error, rate limit, App Check failure — treat as failed attempt
+      correct = false;
+    }
+
+    if (correct) {
+      userVerified.current = true;
+      setVerified(true);
+      setFailedAttempts(0);
+      return true;
+    }
+
+    setFailedAttempts((prev) => {
+      const next = prev + 1;
+      if (next >= MAX_ATTEMPTS) {
+        setCooldownRemaining(COOLDOWN_SECONDS);
+        return 0;
       }
-
-      if (correct) {
-        userVerified.current = true;
-        setVerified(true);
-        setFailedAttempts(0);
-        return true;
-      }
-
-      setFailedAttempts((prev) => {
-        const next = prev + 1;
-        if (next >= MAX_ATTEMPTS) {
-          setCooldownRemaining(COOLDOWN_SECONDS);
-          return 0;
-        }
-        return next;
-      });
-      return false;
-    },
-    [],
-  );
+      return next;
+    });
+    return false;
+  }, []);
 
   return { pinRequired, verified, failedAttempts, cooldownRemaining, loading, submitPin };
 }

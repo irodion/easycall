@@ -52,9 +52,7 @@ export function InstallPrompt() {
       role="dialog"
       aria-label={t('installPrompt.ariaLabel')}
       className={`fixed start-4 end-4 z-50 transition-all duration-300 ease-out ${
-        visible
-          ? 'translate-y-0 opacity-100'
-          : '-translate-y-8 opacity-0'
+        visible ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'
       }`}
       style={{ top: 'max(1rem, var(--safe-top, 0px))' }}
     >

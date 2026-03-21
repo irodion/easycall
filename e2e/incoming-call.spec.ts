@@ -126,7 +126,9 @@ test.describe('Incoming Call Flow', () => {
     await elderlyPage.waitForURL('**/elderly', { timeout: 10_000 });
 
     // Wait for HomeScreen to fully render (auth complete, userId set, onSnapshot active)
-    await expect(elderlyPage.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 10_000 });
+    await expect(elderlyPage.getByRole('heading', { name: 'Contacts' })).toBeVisible({
+      timeout: 10_000,
+    });
 
     // 6. Write incoming call document via Firestore emulator REST API
     const firestoreUrl = `${FIRESTORE_EMULATOR}/v1/projects/${PROJECT_ID}/databases/(default)/documents/users/${elderlyUid}/incomingCall/current`;

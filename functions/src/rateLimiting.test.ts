@@ -126,9 +126,7 @@ describe('checkPinVerifyRateLimit', () => {
       }),
     });
     const db = getFirestore();
-    await expect(checkPinVerifyRateLimit(db, '10.0.0.1')).rejects.toThrow(
-      'Too many PIN attempts',
-    );
+    await expect(checkPinVerifyRateLimit(db, '10.0.0.1')).rejects.toThrow('Too many PIN attempts');
   });
 
   it('allows attempts after the 5-minute window expires', async () => {

@@ -36,10 +36,7 @@ export async function setCaregiverPin(pin: string): Promise<void> {
  */
 export async function verifyCaregiverPin(pin: string): Promise<boolean> {
   const functions = getFunctions(app);
-  const fn = httpsCallable<{ pin: string }, { valid: boolean }>(
-    functions,
-    'verifyCaregiverPin',
-  );
+  const fn = httpsCallable<{ pin: string }, { valid: boolean }>(functions, 'verifyCaregiverPin');
   const result = await fn({ pin });
   return result.data.valid;
 }

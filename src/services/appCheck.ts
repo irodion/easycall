@@ -24,7 +24,7 @@ export function initAppCheck(): AppCheck | null {
     }
     throw new Error(
       'VITE_RECAPTCHA_V3_SITE_KEY is not set. App Check is required in production. ' +
-      'Set it in your environment variables.',
+        'Set it in your environment variables.',
     );
   }
 

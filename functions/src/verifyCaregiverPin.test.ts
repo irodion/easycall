@@ -45,13 +45,11 @@ vi.mock('firebase-admin/firestore', () => ({
 import { verifyCaregiverPin } from './index.js';
 
 // The onCall mock extracts the handler; cast for direct invocation in tests
-const callVerifyPin = verifyCaregiverPin as unknown as (
-  request: {
-    auth: { uid: string } | null;
-    data: unknown;
-    rawRequest?: { ip?: string; headers: Record<string, string> };
-  },
-) => Promise<{ valid: boolean }>;
+const callVerifyPin = verifyCaregiverPin as unknown as (request: {
+  auth: { uid: string } | null;
+  data: unknown;
+  rawRequest?: { ip?: string; headers: Record<string, string> };
+}) => Promise<{ valid: boolean }>;
 
 const mockRequest = (data: unknown, auth: { uid: string } | null = { uid: 'u1' }) => ({
   auth,
@@ -75,27 +73,27 @@ describe('verifyCaregiverPin Cloud Function', () => {
   });
 
   it('rejects unauthenticated requests', async () => {
-    await expect(
-      callVerifyPin(mockRequest({ pin: '1234' }, null)),
-    ).rejects.toThrow('Authentication required.');
+    await expect(callVerifyPin(mockRequest({ pin: '1234' }, null))).rejects.toThrow(
+      'Authentication required.',
+    );
   });
 
   it('rejects non-numeric PIN', async () => {
-    await expect(
-      callVerifyPin(mockRequest({ pin: 'abc' })),
-    ).rejects.toThrow('pin must be a 4-8 digit numeric string.');
+    await expect(callVerifyPin(mockRequest({ pin: 'abc' }))).rejects.toThrow(
+      'pin must be a 4-8 digit numeric string.',
+    );
   });
 
   it('rejects PIN shorter than 4 digits', async () => {
-    await expect(
-      callVerifyPin(mockRequest({ pin: '123' })),
-    ).rejects.toThrow('pin must be a 4-8 digit numeric string.');
+    await expect(callVerifyPin(mockRequest({ pin: '123' }))).rejects.toThrow(
+      'pin must be a 4-8 digit numeric string.',
+    );
   });
 
   it('rejects PIN longer than 8 digits', async () => {
-    await expect(
-      callVerifyPin(mockRequest({ pin: '123456789' })),
-    ).rejects.toThrow('pin must be a 4-8 digit numeric string.');
+    await expect(callVerifyPin(mockRequest({ pin: '123456789' }))).rejects.toThrow(
+      'pin must be a 4-8 digit numeric string.',
+    );
   });
 
   it('accepts exactly 4-digit PIN', async () => {
