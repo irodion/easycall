@@ -24,8 +24,7 @@ const originalLocation = window.location;
 
 describe('resetAppData', () => {
   let mockReplace: ReturnType<typeof vi.fn>;
-  let localStorageClearSpy: ReturnType<typeof vi.spyOn>;
-  let sessionStorageClearSpy: ReturnType<typeof vi.spyOn>;
+  let storageClearSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     mockSignOut.mockClear();
@@ -40,13 +39,11 @@ describe('resetAppData', () => {
       configurable: true,
     });
 
-    localStorageClearSpy = vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {});
-    sessionStorageClearSpy = localStorageClearSpy; // same spy covers both
-    void sessionStorageClearSpy; // used in assertions below via Storage.prototype.clear
+    storageClearSpy = vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    localStorageClearSpy.mockRestore();
+    storageClearSpy.mockRestore();
     Object.defineProperty(window, 'location', {
       value: originalLocation,
       writable: true,
@@ -116,7 +113,7 @@ describe('resetAppData', () => {
   it('clears localStorage and sessionStorage', async () => {
     await resetAppData();
     // Storage.prototype.clear is called for both localStorage.clear() and sessionStorage.clear()
-    expect(localStorageClearSpy).toHaveBeenCalled();
+    expect(storageClearSpy).toHaveBeenCalled();
   });
 
   it('clears IndexedDB when databases() is available', async () => {
@@ -147,7 +144,7 @@ describe('resetAppData', () => {
       writable: true,
       configurable: true,
     });
-    localStorageClearSpy = vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {});
+    storageClearSpy = vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {});
   });
 
   it('skips IndexedDB cleanup when indexedDB is not defined', async () => {
@@ -186,7 +183,7 @@ describe('resetAppData', () => {
       writable: true,
       configurable: true,
     });
-    localStorageClearSpy = vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {});
+    storageClearSpy = vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {});
   });
 
   it('reloads to root after cleanup', async () => {
@@ -199,7 +196,7 @@ describe('resetAppData', () => {
 
     await resetAppData();
 
-    expect(localStorageClearSpy).toHaveBeenCalled();
+    expect(storageClearSpy).toHaveBeenCalled();
     expect(mockReplace).toHaveBeenCalledWith('/');
   });
 

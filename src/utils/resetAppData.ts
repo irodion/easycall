@@ -79,7 +79,8 @@ export async function resetAppData(): Promise<void> {
         const dbs = await indexedDB.databases();
         dbNames = dbs.map((d) => d.name).filter((n): n is string => !!n);
       } else {
-        // Safari/Firefox: databases() unavailable, delete known Firebase DBs by name
+        // Safari/Firefox: databases() unavailable, delete known Firebase DBs by name.
+        // Names sourced from Firebase JS SDK v12 (modular). Update if SDK changes.
         const projectId = app.options.projectId ?? '';
         dbNames = [
           'firebaseLocalStorageDb',

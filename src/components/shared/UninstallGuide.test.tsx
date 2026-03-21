@@ -20,6 +20,11 @@ afterEach(() => {
     writable: true,
     configurable: true,
   });
+  Object.defineProperty(navigator, 'maxTouchPoints', {
+    value: 0,
+    writable: true,
+    configurable: true,
+  });
 });
 
 describe('UninstallGuide', () => {
@@ -77,12 +82,6 @@ describe('UninstallGuide', () => {
     expect(
       screen.getByText(/long-press the easycall icon on your home screen/i),
     ).toBeInTheDocument();
-    // Restore
-    Object.defineProperty(navigator, 'maxTouchPoints', {
-      value: 0,
-      writable: true,
-      configurable: true,
-    });
   });
 
   it('shows Android steps on Android user agent', () => {
