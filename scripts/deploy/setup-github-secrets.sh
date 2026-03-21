@@ -71,21 +71,14 @@ if [ -f "functions/.env" ]; then
       gh secret set "$var" --body "$val"
       ok "Set $var (from functions/.env)"
     else
-      read -p "  $var (or 'skip'): " manual_val
-      if [ "$manual_val" != "skip" ] && [ -n "$manual_val" ]; then
-        gh secret set "$var" --body "$manual_val"
-        ok "Set $var"
-      fi
+      warn "$var not found in functions/.env — skipping (set manually with: gh secret set $var)"
     fi
   done
 else
-  for var in JAAS_APP_ID JAAS_KEY_ID JAAS_PRIVATE_KEY; do
-    read -p "  $var (or 'skip'): " manual_val
-    if [ "$manual_val" != "skip" ] && [ -n "$manual_val" ]; then
-      gh secret set "$var" --body "$manual_val"
-      ok "Set $var"
-    fi
-  done
+  warn "functions/.env not found — set JAAS secrets manually:"
+  echo "    gh secret set JAAS_APP_ID --body '<value>'"
+  echo "    gh secret set JAAS_KEY_ID --body '<value>'"
+  echo "    gh secret set JAAS_PRIVATE_KEY < path/to/private-key.pem"
 fi
 
 echo ""
