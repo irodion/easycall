@@ -58,6 +58,10 @@ export function usePairingCode(userId: string | null) {
       } catch (err) {
         if (cancelled || !mountedRef.current) return;
         console.error('Failed to generate pairing code:', err);
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = undefined;
+        }
         setCode(null);
         setError(true);
       }
@@ -88,6 +92,10 @@ export function usePairingCode(userId: string | null) {
       // nosemgrep: no-console-log-sensitive — logs error object, not the code itself
       console.error('Failed to refresh pairing code:', err);
       if (!mountedRef.current) return;
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = undefined;
+      }
       // Clear stale code so the error UI shows with a retry button
       setCode(null);
       setError(true);

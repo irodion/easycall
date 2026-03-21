@@ -301,31 +301,25 @@ test.describe('Caregiver identity headers (emulators)', () => {
     );
   });
 
-  test('manage contacts shows heading with user name when doc is readable', async ({ page }) => {
-    // Grant the caregiver read access to the elderly user doc by
-    // making them the doc owner (workaround: Firestore rules allow
-    // read: if request.auth.uid == userId). In production, the
-    // caregiver reads their own linkedElderlyUsers then the dashboard
-    // fetches user docs via a where(__name__, 'in', [...]) query.
-    //
-    // For this E2E test we verify the component renders the identity
-    // heading by seeding the elderly user doc as readable (via admin).
-    // The component will show "Contacts for Grandma Rose" if the
-    // getDoc succeeds, or fall back to "Manage Contacts" otherwise.
+  test('manage contacts shows elderly user name in heading', async ({ page }) => {
     await page.goto(`/caregiver/manage/${elderlyUid}`);
 
-    // At minimum, the page heading should be visible (either variant)
+    // Caregiver can read the elderly user doc (via isCaregiverOf rule),
+    // so the heading should include the seeded display name
     await expect(
-      page.getByRole('heading', { name: /contacts/i }),
+      page.getByRole('heading', { name: /contacts for grandma rose/i }),
     ).toBeVisible({ timeout: 15_000 });
   });
 
-  test('settings page shows back-to-dashboard link even during loading', async ({ page }) => {
+  test('settings page shows elderly user name in heading', async ({ page }) => {
     await page.goto(`/caregiver/settings/${elderlyUid}`);
 
-    // The back link should be visible even before settings load
-    const backLink = page.getByRole('link', { name: /back to dashboard/i });
-    await expect(backLink).toBeVisible({ timeout: 15_000 });
+    // Wait for onSnapshot to deliver settings + displayName
+    await expect(page.getByText(/settings for grandma rose/i)).toBeVisible({
+      timeout: 15_000,
+    });
+    // Back link should also be visible
+    await expect(page.getByRole('link', { name: /back to dashboard/i })).toBeVisible();
   });
 });
 
@@ -391,12 +385,13 @@ test.describe('Caregiver PIN prompt title (emulators)', () => {
     // Navigate to /elderly first to trigger anonymous auth (AuthGuard calls
     // signInAnonymously). Without this, the RoleSelector page can't read
     // config docs because Firestore rules require request.auth != null.
+    // Register the response waiter BEFORE navigation to avoid missing the response
+    const authResponse = page.waitForResponse(
+      (res) => res.url().includes('accounts:signUp'),
+      { timeout: 15_000 },
+    );
     await page.goto('/elderly');
-    // Wait for auth to complete — AuthGuard triggers signInAnonymously.
-    // Wait for the signUp intercept to fire (proves auth happened).
-    await page.waitForResponse((res) => res.url().includes('accounts:signUp'), {
-      timeout: 15_000,
-    });
+    await authResponse;
 
     // Now navigate to role selector — auth state is present, config reads work
     await page.goto('/');

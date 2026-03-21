@@ -244,7 +244,7 @@ describe('AuthGuard', () => {
     });
 
     // PIN prompt (AppLock dialog) should be visible, content should NOT
-    expect(screen.getByRole('dialog', { name: /enter.*pin/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /enter caregiver pin/i })).toBeInTheDocument();
     expect(screen.queryByText('Caregiver Dashboard')).not.toBeInTheDocument();
   });
 
