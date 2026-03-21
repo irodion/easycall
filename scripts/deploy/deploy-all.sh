@@ -36,6 +36,8 @@ echo -e "${BLUE}╚════════════════════�
 header "Step 1/5: Installing dependencies"
 pnpm install --frozen-lockfile
 ok "Root dependencies installed"
+(cd functions && pnpm install --frozen-lockfile)
+ok "Functions dependencies installed"
 
 # Step 2: Validate environment
 header "Step 2/5: Validating environment"
