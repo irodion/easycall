@@ -1,9 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 import { SettingsScreen } from './SettingsScreen';
 import type { UserSettings } from '@/types/user';
+
+const mockResetAppData = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn().mockReturnValue('doc-ref'),
@@ -24,6 +26,10 @@ vi.mock('@/hooks/usePairingCode', () => ({
   }),
 }));
 
+vi.mock('@/utils/resetAppData', () => ({
+  resetAppData: () => mockResetAppData(),
+}));
+
 const defaultSettings: UserSettings = {
   fontSize: 'large',
   highContrast: false,
@@ -35,6 +41,10 @@ const defaultSettings: UserSettings = {
 };
 
 describe('SettingsScreen', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders font size radio group with 2 options', () => {
     renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
     expect(screen.getAllByRole('radiogroup').length).toBeGreaterThanOrEqual(1);
@@ -109,6 +119,40 @@ describe('SettingsScreen', () => {
     );
     const hebrewRadio = screen.getByRole('radio', { name: 'עברית' }) as HTMLInputElement;
     expect(hebrewRadio.checked).toBe(true);
+  });
+
+  it('renders Reset App button', () => {
+    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    expect(screen.getByRole('button', { name: /reset app/i })).toBeInTheDocument();
+  });
+
+  it('opens confirm dialog when Reset App clicked', () => {
+    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(/sign you out and remove all app data/i)).toBeInTheDocument();
+  });
+
+  it('calls resetAppData when confirmed', async () => {
+    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
+    fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
+    await waitFor(() => {
+      expect(mockResetAppData).toHaveBeenCalled();
+    });
+  });
+
+  it('closes dialog on cancel without calling resetAppData', () => {
+    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(mockResetAppData).not.toHaveBeenCalled();
+  });
+
+  it('renders UninstallGuide toggle', () => {
+    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    expect(screen.getByRole('button', { name: /how to remove/i })).toBeInTheDocument();
   });
 
   it('passes vitest-axe accessibility check', async () => {

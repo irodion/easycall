@@ -9,6 +9,9 @@ import { setCaregiverPin, removeCaregiverPin } from '@/services/caregiverPinServ
 import { useCaregiverPin } from '@/hooks/useCaregiverPin';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { UninstallGuide } from '@/components/shared/UninstallGuide';
+import { resetAppData } from '@/utils/resetAppData';
 
 type LinkState = 'idle' | 'loading' | 'success' | 'error';
 type ResetState = 'idle' | 'loading' | 'sent' | 'error';
@@ -235,6 +238,40 @@ function SecuritySettings() {
   );
 }
 
+function ResetAppSection() {
+  const { t } = useTranslation();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  const handleReset = async () => {
+    setResetting(true);
+    setConfirmOpen(false);
+    await resetAppData();
+  };
+
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-sm">
+      <EasyCallButton
+        size="default"
+        variant="danger"
+        onClick={() => setConfirmOpen(true)}
+        disabled={resetting}
+      >
+        {resetting ? t('resetApp.resetting') : t('resetApp.resetButton')}
+      </EasyCallButton>
+
+      <UninstallGuide />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        message={t('resetApp.confirmMessage')}
+        onConfirm={() => void handleReset()}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </div>
+  );
+}
+
 export function CaregiverAccount() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -347,6 +384,8 @@ export function CaregiverAccount() {
           </Link>
         </div>
 
+        <ResetAppSection />
+
         <SecuritySettings />
       </div>
     );
@@ -443,6 +482,8 @@ export function CaregiverAccount() {
       >
         {t('caregiverAccount.backToDashboard')}
       </Link>
+
+      <ResetAppSection />
 
       <SecuritySettings />
     </div>
