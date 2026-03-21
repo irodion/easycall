@@ -392,8 +392,11 @@ test.describe('Caregiver PIN prompt title (emulators)', () => {
     // signInAnonymously). Without this, the RoleSelector page can't read
     // config docs because Firestore rules require request.auth != null.
     await page.goto('/elderly');
-    // Wait for auth to complete (page will render something)
-    await page.waitForTimeout(2000);
+    // Wait for auth to complete — AuthGuard triggers signInAnonymously.
+    // Wait for the signUp intercept to fire (proves auth happened).
+    await page.waitForResponse((res) => res.url().includes('accounts:signUp'), {
+      timeout: 15_000,
+    });
 
     // Now navigate to role selector — auth state is present, config reads work
     await page.goto('/');

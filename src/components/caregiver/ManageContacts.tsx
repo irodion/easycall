@@ -36,9 +36,11 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
   }, [elderlyUserId, subscribeToContacts]);
 
   useEffect(() => {
+    let active = true;
+    setDisplayName(null);
     void getDoc(doc(db, 'users', elderlyUserId))
       .then((snap) => {
-        if (snap.exists()) {
+        if (active && snap.exists()) {
           const name = snap.data()['displayName'];
           if (typeof name === 'string') setDisplayName(name);
         }
@@ -46,6 +48,9 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
       .catch(() => {
         // Silently fall back to generic title if the read fails
       });
+    return () => {
+      active = false;
+    };
   }, [elderlyUserId]);
 
   const handleAdd = async () => {

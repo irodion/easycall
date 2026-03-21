@@ -9,7 +9,9 @@
     "saving": "Speichern...",
     "loading": "Laden...",
     "install": "Installieren",
-    "somethingWentWrong": "Etwas ist schiefgelaufen"
+    "somethingWentWrong": "Etwas ist schiefgelaufen",
+    "dismiss": "Verwerfen",
+    "retry": "Erneut versuchen"
   },
   "home": {
     "title": "Kontakte",
@@ -123,7 +125,8 @@
     "pinSaveError": "PIN konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "savePin": "PIN speichern",
     "language": "Sprache",
-    "settingsFor": "Einstellungen für {{name}}"
+    "settingsFor": "Einstellungen für {{name}}",
+    "loadError": "Einstellungen konnten nicht geladen werden. Überprüfen Sie die Berechtigungen und versuchen Sie es erneut."
   },
   "presence": {
     "online": "Online",

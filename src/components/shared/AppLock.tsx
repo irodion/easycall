@@ -72,9 +72,9 @@ export function AppLock({
       ref={dialogRef}
       className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-[var(--space-lg)] bg-base-100 p-[var(--space-md)]"
       role="dialog"
-      aria-label={t('appLock.title')}
+      aria-labelledby="applock-heading"
     >
-      <h1 className="text-[length:var(--text-heading)] font-bold text-center">
+      <h1 id="applock-heading" className="text-[length:var(--text-heading)] font-bold text-center">
         {title ?? t('appLock.enterPin')}
       </h1>
 

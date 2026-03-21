@@ -9,7 +9,9 @@
     "saving": "שומר...",
     "loading": "טוען...",
     "install": "התקן",
-    "somethingWentWrong": "משהו השתבש"
+    "somethingWentWrong": "משהו השתבש",
+    "dismiss": "סגור",
+    "retry": "נסה שוב"
   },
   "home": {
     "title": "אנשי קשר",
@@ -123,7 +125,8 @@
     "pinSaveError": "שמירת ה-PIN נכשלה. אנא נסה שוב.",
     "savePin": "שמור PIN",
     "language": "שפה",
-    "settingsFor": "הגדרות עבור {{name}}"
+    "settingsFor": "הגדרות עבור {{name}}",
+    "loadError": "לא ניתן לטעון הגדרות. בדקו הרשאות ונסו שוב."
   },
   "presence": {
     "online": "מחובר",

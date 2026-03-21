@@ -9,7 +9,9 @@
     "saving": "Сохранение...",
     "loading": "Загрузка...",
     "install": "Установить",
-    "somethingWentWrong": "Что-то пошло не так"
+    "somethingWentWrong": "Что-то пошло не так",
+    "dismiss": "Закрыть",
+    "retry": "Повторить"
   },
   "home": {
     "title": "Контакты",
@@ -123,7 +125,8 @@
     "pinSaveError": "Не удалось сохранить PIN. Пожалуйста, попробуйте снова.",
     "savePin": "Сохранить PIN",
     "language": "Язык",
-    "settingsFor": "Настройки {{name}}"
+    "settingsFor": "Настройки {{name}}",
+    "loadError": "Не удалось загрузить настройки. Проверьте разрешения и попробуйте снова."
   },
   "presence": {
     "online": "В сети",

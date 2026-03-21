@@ -9,7 +9,9 @@
     "saving": "Guardando...",
     "loading": "Cargando...",
     "install": "Instalar",
-    "somethingWentWrong": "Algo salió mal"
+    "somethingWentWrong": "Algo salió mal",
+    "dismiss": "Cerrar",
+    "retry": "Reintentar"
   },
   "home": {
     "title": "Contactos",
@@ -123,7 +125,8 @@
     "pinSaveError": "Error al guardar el PIN. Por favor inténtelo de nuevo.",
     "savePin": "Guardar PIN",
     "language": "Idioma",
-    "settingsFor": "Configuración de {{name}}"
+    "settingsFor": "Configuración de {{name}}",
+    "loadError": "No se pudieron cargar las configuraciones. Verifique los permisos e inténtelo de nuevo."
   },
   "presence": {
     "online": "En línea",

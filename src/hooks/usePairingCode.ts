@@ -58,6 +58,7 @@ export function usePairingCode(userId: string | null) {
       } catch (err) {
         if (cancelled || !mountedRef.current) return;
         console.error('Failed to generate pairing code:', err);
+        setCode(null);
         setError(true);
       }
     }
