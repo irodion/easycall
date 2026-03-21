@@ -82,7 +82,7 @@ describe('validatePairingCode Cloud Function', () => {
   });
 
   it('rejects invalid code format (non-6-digit)', async () => {
-    // Caregiver role check must pass first
+    // Admin role check must pass first
     mockDocGet.mockResolvedValue({ exists: true, data: () => ({ role: 'caregiver' }) });
 
     await expect(callValidate({ auth: { uid: 'cg1' }, data: { code: '12345' } })).rejects.toThrow(
@@ -107,7 +107,7 @@ describe('validatePairingCode Cloud Function', () => {
       ).rejects.toThrow('Only caregivers can perform this action.');
     });
 
-    it('rejects elderly users', async () => {
+    it('rejects member users', async () => {
       mockDocGet.mockResolvedValue({ exists: true, data: () => ({ role: 'elderly' }) });
 
       await expect(
@@ -123,7 +123,7 @@ describe('validatePairingCode Cloud Function', () => {
       ).rejects.toThrow('Only caregivers can perform this action.');
     });
 
-    it('allows caregiver role to proceed', async () => {
+    it('allows admin role to proceed', async () => {
       mockDocGet.mockResolvedValue({ exists: true, data: () => ({ role: 'caregiver' }) });
 
       // Transaction will fail because pairing code doesn't exist, but that's
@@ -136,9 +136,9 @@ describe('validatePairingCode Cloud Function', () => {
     });
   });
 
-  describe('pairing code validation (with caregiver role)', () => {
+  describe('pairing code validation (with admin role)', () => {
     beforeEach(() => {
-      // All tests in this block assume caller has caregiver role
+      // All tests in this block assume caller has admin role
       mockDocGet.mockResolvedValue({ exists: true, data: () => ({ role: 'caregiver' }) });
     });
 
@@ -195,7 +195,7 @@ describe('validatePairingCode Cloud Function', () => {
       ).rejects.toThrow('Cannot pair an account with itself.');
     });
 
-    it('succeeds for valid caregiver with valid code', async () => {
+    it('succeeds for valid admin with valid code', async () => {
       mockTxnGet.mockResolvedValue({
         exists: true,
         data: () => ({
@@ -208,11 +208,11 @@ describe('validatePairingCode Cloud Function', () => {
       const result = await callValidate({ auth: { uid: 'cg1' }, data: { code: '123456' } });
       expect(result).toEqual({ elderlyUserId: 'elderly-1' });
       expect(mockTxnUpdate).toHaveBeenCalled();
-      // txn.set is called for: rate limit, caregivers subcollection, caregiver user doc
+      // txn.set is called for: rate limit, caregivers subcollection, admin user doc
       expect(mockTxnSet).toHaveBeenCalledTimes(3);
     });
 
-    it('writes linkedElderlyUsers to caregiver user doc', async () => {
+    it('writes linkedElderlyUsers to admin user doc', async () => {
       mockTxnGet.mockResolvedValue({
         exists: true,
         data: () => ({

@@ -45,7 +45,7 @@ describe('Dashboard', () => {
   });
 
   it('shows Link Elderly User button when no linked users', async () => {
-    // Caregiver doc has no linkedElderlyUsers
+    // Admin doc has no linkedElderlyUsers
     getDoc.mockResolvedValue({
       exists: () => true,
       data: () => ({ linkedElderlyUsers: [] }),
@@ -55,7 +55,7 @@ describe('Dashboard', () => {
     renderWithProviders(<Dashboard userId="caregiver-1" />);
 
     // Wait for async data fetch
-    await screen.findByRole('link', { name: /link elderly user/i });
+    await screen.findByRole('link', { name: /link member/i });
   });
 
   it('shows empty state message when no linked users', async () => {
@@ -67,11 +67,11 @@ describe('Dashboard', () => {
     const { Dashboard } = await import('./Dashboard');
     renderWithProviders(<Dashboard userId="caregiver-1" />);
 
-    await screen.findByText(/no linked users yet/i);
-    expect(screen.getByText(/tap.*link elderly user/i)).toBeInTheDocument();
+    await screen.findByText(/no linked members yet/i);
+    expect(screen.getByText(/tap.*link member/i)).toBeInTheDocument();
   });
 
-  it('renders a card per linked elderly user', async () => {
+  it('renders a card per linked member', async () => {
     getDoc.mockImplementation((_db: unknown, path: unknown, ...args: unknown[]) => {
       // Return different docs based on what's being fetched
       const docPath = String(path) + args.join('/');
@@ -90,7 +90,7 @@ describe('Dashboard', () => {
       });
     });
 
-    // Use different getDocs for elderly user
+    // Use different getDocs for member user
     getDocs.mockResolvedValue({
       docs: [
         {
@@ -142,7 +142,7 @@ describe('Dashboard', () => {
     expect(manageLink.getAttribute('href')).toBe('/caregiver/manage/elderly-1');
   });
 
-  it('handles non-existent caregiver doc gracefully', async () => {
+  it('handles non-existent admin doc gracefully', async () => {
     getDoc.mockResolvedValue({
       exists: () => false,
     });
@@ -151,7 +151,7 @@ describe('Dashboard', () => {
     renderWithProviders(<Dashboard userId="caregiver-1" />);
 
     // Should stop loading and show the link button (no linked users)
-    await screen.findByRole('link', { name: /link elderly user/i });
+    await screen.findByRole('link', { name: /link member/i });
     // No spinner should remain
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
@@ -177,7 +177,7 @@ describe('Dashboard', () => {
 
     const { Dashboard } = await import('./Dashboard');
     const { container } = renderWithProviders(<Dashboard userId="caregiver-1" />);
-    await screen.findByRole('link', { name: /link elderly user/i });
+    await screen.findByRole('link', { name: /link member/i });
     expect(await axe(container)).toHaveNoViolations();
   });
 

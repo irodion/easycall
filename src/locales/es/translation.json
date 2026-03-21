@@ -18,7 +18,7 @@
     "history": "Historial",
     "settings": "Ajustes",
     "noContacts": "No hay contactos aún",
-    "noContactsHint": "Un cuidador puede agregar contactos por usted",
+    "noContactsHint": "Un administrador puede agregar contactos por usted",
     "callContact": "Llamar a {{name}}",
     "tapToCall": "Toca para llamar",
     "navigation": "Navegación"
@@ -82,13 +82,13 @@
     "loadError": "Error al cargar más llamadas. Por favor inténtelo de nuevo."
   },
   "dashboard": {
-    "title": "Panel del Cuidador",
-    "linkUser": "Vincular Usuario Mayor",
+    "title": "Panel de Administración",
+    "linkUser": "Vincular Miembro",
     "lastSeen": "Última vez: {{time}}",
     "manageContacts": "Administrar Contactos",
     "backToDashboard": "Volver al Panel",
-    "noLinkedUsers": "Aún no hay usuarios vinculados",
-    "noLinkedUsersHint": "Toque \"Vincular Usuario Mayor\" para emparejar con el dispositivo de un familiar."
+    "noLinkedUsers": "Aún no hay miembros vinculados",
+    "noLinkedUsersHint": "Toque \"Vincular Miembro\" para emparejar con el dispositivo de un miembro."
   },
   "manageContacts": {
     "title": "Administrar Contactos",
@@ -141,12 +141,12 @@
     "closeRegistration": "Cerrar registro",
     "openRegistration": "Abrir registro",
     "closed": "El registro está cerrado.",
-    "closedMessage": "Esta aplicación no acepta nuevos usuarios. Si eres un familiar, pide a tu cuidador que abra el registro."
+    "closedMessage": "Esta aplicación no acepta nuevos usuarios. Si necesitas acceso, pide a tu administrador que abra el registro."
   },
   "caregiverPin": {
-    "title": "PIN del cuidador",
-    "enabledDescription": "Se requiere un PIN para acceder a las funciones de cuidador. Puedes cambiarlo o eliminarlo.",
-    "disabledDescription": "Establece un PIN para proteger el acceso de cuidador. Compártelo solo con familiares.",
+    "title": "PIN de administrador",
+    "enabledDescription": "Se requiere un PIN para acceder a las funciones de administrador. Puedes cambiarlo o eliminarlo.",
+    "disabledDescription": "Establece un PIN para proteger el acceso de administrador. Compártelo solo con personas de confianza.",
     "setPin": "Establecer PIN",
     "newPin": "Nuevo PIN",
     "confirmPin": "Confirmar PIN",
@@ -156,29 +156,29 @@
     "pinMismatchError": "Los PINs no coinciden.",
     "savePin": "Guardar PIN",
     "saveError": "Error al guardar el PIN. Inténtalo de nuevo.",
-    "saveSuccess": "PIN del cuidador guardado correctamente.",
+    "saveSuccess": "PIN de administrador guardado correctamente.",
     "removePin": "Eliminar PIN",
     "removeError": "Error al eliminar el PIN. Inténtalo de nuevo.",
-    "enterPin": "Ingresa el PIN del cuidador"
+    "enterPin": "Ingresa el PIN de administrador"
   },
   "roleSelector": {
     "notSignedIn": "No ha iniciado sesión. Por favor inténtelo de nuevo.",
     "saveFailed": "Error al guardar el rol: {{error}}",
     "whoAreYou": "¿Quién es usted?",
-    "elderlyUser": "Soy un usuario mayor",
-    "caregiver": "Soy un cuidador familiar",
+    "elderlyUser": "Quiero hacer llamadas",
+    "caregiver": "Quiero administrar llamadas",
     "alreadyHaveAccount": "¿Ya tiene una cuenta? Iniciar sesión"
   },
   "onboarding": {
     "welcome": "Bienvenido a EasyCall",
-    "elderlyDescription": "Videollamadas sencillas con su familia. ¡Solo toque una foto para llamar!",
-    "caregiverDescription": "Administre videollamadas para sus familiares de forma remota.",
+    "elderlyDescription": "Videollamadas sencillas con las personas que te importan. ¡Solo toque una foto para llamar!",
+    "caregiverDescription": "Configure y administre videollamadas para otros de forma remota.",
     "cameraMic": "Cámara y Micrófono",
     "cameraMicHint": "EasyCall necesita acceso a su cámara y micrófono para las videollamadas.",
     "notifications": "Permiso de Notificaciones",
     "notificationsHint": "Permita las notificaciones para saber cuándo alguien le está llamando.",
-    "pairWithCaregiver": "Emparejar con Cuidador",
-    "linkToElderly": "Vincular a Usuario Mayor",
+    "pairWithCaregiver": "Emparejar con Administrador",
+    "linkToElderly": "Vincular a Miembro",
     "done": "Listo",
     "stepOf": "Paso {{step}} de {{total}}",
     "failedSetup": "Error al completar la configuración. Por favor inténtelo de nuevo."
@@ -192,7 +192,7 @@
     "generateError": "Error al generar el código. Por favor inténtelo de nuevo."
   },
   "pairElderly": {
-    "enterCode": "Ingrese el código de 6 dígitos que aparece en la pantalla del usuario mayor:",
+    "enterCode": "Ingrese el código de 6 dígitos que aparece en la pantalla del miembro:",
     "linking": "Vinculando...",
     "linkAccount": "Vincular Cuenta",
     "tooManyAttempts": "Demasiados intentos. Espere 10 minutos antes de intentar de nuevo."

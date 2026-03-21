@@ -7,7 +7,7 @@ const MAX_ATTEMPTS = 5;
 const COOLDOWN_SECONDS = 300;
 
 export interface UseCaregiverPinReturn {
-  /** Whether a caregiver PIN is configured for this instance */
+  /** Whether an admin PIN is configured for this instance */
   pinRequired: boolean;
   /** Whether the PIN has been verified in this session */
   verified: boolean;

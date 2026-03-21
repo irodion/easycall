@@ -156,7 +156,7 @@ async function checkEmulators(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Suite 1: Pre-seeded elderly user (contacts visible on HomeScreen)
+// Suite 1: Pre-seeded member (contacts visible on HomeScreen)
 // ---------------------------------------------------------------------------
 
 test.describe('Elderly user call flow (emulators)', () => {
@@ -203,7 +203,7 @@ test.describe('Elderly user call flow (emulators)', () => {
     );
   });
 
-  test('elderly user sees contacts on home screen after auth', async ({ page }) => {
+  test('member sees contacts on home screen after auth', async ({ page }) => {
     // Navigate to /elderly — AuthGuard triggers signInAnonymously, finds seeded role
     await page.goto('/elderly');
 
@@ -211,7 +211,7 @@ test.describe('Elderly user call flow (emulators)', () => {
     expect(page.url()).toContain('/elderly');
   });
 
-  test('elderly user can tap a contact and reach the call screen', async ({ page }) => {
+  test('member can tap a contact and reach the call screen', async ({ page }) => {
     await page.goto('/elderly');
 
     await expect(page.getByText('Contact 1')).toBeVisible({ timeout: 15000 });
@@ -220,7 +220,7 @@ test.describe('Elderly user call flow (emulators)', () => {
     await expect(page.getByRole('button', { name: /end call/i })).toBeVisible({ timeout: 15000 });
   });
 
-  test('elderly user can end a call and return to home screen', async ({ page }) => {
+  test('member can end a call and return to home screen', async ({ page }) => {
     await page.goto('/elderly');
 
     await expect(page.getByText('Contact 1')).toBeVisible({ timeout: 15000 });
@@ -269,11 +269,11 @@ test.describe('Role selection flow (emulators)', () => {
     // Navigate to /elderly — AuthGuard signs in (no user doc) → shows RoleSelector
     await page.goto('/elderly');
 
-    await expect(page.getByRole('button', { name: /elderly user/i })).toBeVisible({
+    await expect(page.getByRole('button', { name: /make calls/i })).toBeVisible({
       timeout: 10000,
     });
 
-    await page.getByRole('button', { name: /elderly user/i }).click();
+    await page.getByRole('button', { name: /make calls/i }).click();
 
     // setDoc writes role to Firestore. AuthGuard doesn't re-run on same-route navigate,
     // so we reload — on reload, auth state is restored from IndexedDB, AuthGuard reads
@@ -286,7 +286,7 @@ test.describe('Role selection flow (emulators)', () => {
     await page.reload();
 
     await expect(page).toHaveURL(/\/elderly/, { timeout: 15000 });
-    await expect(page.getByRole('button', { name: /elderly user/i })).not.toBeVisible({
+    await expect(page.getByRole('button', { name: /make calls/i })).not.toBeVisible({
       timeout: 10000,
     });
   });

@@ -2,7 +2,7 @@
 @import './styles/tokens.css';
 @plugin "daisyui";
 
-/* Custom "elderly" theme — WCAG AAA high-contrast, warm palette optimized for aging vision */
+/* Custom "elderly" theme — WCAG AAA high-contrast, warm palette optimized for accessibility */
 @plugin "daisyui/theme" {
   name: 'elderly';
   default: true;
@@ -23,7 +23,7 @@
   --color-secondary: oklch(0.42 0.14 310);
   --color-secondary-content: oklch(0.98 0.01 310);
 
-  /* Warm amber accent — best perceived color family for elderly */
+  /* Warm amber accent — high-visibility color family for accessibility */
   --color-accent: oklch(0.52 0.14 55);
   --color-accent-content: oklch(0.98 0.01 55);
 

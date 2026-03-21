@@ -94,7 +94,7 @@ test.describe('Incoming Call Flow', () => {
   test.describe.configure({ mode: 'serial' });
   test.beforeAll(checkEmulators);
 
-  test('elderly user sees ringing screen when a call is initiated via Firestore', async ({
+  test('member sees ringing screen when a call is initiated via Firestore', async ({
     browser,
   }) => {
     await clearEmulators();
@@ -103,7 +103,7 @@ test.describe('Incoming Call Flow', () => {
     const user = await createEmulatorUser();
     const elderlyUid = user.localId;
 
-    // 2. Seed Firestore with elderly role
+    // 2. Seed Firestore with member role
     await seedUserAsElderly(elderlyUid);
 
     // 3. Set up browser context with permissions
@@ -121,7 +121,7 @@ test.describe('Incoming Call Flow', () => {
       }),
     );
 
-    // 5. Navigate to elderly home (triggers AuthGuard → signInAnonymously)
+    // 5. Navigate to member home (triggers AuthGuard → signInAnonymously)
     await elderlyPage.goto('/elderly');
     await elderlyPage.waitForURL('**/elderly', { timeout: 10_000 });
 

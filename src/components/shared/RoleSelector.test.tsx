@@ -55,15 +55,15 @@ describe('RoleSelector', () => {
   it('renders two role buttons', async () => {
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
-    expect(screen.getByRole('button', { name: /elderly user/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /I want to make calls/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /I want to manage calls/i })).toBeInTheDocument();
   });
 
   it('buttons are at least 56px (touch-target-min class)', async () => {
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
-    const elderlyBtn = screen.getByRole('button', { name: /elderly user/i });
-    const caregiverBtn = screen.getByRole('button', { name: /family caregiver/i });
+    const elderlyBtn = screen.getByRole('button', { name: /I want to make calls/i });
+    const caregiverBtn = screen.getByRole('button', { name: /I want to manage calls/i });
     expect(elderlyBtn.className).toContain('touch-target-min');
     expect(caregiverBtn.className).toContain('touch-target-min');
   });
@@ -72,7 +72,7 @@ describe('RoleSelector', () => {
     const { setDoc } = await import('firebase/firestore');
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
-    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+    fireEvent.click(screen.getByRole('button', { name: /I want to make calls/i }));
     await vi.waitFor(() => {
       expect(setDoc).toHaveBeenCalledWith(
         'doc-ref',
@@ -86,7 +86,7 @@ describe('RoleSelector', () => {
     const { httpsCallable } = await import('firebase/functions');
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
-    fireEvent.click(screen.getByRole('button', { name: /family caregiver/i }));
+    fireEvent.click(screen.getByRole('button', { name: /I want to manage calls/i }));
     await vi.waitFor(() => {
       expect(httpsCallable).toHaveBeenCalledWith(expect.anything(), 'assignCaregiverRole');
       expect(mockCallable).toHaveBeenCalled();
@@ -98,7 +98,7 @@ describe('RoleSelector', () => {
     const { setDoc } = await import('firebase/firestore');
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
-    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+    fireEvent.click(screen.getByRole('button', { name: /I want to make calls/i }));
     await vi.waitFor(() => {
       expect(ensureAuthenticated).toHaveBeenCalled();
       expect(setDoc).toHaveBeenCalled();
@@ -112,7 +112,7 @@ describe('RoleSelector', () => {
 
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
-    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+    fireEvent.click(screen.getByRole('button', { name: /I want to make calls/i }));
 
     await vi.waitFor(() => {
       const alert = screen.getByRole('alert');
@@ -130,7 +130,7 @@ describe('RoleSelector', () => {
 
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
-    fireEvent.click(screen.getByRole('button', { name: /elderly user/i }));
+    fireEvent.click(screen.getByRole('button', { name: /I want to make calls/i }));
 
     await vi.waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
@@ -144,12 +144,12 @@ describe('RoleSelector', () => {
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
 
-    expect(screen.getByRole('button', { name: /elderly user/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /I want to make calls/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /I want to manage calls/i })).toBeDisabled();
     expect(screen.getByText(/not accepting new users/i)).toBeInTheDocument();
   });
 
-  it('disables caregiver button when PIN status is loading', async () => {
+  it('disables admin button when PIN status is loading', async () => {
     const { useCaregiverPin } = await import('@/hooks/useCaregiverPin');
     vi.mocked(useCaregiverPin).mockReturnValue({
       pinRequired: false,
@@ -163,10 +163,10 @@ describe('RoleSelector', () => {
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
 
-    // Caregiver button disabled due to PIN loading
-    expect(screen.getByRole('button', { name: /family caregiver/i })).toBeDisabled();
-    // Elderly button also disabled via registration loading check — but that's from the
-    // top-level mock. The key assertion is the caregiver button is disabled.
+    // Admin button disabled due to PIN loading
+    expect(screen.getByRole('button', { name: /I want to manage calls/i })).toBeDisabled();
+    // Member button also disabled via registration loading check — but that's from the
+    // top-level mock. The key assertion is the admin button is disabled.
   });
 
   it('passes vitest-axe', async () => {

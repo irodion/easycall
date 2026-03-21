@@ -25,7 +25,7 @@ export function RoleSelector() {
       return;
     }
 
-    // If selecting caregiver and PIN is required but not verified, show prompt
+    // If selecting admin role and PIN is required but not verified, show prompt
     if (role === 'caregiver' && caregiverPin.pinRequired && !caregiverPin.verified) {
       setShowPinPrompt(true);
       return;

@@ -105,7 +105,7 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
     return <Navigate to={redirectPath} replace />;
   }
 
-  // correct-role: for caregiver routes, enforce PIN if configured
+  // correct-role: for admin routes, enforce PIN if configured
   if (requiredRole === 'caregiver') {
     return <CaregiverPinGate>{children ? <>{children}</> : <Outlet />}</CaregiverPinGate>;
   }

@@ -110,7 +110,7 @@ async function checkEmulators(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Suite 1: Account banner and linking flow
+// Suite 1: Account banner and linking flow (admin)
 // ---------------------------------------------------------------------------
 
 test.describe('Caregiver account linking (emulators)', () => {
@@ -150,7 +150,7 @@ test.describe('Caregiver account linking (emulators)', () => {
 
     // Banner stays dismissed after reload
     await page.reload();
-    await expect(page.getByText(/caregiver dashboard/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/admin dashboard/i)).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(/secure your account/i)).not.toBeVisible();
   });
 
@@ -308,7 +308,7 @@ test.describe('Forgot password page (emulators)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Suite 4: Returning caregiver sign-in flow (full round-trip)
+// Suite 4: Returning admin sign-in flow (full round-trip)
 // ---------------------------------------------------------------------------
 
 test.describe('Returning caregiver sign-in (emulators)', () => {
@@ -318,10 +318,10 @@ test.describe('Returning caregiver sign-in (emulators)', () => {
   test('caregiver can sign in with email/password and access dashboard', async ({ page }) => {
     await clearEmulators();
 
-    // 1. Create an email/password user in auth emulator (simulates a previously linked account)
+    // 1. Create an email/password user in auth emulator (simulates a previously linked admin account)
     const emailUser = await createEmailUser('caregiver@example.com', 'mypassword123');
 
-    // 2. Seed Firestore with caregiver role for that UID
+    // 2. Seed Firestore with admin role for that UID
     await seedUserAsCaregiver(emailUser.localId);
 
     // 3. Navigate to login page
@@ -333,8 +333,8 @@ test.describe('Returning caregiver sign-in (emulators)', () => {
     await page.getByLabel(/password/i).fill('mypassword123');
     await page.getByRole('button', { name: /sign in/i }).click();
 
-    // 5. Should navigate to caregiver dashboard
+    // 5. Should navigate to admin dashboard
     await expect(page).toHaveURL(/\/caregiver/, { timeout: 15000 });
-    await expect(page.getByText(/caregiver dashboard/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/admin dashboard/i)).toBeVisible({ timeout: 10000 });
   });
 });

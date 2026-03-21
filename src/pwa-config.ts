@@ -3,7 +3,7 @@ import type { ManifestOptions } from 'vite-plugin-pwa';
 export const pwaManifest: Partial<ManifestOptions> = {
   name: 'EasyCall — Video Calling for Everyone',
   short_name: 'EasyCall',
-  description: 'Simple video calling for elderly users',
+  description: 'Simple video calling for everyone',
   start_url: '/',
   display: 'standalone',
   orientation: 'portrait',
