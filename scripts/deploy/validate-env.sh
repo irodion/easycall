@@ -66,7 +66,7 @@ if [ -f "$ENV_FILE" ]; then
   # Validate required VITE_ vars
   for var in VITE_FIREBASE_API_KEY VITE_FIREBASE_AUTH_DOMAIN VITE_FIREBASE_PROJECT_ID \
              VITE_FIREBASE_STORAGE_BUCKET VITE_FIREBASE_MESSAGING_SENDER_ID VITE_FIREBASE_APP_ID \
-             VITE_FIREBASE_VAPID_KEY; do
+             VITE_FIREBASE_VAPID_KEY VITE_RECAPTCHA_V3_SITE_KEY; do
     val=$(grep "^${var}=" "$ENV_FILE" 2>/dev/null | cut -d= -f2- || true)
     if [ -n "$val" ]; then
       ok "$var is set"

@@ -13,8 +13,14 @@ ok() { echo -e "  ${GREEN}✓${NC} $1"; }
 fail() { echo -e "  ${RED}✗${NC} $1"; ERRORS=$((ERRORS + 1)); }
 
 # Get project config
-FIREBASE_PROJECT=$(cat .firebaserc 2>/dev/null | grep -o '"default": "[^"]*"' | cut -d'"' -f4)
+FIREBASE_PROJECT=$(cat .firebaserc 2>/dev/null | grep -o '"default": "[^"]*"' | cut -d'"' -f4 || true)
 SITE_URL="${SITE_URL:-}"
+
+if [ -z "$FIREBASE_PROJECT" ]; then
+  fail ".firebaserc missing or malformed — cannot determine Firebase project"
+  echo -e "\n${RED}Health check aborted.${NC}"
+  exit 1
+fi
 
 header "Firebase Services Health Check"
 

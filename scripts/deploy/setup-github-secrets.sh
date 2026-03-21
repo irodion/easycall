@@ -8,6 +8,7 @@ NC='\033[0m'
 
 ok() { echo -e "  ${GREEN}✓${NC} $1"; }
 fail() { echo -e "  ${RED}✗${NC} $1"; }
+warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 
 if ! command -v gh &>/dev/null; then
   echo -e "${RED}gh CLI not found. Install: brew install gh${NC}"

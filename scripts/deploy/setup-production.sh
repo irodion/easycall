@@ -84,10 +84,10 @@ echo ""
 if [ -f "functions/.env" ] && grep -q "JAAS_APP_ID=" functions/.env; then
   ok "functions/.env already exists with JAAS config"
 else
-  read -p "  JAAS_APP_ID: " JAAS_APP_ID
-  read -p "  JAAS_KEY_ID: " JAAS_KEY_ID
+  read -r -p "  JAAS_APP_ID: " JAAS_APP_ID
+  read -r -p "  JAAS_KEY_ID: " JAAS_KEY_ID
   echo "  JAAS_PRIVATE_KEY: paste the private key, replacing newlines with \\n"
-  read -p "  > " JAAS_PRIVATE_KEY
+  read -r -p "  > " JAAS_PRIVATE_KEY
   printf 'JAAS_APP_ID=%s\nJAAS_KEY_ID=%s\nJAAS_PRIVATE_KEY=%s\n' \
     "$JAAS_APP_ID" "$JAAS_KEY_ID" "$JAAS_PRIVATE_KEY" > functions/.env
   ok "functions/.env created"
