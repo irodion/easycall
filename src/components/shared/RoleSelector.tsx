@@ -20,7 +20,7 @@ export function RoleSelector() {
   const [showPinPrompt, setShowPinPrompt] = useState(false);
 
   const handleSelectRole = async (role: 'elderly' | 'caregiver', pin?: string) => {
-    if (!registrationOpen) {
+    if (role === 'caregiver' && !registrationOpen) {
       setError(t('registrationLock.closed'));
       return;
     }
@@ -97,7 +97,7 @@ export function RoleSelector() {
           onClick={() => {
             void handleSelectRole('elderly');
           }}
-          disabled={isSaving || registrationLoading || !registrationOpen}
+          disabled={isSaving}
           aria-label={t('roleSelector.elderlyUser')}
         >
           {t('roleSelector.elderlyUser')}

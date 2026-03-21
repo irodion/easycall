@@ -137,14 +137,14 @@ describe('RoleSelector', () => {
     });
   });
 
-  it('disables buttons when registration is closed', async () => {
+  it('disables only admin button when registration is closed', async () => {
     const { useRegistrationLock } = await import('@/hooks/useRegistrationLock');
     vi.mocked(useRegistrationLock).mockReturnValue({ isOpen: false, loading: false });
 
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
 
-    expect(screen.getByRole('button', { name: /I want to make calls/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /I want to make calls/i })).toBeEnabled();
     expect(screen.getByRole('button', { name: /I want to manage calls/i })).toBeDisabled();
     expect(screen.getByText(/not accepting new users/i)).toBeInTheDocument();
   });

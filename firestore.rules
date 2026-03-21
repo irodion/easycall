@@ -46,12 +46,9 @@ service cloud.firestore {
       allow update: if request.auth.uid == userId
         && (!('role' in resource.data) || request.resource.data.role == resource.data.role);
       allow delete: if request.auth.uid == userId;
-      // New user creation requires registration to be open and role must be 'elderly'.
-      // Caregiver role assignment goes through the assignCaregiverRole Cloud Function.
+      // New user creation: role must be 'elderly' (caregiver goes through Cloud Function).
       allow create: if request.auth.uid == userId
-        && request.resource.data.role == 'elderly'
-        && (!exists(/databases/$(database)/documents/config/registration)
-            || get(/databases/$(database)/documents/config/registration).data.open == true);
+        && request.resource.data.role == 'elderly';
 
       // Contacts: owner or linked caregiver
       match /contacts/{contactId} {
