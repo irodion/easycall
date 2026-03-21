@@ -15,10 +15,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // PIN status flag: readable (only { pinSet: boolean }, no secrets).
+    // PIN status flag: readable by anyone (checked on pre-auth role selector).
+    // Only contains { pinSet: boolean } — no secrets.
     // Written by Cloud Functions only.
     match /config/caregiverPinStatus {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow write: if false;
     }
 
