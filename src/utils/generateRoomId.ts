@@ -10,3 +10,12 @@ export function generateRoomId(name: string): string {
   const suffix = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
   return `easycall-${safeLabel}-${suffix}`;
 }
+
+// Deterministic room ID for a pair of linked users. Sorting UIDs ensures
+// the same pair always produces the same room regardless of who was added first,
+// so Alice→Bob and Bob→Alice share a single Jitsi room.
+export function generateLinkedRoomId(uid1: string, uid2: string): string {
+  const [a, b] = [uid1, uid2].sort();
+  const suffix = `${a!.slice(0, 14)}${b!.slice(0, 14)}`.toLowerCase();
+  return `easycall-link-${suffix}`;
+}

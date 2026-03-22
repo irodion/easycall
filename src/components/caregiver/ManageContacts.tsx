@@ -4,7 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import { BackToDashboard } from '@/components/shared/BackToDashboard';
 import { useContactStore } from '@/stores/contactStore';
-import { generateRoomId } from '@/utils/generateRoomId';
+import { generateRoomId, generateLinkedRoomId } from '@/utils/generateRoomId';
 import { compressImage, blobToDataUrl } from '@/utils/compressImage';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
@@ -105,7 +105,7 @@ export function ManageContacts({ elderlyUserId, caregiverUserId }: ManageContact
     await addContact(elderlyUserId, {
       name: linkedDisplayName,
       photoURL: null,
-      jitsiRoomId: generateRoomId(linkedDisplayName),
+      jitsiRoomId: generateLinkedRoomId(elderlyUserId, userId),
       contactUserId: userId,
       displayOrder: maxOrder + 1,
     });

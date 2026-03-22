@@ -140,13 +140,17 @@ async function seedCaregiverLink(elderlyUid: string, caregiverUid: string): Prom
     throw new Error(`Failed to seed caregiver link: ${caregiverDocRes.status}`);
 }
 
-async function getContactsForUser(uid: string): Promise<unknown[]> {
+interface FirestoreDoc {
+  fields?: Record<string, { stringValue?: string; integerValue?: string }>;
+}
+
+async function getContactsForUser(uid: string): Promise<FirestoreDoc[]> {
   const res = await fetch(
     `${FIRESTORE_EMULATOR}/v1/projects/${PROJECT_ID}/databases/(default)/documents/users/${uid}/contacts`,
     { headers: { ...EMULATOR_AUTH_HEADER } },
   );
   if (!res.ok) return [];
-  const data = (await res.json()) as { documents?: unknown[] };
+  const data = (await res.json()) as { documents?: FirestoreDoc[] };
   return data.documents ?? [];
 }
 
@@ -419,7 +423,27 @@ test.describe('Admin linked contacts flow (emulators)', () => {
       timeout: 10_000,
     });
 
-    // Step 3: Verify Alice sees Bob
+    // Step 3: Verify both contacts share the same Jitsi room ID
+    // This is critical — without a shared room, calls between them would fail
+    await expect
+      .poll(
+        async () => {
+          const aliceContacts = await getContactsForUser(elderlyA.localId);
+          const bobContacts = await getContactsForUser(elderlyB.localId);
+          return { alice: aliceContacts.length, bob: bobContacts.length };
+        },
+        { timeout: 10_000 },
+      )
+      .toEqual({ alice: 1, bob: 1 });
+
+    const aliceContacts = await getContactsForUser(elderlyA.localId);
+    const bobContacts = await getContactsForUser(elderlyB.localId);
+    const aliceRoomId = aliceContacts[0]?.fields?.['jitsiRoomId']?.stringValue;
+    const bobRoomId = bobContacts[0]?.fields?.['jitsiRoomId']?.stringValue;
+    expect(aliceRoomId).toBeTruthy();
+    expect(aliceRoomId).toBe(bobRoomId);
+
+    // Step 4: Verify Alice sees Bob
     const aliceCtx = await browser.newContext({
       permissions: ['camera', 'microphone'],
     });
