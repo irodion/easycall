@@ -44,10 +44,6 @@ vi.mock('@/hooks/useContactsPresence', () => ({
   useContactsPresence: () => mockPresenceMap,
 }));
 
-vi.mock('@/hooks/useLinkedUserNames', () => ({
-  useLinkedUserNames: () => new Map(),
-}));
-
 describe('HomeScreen', () => {
   beforeEach(() => {
     mockContacts.length = 0;
