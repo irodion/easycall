@@ -104,7 +104,8 @@
     "removeFailed": "Error al eliminar contacto: {{error}}",
     "saveNewContact": "Guardar nuevo contacto",
     "cancelAdd": "Cancelar agregar",
-    "choosePhoto": "Elegir foto"
+    "choosePhoto": "Elegir foto",
+    "addFromMembers": "Agregar desde Miembros"
   },
   "elderlySettings": {
     "fontSize": "Tamaño de Fuente",
@@ -314,5 +315,24 @@
       "step2": "Haz clic en el menú (tres puntos) en la barra de direcciones",
       "step3": "Selecciona \"Desinstalar EasyCall\" y confirma"
     }
+  },
+  "setName": {
+    "title": "¿Cómo te llamas?",
+    "description": "Ingresa tu nombre para que otros puedan reconocerte.",
+    "namePlaceholder": "Ingresa tu nombre",
+    "nameLabel": "Tu nombre",
+    "save": "Continuar",
+    "saving": "Guardando...",
+    "error": "Error al guardar el nombre. Inténtalo de nuevo.",
+    "nameRequired": "Por favor ingresa tu nombre"
+  },
+  "linkedUserPicker": {
+    "title": "Agregar desde Miembros",
+    "noAvailableUsers": "Todos los miembros vinculados ya están agregados como contactos.",
+    "addUser": "Agregar a {{name}}",
+    "adding": "Agregando...",
+    "addFailed": "Error al agregar contacto: {{error}}",
+    "adminFallback": "Administrador",
+    "memberFallback": "Miembro"
   }
 }

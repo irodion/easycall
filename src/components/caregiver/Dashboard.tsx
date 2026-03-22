@@ -8,6 +8,7 @@ import { EasyCallText } from '@/components/shared/EasyCallText';
 import { StatusIndicator } from '@/components/shared/StatusIndicator';
 import { presenceTextStyles, presenceI18nKeys } from '@/components/shared/presenceStyles';
 import { useContactsPresence } from '@/hooks/useContactsPresence';
+import { chunkArray } from '@/utils/chunkArray';
 import { AccountBanner } from './AccountBanner';
 import type { EasyCallUser } from '@/types/user';
 
@@ -16,14 +17,6 @@ interface DashboardProps {
 }
 
 type LinkedUser = Pick<EasyCallUser, 'uid' | 'displayName' | 'lastSeen'>;
-
-function chunkArray<T>(arr: T[], size: number): T[][] {
-  const chunks: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) {
-    chunks.push(arr.slice(i, i + size));
-  }
-  return chunks;
-}
 
 export function Dashboard({ userId }: DashboardProps) {
   const { t } = useTranslation();

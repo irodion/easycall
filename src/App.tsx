@@ -29,10 +29,10 @@ import type { UserSettings } from '@/types/user';
 import { SkipToContent } from '@/components/shared/SkipToContent';
 import { loadLanguage, RTL_LANGUAGES } from '@/i18n';
 
-function ManageContactsPage() {
+function ManageContactsPage({ userId }: { userId: string }) {
   const { elderlyUserId } = useParams<{ elderlyUserId: string }>();
   if (!elderlyUserId) return null;
-  return <ManageContacts elderlyUserId={elderlyUserId} />;
+  return <ManageContacts elderlyUserId={elderlyUserId} caregiverUserId={userId} />;
 }
 
 function CaregiverSettingsPage() {
@@ -138,7 +138,10 @@ function AuthenticatedApp() {
             </Route>
             <Route element={<AuthGuard requiredRole="caregiver" />}>
               <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />
-              <Route path="/caregiver/manage/:elderlyUserId" element={<ManageContactsPage />} />
+              <Route
+                path="/caregiver/manage/:elderlyUserId"
+                element={userId ? <ManageContactsPage userId={userId} /> : null}
+              />
               <Route path="/caregiver/pair" element={<PairElderlyUserPage />} />
               <Route
                 path="/caregiver/settings/:elderlyUserId"

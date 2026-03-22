@@ -10,6 +10,7 @@ import { StatusIndicator } from '@/components/shared/StatusIndicator';
 import { presenceI18nKeys } from '@/components/shared/presenceStyles';
 import { Icon } from '@/components/shared/Icon';
 import { useContactsPresence } from '@/hooks/useContactsPresence';
+import { useLinkedUserNames } from '@/hooks/useLinkedUserNames';
 
 interface HomeScreenProps {
   userId: string;
@@ -23,6 +24,7 @@ export function HomeScreen({ userId }: HomeScreenProps) {
   const { activeCall, dismiss } = useActiveCall(userId);
   const contactUserIds = useMemo(() => contacts.map((c) => c.contactUserId), [contacts]);
   const presenceMap = useContactsPresence(contactUserIds);
+  const linkedUserNames = useLinkedUserNames(contactUserIds);
 
   const [failedPhotoUrls, setFailedPhotoUrls] = useState<Set<string>>(new Set());
 
@@ -57,50 +59,56 @@ export function HomeScreen({ userId }: HomeScreenProps) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
-          {contacts.map((contact) => (
-            <EasyCallCard
-              key={contact.id}
-              onClick={() => void navigate(`/call/${contact.id}`)}
-              aria-label={t('home.callContact', { name: contact.name })}
-              className="flex flex-col items-center gap-2 p-4"
-            >
-              <div className="relative">
-                {contact.photoURL && !failedPhotoUrls.has(contact.photoURL) ? (
-                  <img
-                    src={contact.photoURL}
-                    alt=""
-                    className="w-28 h-28 rounded-full object-cover ring-2 ring-primary/20"
-                    onError={() =>
-                      setFailedPhotoUrls((prev) => new Set(prev).add(contact.photoURL!))
-                    }
-                  />
-                ) : (
-                  <div className="w-28 h-28 rounded-full bg-primary flex items-center justify-center text-3xl font-bold text-primary-content ring-2 ring-primary/20">
-                    {contact.name[0] ?? '?'}
-                  </div>
-                )}
-                {contact.contactUserId && presenceMap.has(contact.contactUserId) && (
-                  <StatusIndicator
-                    state={presenceMap.get(contact.contactUserId)!.state}
-                    size="md"
-                    className="absolute bottom-0 right-0"
-                  />
-                )}
-              </div>
-              <EasyCallText as="span" variant="button" className="font-bold text-center">
-                {contact.name}
-              </EasyCallText>
-              <span className="flex items-center gap-1 text-[length:var(--text-body)] text-primary/70">
-                <Icon name="phone" size={16} aria-hidden />
-                {t('home.tapToCall')}
-              </span>
-              {contact.contactUserId && presenceMap.has(contact.contactUserId) && (
-                <span className="text-[length:var(--text-body)] text-base-content/80">
-                  {t(presenceI18nKeys[presenceMap.get(contact.contactUserId)!.state])}
+          {contacts.map((contact) => {
+            const resolvedName = contact.contactUserId
+              ? linkedUserNames.get(contact.contactUserId)
+              : undefined;
+            const displayName = resolvedName || contact.name;
+            return (
+              <EasyCallCard
+                key={contact.id}
+                onClick={() => void navigate(`/call/${contact.id}`)}
+                aria-label={t('home.callContact', { name: displayName })}
+                className="flex flex-col items-center gap-2 p-4"
+              >
+                <div className="relative">
+                  {contact.photoURL && !failedPhotoUrls.has(contact.photoURL) ? (
+                    <img
+                      src={contact.photoURL}
+                      alt=""
+                      className="w-28 h-28 rounded-full object-cover ring-2 ring-primary/20"
+                      onError={() =>
+                        setFailedPhotoUrls((prev) => new Set(prev).add(contact.photoURL!))
+                      }
+                    />
+                  ) : (
+                    <div className="w-28 h-28 rounded-full bg-primary flex items-center justify-center text-3xl font-bold text-primary-content ring-2 ring-primary/20">
+                      {displayName[0] ?? '?'}
+                    </div>
+                  )}
+                  {contact.contactUserId && presenceMap.has(contact.contactUserId) && (
+                    <StatusIndicator
+                      state={presenceMap.get(contact.contactUserId)!.state}
+                      size="md"
+                      className="absolute bottom-0 right-0"
+                    />
+                  )}
+                </div>
+                <EasyCallText as="span" variant="button" className="font-bold text-center">
+                  {displayName}
+                </EasyCallText>
+                <span className="flex items-center gap-1 text-[length:var(--text-body)] text-primary/70">
+                  <Icon name="phone" size={16} aria-hidden />
+                  {t('home.tapToCall')}
                 </span>
-              )}
-            </EasyCallCard>
-          ))}
+                {contact.contactUserId && presenceMap.has(contact.contactUserId) && (
+                  <span className="text-[length:var(--text-body)] text-base-content/80">
+                    {t(presenceI18nKeys[presenceMap.get(contact.contactUserId)!.state])}
+                  </span>
+                )}
+              </EasyCallCard>
+            );
+          })}
         </div>
       )}
 
