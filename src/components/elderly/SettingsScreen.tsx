@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/services/firebase';
+import { updateProfile } from 'firebase/auth';
+import { auth, db } from '@/services/firebase';
 import { EasyCallText } from '@/components/shared/EasyCallText';
+import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { Icon } from '@/components/shared/Icon';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import { PairingCodeDisplay } from '@/components/shared/PairingCodeDisplay';
@@ -16,9 +18,10 @@ import type { UserSettings } from '@/types/user';
 interface SettingsScreenProps {
   settings: UserSettings;
   userId: string;
+  displayName: string;
 }
 
-export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
+export function SettingsScreen({ settings, userId, displayName }: SettingsScreenProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const fontLabelId = 'font-size-label';
@@ -26,6 +29,27 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
   const { canInstall, install } = useInstallPrompt();
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(displayName);
+  const [savingName, setSavingName] = useState(false);
+
+  const handleSaveName = async () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed || savingName) return;
+    setSaveError(null);
+    setSavingName(true);
+    try {
+      await updateDoc(doc(db, 'users', userId), { displayName: trimmed });
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { displayName: trimmed });
+      }
+      setEditingName(false);
+    } catch {
+      setSaveError(t('setName.error'));
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   const handleReset = async () => {
     setResetting(true);
@@ -72,6 +96,65 @@ export function SettingsScreen({ settings, userId }: SettingsScreenProps) {
           </EasyCallText>
         </div>
       )}
+
+      <section data-testid="name-section">
+        <EasyCallText as="h2" variant="button" className="font-bold mb-2">
+          {t('settings.yourName')}
+        </EasyCallText>
+        {editingName ? (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="edit-name-input" className="sr-only">
+              {t('setName.nameLabel')}
+            </label>
+            <input
+              id="edit-name-input"
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              placeholder={t('setName.namePlaceholder')}
+              className="input input-bordered w-full text-[length:var(--text-body)] min-h-14"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <EasyCallButton
+                size="large"
+                disabled={!nameInput.trim() || savingName}
+                onClick={() => void handleSaveName()}
+                className="flex-1"
+              >
+                {savingName ? t('setName.saving') : t('setName.save')}
+              </EasyCallButton>
+              <EasyCallButton
+                variant="secondary"
+                size="large"
+                disabled={savingName}
+                onClick={() => {
+                  setEditingName(false);
+                  setNameInput(displayName);
+                }}
+                className="flex-1"
+              >
+                {t('common.cancel')}
+              </EasyCallButton>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setNameInput(displayName);
+              setEditingName(true);
+            }}
+            className="flex items-center gap-2 min-h-14 min-w-14 px-4 py-2 bg-base-200 rounded-xl w-full text-left"
+            aria-label={t('settings.changeName')}
+          >
+            <EasyCallText as="span" variant="body" className="flex-1">
+              {displayName || t('settings.noName')}
+            </EasyCallText>
+            <Icon name="settings" size={18} />
+          </button>
+        )}
+      </section>
 
       <section>
         <EasyCallText as="h2" variant="button" className="font-bold mb-3" id={fontLabelId}>

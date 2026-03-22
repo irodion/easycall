@@ -13,9 +13,14 @@ vi.mock('firebase/firestore', () => ({
   getFirestore: vi.fn(),
 }));
 
+vi.mock('firebase/auth', () => ({
+  updateProfile: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('@/services/firebase', () => ({
   db: {},
   app: {},
+  auth: { currentUser: { uid: 'user-1' } },
 }));
 
 vi.mock('@/hooks/usePairingCode', () => ({
@@ -46,7 +51,9 @@ describe('SettingsScreen', () => {
   });
 
   it('renders font size radio group with 2 options', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     expect(screen.getAllByRole('radiogroup').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('radio', { name: 'Large' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'Extra Large' })).toBeInTheDocument();
@@ -54,7 +61,11 @@ describe('SettingsScreen', () => {
 
   it('reflects current fontSize in radio selection', () => {
     renderWithProviders(
-      <SettingsScreen settings={{ ...defaultSettings, fontSize: 'x-large' }} userId="user-1" />,
+      <SettingsScreen
+        settings={{ ...defaultSettings, fontSize: 'x-large' }}
+        userId="user-1"
+        displayName="Test User"
+      />,
     );
     const xlarge = screen.getByRole('radio', { name: 'Extra Large' }) as HTMLInputElement;
     expect(xlarge.checked).toBe(true);
@@ -62,7 +73,9 @@ describe('SettingsScreen', () => {
 
   it('writes fontSize change to Firestore via updateDoc', async () => {
     const { updateDoc } = await import('firebase/firestore');
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     fireEvent.click(screen.getByRole('radio', { name: 'Extra Large' }));
     expect(updateDoc).toHaveBeenCalledWith('doc-ref', {
       'settings.fontSize': 'x-large',
@@ -72,7 +85,9 @@ describe('SettingsScreen', () => {
   it('writes language change to Firestore via updateDoc', async () => {
     const { updateDoc } = await import('firebase/firestore');
     vi.mocked(updateDoc).mockClear();
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     fireEvent.click(screen.getByText('Español'));
     expect(updateDoc).toHaveBeenCalledWith('doc-ref', {
       'settings.language': 'es',
@@ -80,32 +95,42 @@ describe('SettingsScreen', () => {
   });
 
   it('renders pairing code section with PairingCodeDisplay', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     expect(screen.getByTestId('pairing-code-section')).toBeInTheDocument();
     // PairingCodeDisplay should render the code from the mock
     expect(screen.getByText('123456')).toBeInTheDocument();
   });
 
   it('Add Contact button navigates to /elderly/add-contact', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />, {
-      routerProps: { initialEntries: ['/elderly/settings'] },
-    });
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+      {
+        routerProps: { initialEntries: ['/elderly/settings'] },
+      },
+    );
     const link = screen.getByRole('link', { name: /add contact/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/elderly/add-contact');
   });
 
   it('Back button/link navigates to /elderly', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />, {
-      routerProps: { initialEntries: ['/elderly/settings'] },
-    });
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+      {
+        routerProps: { initialEntries: ['/elderly/settings'] },
+      },
+    );
     const link = screen.getByRole('link', { name: /back/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/elderly');
   });
 
   it('renders language radio group with 5 options', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     expect(screen.getByText('English')).toBeInTheDocument();
     expect(screen.getByText('Español')).toBeInTheDocument();
     expect(screen.getByText('עברית')).toBeInTheDocument();
@@ -115,26 +140,36 @@ describe('SettingsScreen', () => {
 
   it('reflects current language selection', () => {
     renderWithProviders(
-      <SettingsScreen settings={{ ...defaultSettings, language: 'he' }} userId="user-1" />,
+      <SettingsScreen
+        settings={{ ...defaultSettings, language: 'he' }}
+        userId="user-1"
+        displayName="Test User"
+      />,
     );
     const hebrewRadio = screen.getByRole('radio', { name: 'עברית' }) as HTMLInputElement;
     expect(hebrewRadio.checked).toBe(true);
   });
 
   it('renders Reset App button', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     expect(screen.getByRole('button', { name: /reset app/i })).toBeInTheDocument();
   });
 
   it('opens confirm dialog when Reset App clicked', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText(/sign you out and remove all app data/i)).toBeInTheDocument();
   });
 
   it('calls resetAppData when confirmed', async () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
     await waitFor(() => {
@@ -143,7 +178,9 @@ describe('SettingsScreen', () => {
   });
 
   it('closes dialog on cancel without calling resetAppData', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     fireEvent.click(screen.getByRole('button', { name: /reset app/i }));
     fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -151,13 +188,15 @@ describe('SettingsScreen', () => {
   });
 
   it('renders UninstallGuide toggle', () => {
-    renderWithProviders(<SettingsScreen settings={defaultSettings} userId="user-1" />);
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
     expect(screen.getByRole('button', { name: /how to remove/i })).toBeInTheDocument();
   });
 
   it('passes vitest-axe accessibility check', async () => {
     const { container } = renderWithProviders(
-      <SettingsScreen settings={defaultSettings} userId="user-1" />,
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
     );
     expect(await axe(container)).toHaveNoViolations();
   });

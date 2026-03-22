@@ -45,7 +45,10 @@
     "language": "שפה",
     "saveError": "שמירת ההגדרות נכשלה. אנא נסה שוב.",
     "reviewSetup": "סקירת מדריך ההגדרה",
-    "installApp": "התקן אפליקציה"
+    "installApp": "התקן אפליקציה",
+    "yourName": "השם שלך",
+    "changeName": "שנה את השם שלך",
+    "noName": "לא הוגדר"
   },
   "permissions": {
     "checking": "בודק הרשאות מצלמה ומיקרופון",

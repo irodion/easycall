@@ -45,7 +45,10 @@
     "language": "Sprache",
     "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "reviewSetup": "Einrichtung erneut ansehen",
-    "installApp": "App installieren"
+    "installApp": "App installieren",
+    "yourName": "Ihr Name",
+    "changeName": "Namen ändern",
+    "noName": "Nicht festgelegt"
   },
   "permissions": {
     "checking": "Kamera- und Mikrofonberechtigungen werden überprüft",

@@ -106,15 +106,11 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
   }
 
   if (authState === 'onboarding' && user) {
-    return (
-      <OnboardingFlow
-        user={user}
-        onComplete={() => {
-          setAuthState('correct-role');
-          setUser(null);
-        }}
-      />
-    );
+    // No onComplete callback — onSnapshot reactively handles the transition
+    // when OnboardingFlow writes onboardingComplete: true to Firestore.
+    // Previously, onComplete set correct-role directly, racing with onSnapshot
+    // and skipping the needs-name check for elderly users.
+    return <OnboardingFlow user={user} />;
   }
 
   if (authState === 'needs-name' && user) {
