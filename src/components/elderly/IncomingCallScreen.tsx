@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useCallStore } from '@/stores/callStore';
-import { declineCall } from '@/services/callSignaling';
+import { clearIncomingCallDoc, declineCall } from '@/services/callSignaling';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 export function IncomingCallScreen() {
@@ -46,7 +46,10 @@ export function IncomingCallScreen() {
       return;
     }
     const roomId = incomingCall.roomId; // capture before clearing
+    const elderlyUserId = incomingCall.elderlyUserId;
     clearIncomingCall();
+    // Delete the signaling doc so subsequent calls can create a fresh one
+    void clearIncomingCallDoc(elderlyUserId);
     void navigate(`/call-room/${roomId}`);
   };
 
@@ -59,6 +62,8 @@ export function IncomingCallScreen() {
       // nosemgrep: no-console-log-sensitive — logs static error message, no user data
       console.error('Failed to decline call');
     }
+    // Delete the doc so subsequent calls can create a fresh one (fire-and-forget)
+    void clearIncomingCallDoc(incomingCall.elderlyUserId);
     clearIncomingCall();
   };
 

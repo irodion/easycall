@@ -6,6 +6,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, auth, ensureAuthenticated } from '@/services/firebase';
 import { loadJitsiApi, getJaasAppId } from '@/services/jitsi';
 import { setActiveCall, clearActiveCall, writeCallHistoryEntry } from '@/services/callHistory';
+import { initiateCall, clearIncomingCallDoc } from '@/services/callSignaling';
 import { useContactStore } from '@/stores/contactStore';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
@@ -138,6 +139,19 @@ export function CallScreen({ setInCall }: CallScreenProps) {
             jitsiRoomId,
             startedAt: Timestamp.now(),
           });
+
+          // Signal the contact that they have an incoming call (outgoing calls only).
+          // When answering via /call-room/:roomId, contactId is absent — skip signaling
+          // to avoid ringing the original caller back.
+          if (contactId && contact!.contactUserId) {
+            void initiateCall({
+              elderlyUserId: contact!.contactUserId,
+              callerId: user.uid,
+              callerName: displayName,
+              callerPhotoURL: user.photoURL ?? undefined,
+              jitsiRoomId,
+            });
+          }
         }
 
         beforeUnloadRef.current = (e: BeforeUnloadEvent) => {
@@ -241,6 +255,8 @@ export function CallScreen({ setInCall }: CallScreenProps) {
     void writeHistory();
     const uid = auth.currentUser?.uid;
     if (uid) void clearActiveCall(uid);
+    // Clean up incoming call signaling for the contact (outgoing calls only)
+    if (contactId && contact?.contactUserId) void clearIncomingCallDoc(contact.contactUserId);
     apiRef.current?.executeCommand('hangup');
     void navigate('/elderly');
   };

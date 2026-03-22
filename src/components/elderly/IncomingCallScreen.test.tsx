@@ -12,8 +12,10 @@ vi.mock('react-router', async () => {
 });
 
 const mockDeclineCall = vi.fn().mockResolvedValue(undefined);
+const mockClearIncomingCallDoc = vi.fn().mockResolvedValue(undefined);
 vi.mock('@/services/callSignaling', () => ({
   declineCall: (...args: unknown[]) => mockDeclineCall(...args),
+  clearIncomingCallDoc: (...args: unknown[]) => mockClearIncomingCallDoc(...args),
 }));
 
 // Mock Audio constructor globally
@@ -94,10 +96,11 @@ describe('IncomingCallScreen', () => {
     await user.click(screen.getByRole('button', { name: /answer/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/call-room/room-1');
+    expect(mockClearIncomingCallDoc).toHaveBeenCalledWith('user-1');
     expect(useCallStore.getState().isRinging).toBe(false);
   });
 
-  it('Decline button calls declineCall and clears store', async () => {
+  it('Decline button calls declineCall, cleans up signaling doc, and clears store', async () => {
     const user = userEvent.setup();
     useCallStore.setState({
       isRinging: true,
@@ -113,6 +116,7 @@ describe('IncomingCallScreen', () => {
     await user.click(screen.getByRole('button', { name: /decline/i }));
 
     expect(mockDeclineCall).toHaveBeenCalledWith('user-1');
+    expect(mockClearIncomingCallDoc).toHaveBeenCalledWith('user-1');
     expect(useCallStore.getState().isRinging).toBe(false);
   });
 

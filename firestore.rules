@@ -77,7 +77,8 @@ service cloud.firestore {
           && request.resource.data.status == 'ringing';
         allow update: if (request.auth.uid == userId || request.auth.uid == resource.data.callerId)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
-        allow delete: if request.auth.uid == userId;
+        allow delete: if request.auth.uid == userId
+          || (resource != null && request.auth.uid == resource.data.callerId);
       }
 
       // Active call tracking (single doc "current", for auto-rejoin)
