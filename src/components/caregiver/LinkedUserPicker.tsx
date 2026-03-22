@@ -83,8 +83,15 @@ export function LinkedUserPicker({
           setAvailableUsers(users);
           setLoading(false);
         }
-      } catch {
-        if (!cancelled) setLoading(false);
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            t('linkedUserPicker.addFailed', {
+              error: err instanceof Error ? err.message : String(err),
+            }),
+          );
+          setLoading(false);
+        }
       }
     }
 

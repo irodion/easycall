@@ -54,5 +54,5 @@ export function useLinkedUserNames(userIds: string[]): Map<string, string> {
     };
   }, [stableKey]);
 
-  return names;
+  return stableKey ? names : EMPTY_MAP;
 }

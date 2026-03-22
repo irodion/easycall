@@ -317,20 +317,20 @@
     }
   },
   "setName": {
-    "title": "?מה שמך",
-    "description": ".הזן את שמך כדי שאחרים יוכלו לזהות אותך",
+    "title": "מה שמך?",
+    "description": "הזן את שמך כדי שאחרים יוכלו לזהות אותך.",
     "namePlaceholder": "הזן את שמך",
     "nameLabel": "השם שלך",
     "save": "המשך",
-    "saving": "...שומר",
-    "error": ".שגיאה בשמירת השם. נסה שוב",
+    "saving": "שומר...",
+    "error": "שגיאה בשמירת השם. נסה שוב.",
     "nameRequired": "אנא הזן את שמך"
   },
   "linkedUserPicker": {
     "title": "הוסף מחברים",
-    "noAvailableUsers": ".כל החברים המקושרים כבר נוספו כאנשי קשר",
+    "noAvailableUsers": "כל החברים המקושרים כבר נוספו כאנשי קשר.",
     "addUser": "הוסף את {{name}}",
-    "adding": "...מוסיף",
+    "adding": "מוסיף...",
     "addFailed": "שגיאה בהוספת איש קשר: {{error}}",
     "adminFallback": "מנהל",
     "memberFallback": "חבר"
