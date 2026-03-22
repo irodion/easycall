@@ -57,13 +57,13 @@ export function IncomingCallScreen() {
     if (!incomingCall) return;
     try {
       await declineCall(incomingCall.elderlyUserId);
-      // Delete the doc so subsequent calls can create a fresh one
-      await clearIncomingCallDoc(incomingCall.elderlyUserId);
     } catch {
       // Log but still clear — user intent is to dismiss
       // nosemgrep: no-console-log-sensitive — logs static error message, no user data
       console.error('Failed to decline call');
     }
+    // Delete the doc so subsequent calls can create a fresh one (fire-and-forget)
+    void clearIncomingCallDoc(incomingCall.elderlyUserId);
     clearIncomingCall();
   };
 
