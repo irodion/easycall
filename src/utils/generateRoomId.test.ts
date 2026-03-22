@@ -65,8 +65,17 @@ describe('generateLinkedRoomId', () => {
     expect(id1).toBe(id2);
   });
 
-  it('produces lowercase output', () => {
-    const id = generateLinkedRoomId('ABC123', 'DEF456');
-    expect(id).toBe(id.toLowerCase());
+  it('preserves case to avoid collisions', () => {
+    const id1 = generateLinkedRoomId('ABCabc', 'DEFdef');
+    const id2 = generateLinkedRoomId('abcABC', 'defDEF');
+    expect(id1).not.toBe(id2);
+  });
+
+  it('uses full UIDs without truncation', () => {
+    const uid1 = 'abcdefghijklmnopqrstuvwxyz12';
+    const uid2 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ34';
+    const id = generateLinkedRoomId(uid1, uid2);
+    expect(id).toContain(uid1);
+    expect(id).toContain(uid2);
   });
 });

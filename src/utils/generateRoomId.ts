@@ -16,6 +16,5 @@ export function generateRoomId(name: string): string {
 // so Alice→Bob and Bob→Alice share a single Jitsi room.
 export function generateLinkedRoomId(uid1: string, uid2: string): string {
   const [a, b] = [uid1, uid2].sort();
-  const suffix = `${a!.slice(0, 14)}${b!.slice(0, 14)}`.toLowerCase();
-  return `easycall-link-${suffix}`;
+  return `easycall-link-${a}-${b}`;
 }
