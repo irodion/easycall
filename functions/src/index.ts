@@ -452,16 +452,22 @@ export const unlinkElderlyUser = onCall({ enforceAppCheck: true }, async (reques
 
   const userPath = `users/${elderlyUserId}`;
 
-  // Fetch all subcollection docs in parallel
-  const [contactRefs, historyRefs, allCaregiverRefs] = await Promise.all([
+  // Fetch all subcollection docs and outstanding pairing codes in parallel
+  const [contactRefs, historyRefs, allCaregiverRefs, pairingCodeRefs] = await Promise.all([
     deleteSubcollectionDocs(db, userPath, 'contacts'),
     deleteSubcollectionDocs(db, userPath, 'callHistory'),
     // Fetch ALL caregiver links — a member may have multiple caregivers.
     // We must remove every link so no caregiver retains a dangling reference.
     deleteSubcollectionDocs(db, userPath, 'caregivers'),
+    // Invalidate outstanding pairing codes so they can't re-link the reset account.
+    db
+      .collection('pairingCodes')
+      .where('elderlyUserId', '==', elderlyUserId)
+      .get()
+      .then((snap) => snap.docs.map((d) => d.ref)),
   ]);
 
-  const allRefs = [...contactRefs, ...historyRefs];
+  const allRefs = [...contactRefs, ...historyRefs, ...pairingCodeRefs];
   // Each caregiver = 2 ops (delete + arrayRemove set). Fixed ops = 4 (activeCall,
   // incomingCall, reset user doc, audit log). Caregiver delete refs are separate.
   const criticalOps = allCaregiverRefs.length * 2 + 4;

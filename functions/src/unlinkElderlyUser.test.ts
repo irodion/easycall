@@ -36,6 +36,13 @@ vi.mock('firebase-admin/firestore', () => ({
       if (path === 'auditLog') {
         return { doc: vi.fn(() => ({ id: 'audit-doc-ref' })) };
       }
+      if (path === 'pairingCodes') {
+        return {
+          where: vi.fn(() => ({
+            get: vi.fn().mockResolvedValue({ docs: [] }),
+          })),
+        };
+      }
       if (path === 'users') {
         return {
           doc: vi.fn(() => ({
