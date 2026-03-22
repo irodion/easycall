@@ -45,7 +45,10 @@
     "language": "Idioma",
     "saveError": "Error al guardar los ajustes. Por favor inténtelo de nuevo.",
     "reviewSetup": "Revisar guía de configuración",
-    "installApp": "Instalar aplicación"
+    "installApp": "Instalar aplicación",
+    "yourName": "Tu nombre",
+    "changeName": "Cambiar tu nombre",
+    "noName": "No establecido"
   },
   "permissions": {
     "checking": "Verificando permisos de cámara y micrófono",

@@ -53,6 +53,7 @@ function PairElderlyUserPage() {
 function AuthenticatedApp() {
   const [userId, setUserId] = useState<string | null>(null);
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS);
+  const [displayName, setDisplayName] = useState('');
 
   useEffect(() => {
     return onAuthStateChanged(auth, (user) => {
@@ -65,6 +66,7 @@ function AuthenticatedApp() {
   if (prevUserId !== userId) {
     setPrevUserId(userId);
     setSettings(DEFAULT_USER_SETTINGS);
+    setDisplayName('');
   }
 
   // Sync settings from Firestore in real-time
@@ -83,6 +85,8 @@ function AuthenticatedApp() {
         if (JSON.stringify(prev) === JSON.stringify(incoming)) return prev;
         return incoming;
       });
+      const name = typeof data['displayName'] === 'string' ? data['displayName'] : '';
+      setDisplayName((prev) => (prev === name ? prev : name));
     });
     return () => {
       unsubscribe();
@@ -123,7 +127,11 @@ function AuthenticatedApp() {
               <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
               <Route
                 path="/elderly/settings"
-                element={userId ? <SettingsScreen userId={userId} settings={settings} /> : null}
+                element={
+                  userId ? (
+                    <SettingsScreen userId={userId} settings={settings} displayName={displayName} />
+                  ) : null
+                }
               />
               <Route
                 path="/elderly/add-contact"

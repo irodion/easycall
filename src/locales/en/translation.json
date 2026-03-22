@@ -45,7 +45,10 @@
     "language": "Language",
     "saveError": "Failed to save settings. Please try again.",
     "reviewSetup": "Review Setup Guide",
-    "installApp": "Install App"
+    "installApp": "Install App",
+    "yourName": "Your Name",
+    "changeName": "Change your name",
+    "noName": "Not set"
   },
   "permissions": {
     "checking": "Checking camera and microphone permissions",

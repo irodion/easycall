@@ -14,7 +14,7 @@ interface OnboardingUser {
 
 interface OnboardingFlowProps {
   user: OnboardingUser;
-  onComplete: () => void;
+  onComplete?: () => void;
 }
 
 const TOTAL_STEPS = 4;
@@ -38,7 +38,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
     try {
       const ref = doc(db, 'users', user.uid);
       await updateDoc(ref, { onboardingComplete: true });
-      onComplete();
+      onComplete?.();
     } catch {
       setError(t('onboarding.failedSetup'));
     } finally {
