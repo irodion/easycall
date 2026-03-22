@@ -332,7 +332,6 @@
     "addUser": "Добавить {{name}}",
     "adding": "Добавление...",
     "addFailed": "Не удалось добавить контакт: {{error}}",
-    "adminFallback": "Администратор",
     "memberFallback": "Участник"
   }
 }

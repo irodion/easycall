@@ -316,9 +316,8 @@ test.describe('Admin linked contacts flow (emulators)', () => {
     // Click "Add from Members"
     await page.getByRole('button', { name: /add from members/i }).click();
 
-    // Should see Bob and Admin User in the picker (not Alice — she's the managed user)
+    // Should see Bob in the picker (not Alice — managed user, not Admin — can't receive calls)
     await expect(page.getByText('Bob')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('Admin User')).toBeVisible();
 
     // Add Bob
     await page.getByRole('button', { name: /add bob/i }).click();
@@ -340,7 +339,7 @@ test.describe('Admin linked contacts flow (emulators)', () => {
       .toBeGreaterThanOrEqual(1);
   });
 
-  test('admin can add both Bob and Admin as contacts for Alice, then Alice sees them', async ({
+  test('admin can add Bob as contact for Alice, then Alice sees Bob on home screen', async ({
     page,
     browser,
   }) => {
@@ -362,13 +361,7 @@ test.describe('Admin linked contacts flow (emulators)', () => {
       timeout: 10_000,
     });
 
-    // Add Admin User
-    await page.getByRole('button', { name: /add admin user/i }).click();
-    await expect(page.getByRole('button', { name: /add admin user/i })).not.toBeVisible({
-      timeout: 10_000,
-    });
-
-    // Now verify Alice can see these contacts on her home screen
+    // Now verify Alice can see Bob on her home screen
     const aliceCtx = await browser.newContext({
       permissions: ['camera', 'microphone'],
     });
@@ -384,9 +377,7 @@ test.describe('Admin linked contacts flow (emulators)', () => {
 
     await alicePage.goto('/elderly');
 
-    // Alice should see both Bob and Admin User as contacts
     await expect(alicePage.getByText('Bob')).toBeVisible({ timeout: 15_000 });
-    await expect(alicePage.getByText('Admin User')).toBeVisible();
 
     await aliceCtx.close();
   });
@@ -488,20 +479,14 @@ test.describe('Admin linked contacts flow (emulators)', () => {
     // Open picker and add all available users
     await page.getByRole('button', { name: /add from members/i }).click();
 
-    // Add Bob
+    // Add Bob (the only available linked member)
     await expect(page.getByRole('button', { name: /add bob/i })).toBeVisible({ timeout: 10_000 });
     await page.getByRole('button', { name: /add bob/i }).click();
     await expect(page.getByRole('button', { name: /add bob/i })).not.toBeVisible({
       timeout: 10_000,
     });
 
-    // Add Admin
-    await page.getByRole('button', { name: /add admin user/i }).click();
-    await expect(page.getByRole('button', { name: /add admin user/i })).not.toBeVisible({
-      timeout: 10_000,
-    });
-
-    // Now the empty state message should appear
+    // Now the empty state message should appear (caregiver is excluded, Bob was just added)
     await expect(page.getByText(/all linked members are already added/i)).toBeVisible({
       timeout: 10_000,
     });

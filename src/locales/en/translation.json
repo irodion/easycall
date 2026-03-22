@@ -336,7 +336,6 @@
     "addUser": "Add {{name}}",
     "adding": "Adding...",
     "addFailed": "Failed to add contact: {{error}}",
-    "adminFallback": "Admin",
     "memberFallback": "Member"
   }
 }

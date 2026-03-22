@@ -43,11 +43,10 @@ describe('LinkedUserPicker', () => {
     vi.clearAllMocks();
   });
 
-  it('renders available linked users', async () => {
+  it('renders available linked elderly users (excludes caregiver)', async () => {
     mockGetDoc.mockResolvedValue(createCaregiverSnap(['elderly-2', 'elderly-3']));
     mockGetDocs.mockResolvedValue(
       createUsersSnapshot([
-        { id: 'caregiver-1', displayName: 'Admin User' },
         { id: 'elderly-2', displayName: 'Bob' },
         { id: 'elderly-3', displayName: 'Charlie' },
       ]),
@@ -65,19 +64,13 @@ describe('LinkedUserPicker', () => {
       );
     });
 
-    expect(await screen.findByText('Admin User')).toBeInTheDocument();
-    expect(screen.getByText('Bob')).toBeInTheDocument();
+    expect(await screen.findByText('Bob')).toBeInTheDocument();
     expect(screen.getByText('Charlie')).toBeInTheDocument();
   });
 
   it('filters out the elderly user being managed', async () => {
     mockGetDoc.mockResolvedValue(createCaregiverSnap(['elderly-1', 'elderly-2']));
-    mockGetDocs.mockResolvedValue(
-      createUsersSnapshot([
-        { id: 'caregiver-1', displayName: 'Admin' },
-        { id: 'elderly-2', displayName: 'Bob' },
-      ]),
-    );
+    mockGetDocs.mockResolvedValue(createUsersSnapshot([{ id: 'elderly-2', displayName: 'Bob' }]));
 
     const { LinkedUserPicker } = await import('./LinkedUserPicker');
     await act(async () => {
@@ -91,9 +84,7 @@ describe('LinkedUserPicker', () => {
       );
     });
 
-    // elderly-1 should be excluded (it's the user being managed)
     expect(await screen.findByText('Bob')).toBeInTheDocument();
-    expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
   it('filters out users already in contacts', async () => {
@@ -159,9 +150,9 @@ describe('LinkedUserPicker', () => {
     expect(await screen.findByText(/all linked members are already added/i)).toBeInTheDocument();
   });
 
-  it('shows Admin fallback for caregiver without displayName', async () => {
-    mockGetDoc.mockResolvedValue(createCaregiverSnap([]));
-    mockGetDocs.mockResolvedValue(createUsersSnapshot([{ id: 'caregiver-1' }]));
+  it('shows Member fallback for user without displayName', async () => {
+    mockGetDoc.mockResolvedValue(createCaregiverSnap(['elderly-2']));
+    mockGetDocs.mockResolvedValue(createUsersSnapshot([{ id: 'elderly-2' }]));
 
     const { LinkedUserPicker } = await import('./LinkedUserPicker');
     await act(async () => {
@@ -175,7 +166,7 @@ describe('LinkedUserPicker', () => {
       );
     });
 
-    expect(await screen.findByText('Admin')).toBeInTheDocument();
+    expect(await screen.findByText('Member')).toBeInTheDocument();
   });
 
   it('passes vitest-axe', async () => {

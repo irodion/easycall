@@ -332,7 +332,6 @@
     "addUser": "{{name}} hinzufügen",
     "adding": "Hinzufügen...",
     "addFailed": "Kontakt konnte nicht hinzugefügt werden: {{error}}",
-    "adminFallback": "Administrator",
     "memberFallback": "Mitglied"
   }
 }

@@ -43,7 +43,9 @@ export function LinkedUserPicker({
           ? (caregiverData['linkedElderlyUsers'] as string[])
           : [];
 
-        const allIds = [...new Set([caregiverUserId, ...linkedIds])];
+        // Only include elderly users — caregiver can't receive calls (call routes
+        // are behind the elderly AuthGuard, so a caregiver contact is a dead end).
+        const allIds = [...new Set(linkedIds)];
 
         const excludeSet = new Set([elderlyUserId, ...existingContactUserIds]);
         const candidateIds = allIds.filter((id) => !excludeSet.has(id));
@@ -68,15 +70,12 @@ export function LinkedUserPicker({
             snap.docs.map((d) => {
               const data = d.data();
               const name = data['displayName'];
-              const isCaregiverSelf = d.id === caregiverUserId;
               return {
                 uid: d.id,
                 displayName:
                   typeof name === 'string' && name.trim()
                     ? name
-                    : isCaregiverSelf
-                      ? t('linkedUserPicker.adminFallback')
-                      : t('linkedUserPicker.memberFallback'),
+                    : t('linkedUserPicker.memberFallback'),
               };
             }),
           );

@@ -332,7 +332,6 @@
     "addUser": "הוסף את {{name}}",
     "adding": "מוסיף...",
     "addFailed": "שגיאה בהוספת איש קשר: {{error}}",
-    "adminFallback": "מנהל",
     "memberFallback": "חבר"
   }
 }

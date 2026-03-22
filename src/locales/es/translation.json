@@ -332,7 +332,6 @@
     "addUser": "Agregar a {{name}}",
     "adding": "Agregando...",
     "addFailed": "Error al agregar contacto: {{error}}",
-    "adminFallback": "Administrador",
     "memberFallback": "Miembro"
   }
 }
