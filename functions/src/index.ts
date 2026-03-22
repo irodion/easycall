@@ -395,31 +395,38 @@ export const generateJitsiJwt = onCall({ enforceAppCheck: true }, async (request
   if (contactsSnap.empty) {
     throw new HttpsError('not-found', 'Room not found.');
   }
-  if (contactsSnap.size !== 1) {
-    throw new HttpsError('internal', 'Ambiguous room ID — multiple contacts share this room.');
-  }
 
-  const contactDoc = contactsSnap.docs[0]!;
-  const contactData = contactDoc.data();
-  // Path: users/{elderlyUserId}/contacts/{contactId}
-  const elderlyUserId = contactDoc.ref.parent.parent!.id;
+  // Multiple contacts can share a room ID (linked contacts: Alice→Bob and
+  // Bob→Alice use the same deterministic room). Check if the caller is
+  // authorized for ANY of the matching contact docs.
+  let authorized = false;
+  for (const contactDoc of contactsSnap.docs) {
+    const contactData = contactDoc.data();
+    // Path: users/{elderlyUserId}/contacts/{contactId}
+    const elderlyUserId = contactDoc.ref.parent.parent!.id;
 
-  const isElderlyUser = uid === elderlyUserId;
-  const isContactUser =
-    contactData['contactUserId'] != null && uid === contactData['contactUserId'];
+    if (uid === elderlyUserId) {
+      authorized = true;
+      break;
+    }
+    if (contactData['contactUserId'] != null && uid === contactData['contactUserId']) {
+      authorized = true;
+      break;
+    }
 
-  let isCaregiverUser = false;
-  if (!isElderlyUser && !isContactUser) {
     const caregiverDoc = await db
       .collection('users')
       .doc(elderlyUserId)
       .collection('caregivers')
       .doc(uid)
       .get();
-    isCaregiverUser = caregiverDoc.exists;
+    if (caregiverDoc.exists) {
+      authorized = true;
+      break;
+    }
   }
 
-  if (!isElderlyUser && !isContactUser && !isCaregiverUser) {
+  if (!authorized) {
     throw new HttpsError('permission-denied', 'Not a participant in this room.');
   }
 
