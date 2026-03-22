@@ -124,7 +124,7 @@ describe('AuthGuard', () => {
     const { onSnapshot } = await import('firebase/firestore');
     vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
       (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
-        data: () => ({ role: 'elderly', onboardingComplete: true }),
+        data: () => ({ role: 'elderly', onboardingComplete: true, displayName: 'Test User' }),
       });
       return () => {};
     });
@@ -201,7 +201,9 @@ describe('AuthGuard', () => {
 
     // Simulate Firestore doc update with role set
     await act(async () => {
-      snapshotCallback!({ data: () => ({ role: 'elderly', onboardingComplete: true }) });
+      snapshotCallback!({
+        data: () => ({ role: 'elderly', onboardingComplete: true, displayName: 'Test User' }),
+      });
     });
 
     // Should now show protected content without page reload
@@ -268,7 +270,7 @@ describe('AuthGuard', () => {
     const { onSnapshot } = await import('firebase/firestore');
     vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
       (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
-        data: () => ({ role: 'elderly', onboardingComplete: true }),
+        data: () => ({ role: 'elderly', onboardingComplete: true, displayName: 'Test User' }),
       });
       return () => {};
     });
@@ -324,6 +326,177 @@ describe('AuthGuard', () => {
     // PIN already verified — content should render
     expect(screen.getByText('Caregiver Dashboard')).toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: /enter.*pin/i })).not.toBeInTheDocument();
+  });
+
+  it('shows SetNameScreen when elderly user has no displayName', async () => {
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'elderly', onboardingComplete: true }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="elderly">
+          <div>Protected Content</div>
+        </AuthGuard>,
+      );
+    });
+
+    expect(screen.getByText(/what's your name/i)).toBeInTheDocument();
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
+
+  it('shows SetNameScreen when elderly user has empty string displayName', async () => {
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'elderly', onboardingComplete: true, displayName: '  ' }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="elderly">
+          <div>Protected Content</div>
+        </AuthGuard>,
+      );
+    });
+
+    expect(screen.getByText(/what's your name/i)).toBeInTheDocument();
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+  });
+
+  it('renders children when elderly user has valid displayName', async () => {
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'elderly', onboardingComplete: true, displayName: 'Grandma Rose' }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="elderly">
+          <div>Protected Content</div>
+        </AuthGuard>,
+      );
+    });
+
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
+  });
+
+  it('does NOT check displayName for caregiver role', async () => {
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'caregiver', onboardingComplete: true }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="caregiver">
+          <div>Caregiver Dashboard</div>
+        </AuthGuard>,
+      );
+    });
+
+    // Caregiver should get through without displayName check
+    expect(screen.getByText('Caregiver Dashboard')).toBeInTheDocument();
+    expect(screen.queryByText(/what's your name/i)).not.toBeInTheDocument();
+  });
+
+  it('exempts call routes from needs-name gate', async () => {
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'elderly', onboardingComplete: true }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="elderly">
+          <div>Call Screen</div>
+        </AuthGuard>,
+        { routerProps: { initialEntries: ['/call/contact-1'] } },
+      );
+    });
+
+    // On a call route, should render child content even without displayName
+    expect(screen.getByText('Call Screen')).toBeInTheDocument();
+    expect(screen.queryByText(/what's your name/i)).not.toBeInTheDocument();
+  });
+
+  it('exempts call-room routes from needs-name gate', async () => {
+    const { onAuthStateChanged } = await import('firebase/auth');
+    vi.mocked(onAuthStateChanged).mockImplementation((_auth, cb) => {
+      (cb as (user: { uid: string }) => void)({ uid: 'user-1' });
+      return () => {};
+    });
+
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementation((_ref: unknown, onNext: unknown) => {
+      (onNext as (snap: { data: () => Record<string, unknown> }) => void)({
+        data: () => ({ role: 'elderly', onboardingComplete: true }),
+      });
+      return () => {};
+    });
+
+    const { AuthGuard } = await import('./AuthGuard');
+    await act(async () => {
+      renderWithProviders(
+        <AuthGuard requiredRole="elderly">
+          <div>Call Room Screen</div>
+        </AuthGuard>,
+        { routerProps: { initialEntries: ['/call-room/room-abc123'] } },
+      );
+    });
+
+    expect(screen.getByText('Call Room Screen')).toBeInTheDocument();
+    expect(screen.queryByText(/what's your name/i)).not.toBeInTheDocument();
   });
 
   it('passes vitest-axe while loading', async () => {

@@ -105,7 +105,8 @@
     "removeFailed": "Failed to remove contact: {{error}}",
     "saveNewContact": "Save new contact",
     "cancelAdd": "Cancel add",
-    "choosePhoto": "Choose photo"
+    "choosePhoto": "Choose photo",
+    "addFromMembers": "Add from Members"
   },
   "elderlySettings": {
     "fontSize": "Font Size",
@@ -318,5 +319,24 @@
       "step2": "Click the menu (three dots) in the address bar",
       "step3": "Select \"Uninstall EasyCall\" and confirm"
     }
+  },
+  "setName": {
+    "title": "What's Your Name?",
+    "description": "Enter your name so others can recognize you.",
+    "namePlaceholder": "Enter your name",
+    "nameLabel": "Your name",
+    "save": "Continue",
+    "saving": "Saving...",
+    "error": "Failed to save name. Please try again.",
+    "nameRequired": "Please enter your name"
+  },
+  "linkedUserPicker": {
+    "title": "Add from Members",
+    "noAvailableUsers": "All linked members are already added as contacts.",
+    "addUser": "Add {{name}}",
+    "adding": "Adding...",
+    "addFailed": "Failed to add contact: {{error}}",
+    "memberFallback": "Member",
+    "needsName": "Needs to set their name first"
   }
 }

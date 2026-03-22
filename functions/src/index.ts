@@ -395,31 +395,38 @@ export const generateJitsiJwt = onCall({ enforceAppCheck: true }, async (request
   if (contactsSnap.empty) {
     throw new HttpsError('not-found', 'Room not found.');
   }
-  if (contactsSnap.size !== 1) {
-    throw new HttpsError('internal', 'Ambiguous room ID — multiple contacts share this room.');
-  }
 
-  const contactDoc = contactsSnap.docs[0]!;
-  const contactData = contactDoc.data();
-  // Path: users/{elderlyUserId}/contacts/{contactId}
-  const elderlyUserId = contactDoc.ref.parent.parent!.id;
+  // Multiple contacts can share a room ID (linked contacts: Alice→Bob and
+  // Bob→Alice use the same deterministic room). Check if the caller is
+  // authorized for ANY of the matching contact docs.
+  let authorized = false;
+  for (const contactDoc of contactsSnap.docs) {
+    const contactData = contactDoc.data();
+    // Path: users/{elderlyUserId}/contacts/{contactId}
+    const elderlyUserId = contactDoc.ref.parent.parent!.id;
 
-  const isElderlyUser = uid === elderlyUserId;
-  const isContactUser =
-    contactData['contactUserId'] != null && uid === contactData['contactUserId'];
+    if (uid === elderlyUserId) {
+      authorized = true;
+      break;
+    }
+    if (contactData['contactUserId'] != null && uid === contactData['contactUserId']) {
+      authorized = true;
+      break;
+    }
 
-  let isCaregiverUser = false;
-  if (!isElderlyUser && !isContactUser) {
     const caregiverDoc = await db
       .collection('users')
       .doc(elderlyUserId)
       .collection('caregivers')
       .doc(uid)
       .get();
-    isCaregiverUser = caregiverDoc.exists;
+    if (caregiverDoc.exists) {
+      authorized = true;
+      break;
+    }
   }
 
-  if (!isElderlyUser && !isContactUser && !isCaregiverUser) {
+  if (!authorized) {
     throw new HttpsError('permission-denied', 'Not a participant in this room.');
   }
 
@@ -700,6 +707,65 @@ async function sendMissedCallNotifications(
     webpush: { headers: { Urgency: 'normal' } },
   });
 }
+
+// ---------------------------------------------------------------------------
+// onDisplayNameChanged (exported for testing)
+//
+// Core logic for the onUserProfileChanged trigger. When a user's displayName
+// changes, updates all contact documents that reference this user via
+// contactUserId so elderly HomeScreens show the current name.
+// ---------------------------------------------------------------------------
+export async function syncDisplayNameToContacts(
+  db: Firestore,
+  uid: string,
+  beforeName: string | undefined,
+  afterName: string | undefined,
+): Promise<number> {
+  if (!afterName || afterName === beforeName) return 0;
+
+  // Find all contacts across all users that reference this UID
+  const contactsSnap = await db.collectionGroup('contacts').where('contactUserId', '==', uid).get();
+
+  if (contactsSnap.empty) return 0;
+
+  const batch = db.batch();
+  let count = 0;
+  for (const contactDoc of contactsSnap.docs) {
+    if (contactDoc.data()['name'] !== afterName) {
+      batch.update(contactDoc.ref, { name: afterName });
+      count++;
+    }
+  }
+
+  if (count > 0) await batch.commit();
+  return count;
+}
+
+// ---------------------------------------------------------------------------
+// onUserProfileChanged
+//
+// Triggers when a user document is updated. If displayName changed,
+// propagates the new name to all contact docs referencing this user.
+// ---------------------------------------------------------------------------
+export const onUserProfileChanged = onDocumentWritten('users/{uid}', async (event) => {
+  const before = event.data?.before.data();
+  const after = event.data?.after.data();
+  if (!after) return; // doc deleted
+
+  const beforeName = before?.['displayName'] as string | undefined;
+  const afterName = after['displayName'] as string | undefined;
+
+  if (!afterName || afterName === beforeName) return;
+
+  const db = getFirestore();
+  const uid = event.params['uid'];
+  const count = await syncDisplayNameToContacts(db, uid, beforeName, afterName);
+
+  if (count > 0) {
+    // nosemgrep: no-console-log-sensitive — logs count, not name value
+    console.log(`Updated ${count} contact(s) with new displayName for user ${uid}`);
+  }
+});
 
 // ---------------------------------------------------------------------------
 // onUserStatusChanged

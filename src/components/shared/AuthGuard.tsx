@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Outlet, Navigate } from 'react-router';
+import { Outlet, Navigate, useLocation } from 'react-router';
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/services/firebase';
@@ -7,17 +7,25 @@ import { useCaregiverPin } from '@/hooks/useCaregiverPin';
 import { CaregiverPinPrompt } from './CaregiverPinPrompt';
 import { RoleSelector } from './RoleSelector';
 import { OnboardingFlow } from './OnboardingFlow';
+import { SetNameScreen } from '@/components/elderly/SetNameScreen';
 
 interface AuthGuardProps {
   requiredRole: 'elderly' | 'caregiver';
   children?: ReactNode;
 }
 
-type AuthState = 'loading' | 'no-role' | 'onboarding' | 'correct-role' | 'wrong-role';
+type AuthState =
+  | 'loading'
+  | 'no-role'
+  | 'onboarding'
+  | 'needs-name'
+  | 'correct-role'
+  | 'wrong-role';
 
 export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
   const [authState, setAuthState] = useState<AuthState>('loading');
   const [user, setUser] = useState<{ uid: string; role: 'elderly' | 'caregiver' } | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     let unsubDoc: (() => void) | undefined;
@@ -52,6 +60,15 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
             if (!onboardingComplete) {
               setUser({ uid: firebaseUser.uid, role });
               setAuthState('onboarding');
+            } else if (role === 'elderly') {
+              const displayName = data?.['displayName'];
+              if (typeof displayName !== 'string' || displayName.trim() === '') {
+                setUser({ uid: firebaseUser.uid, role });
+                setAuthState('needs-name');
+              } else {
+                setAuthState('correct-role');
+                setUser(null);
+              }
             } else {
               setAuthState('correct-role');
               setUser(null);
@@ -98,6 +115,24 @@ export function AuthGuard({ requiredRole, children }: AuthGuardProps) {
         }}
       />
     );
+  }
+
+  if (authState === 'needs-name' && user) {
+    // Let call routes through — don't block incoming/rejoining calls for
+    // migrated users who haven't set their name yet.
+    const isCallRoute =
+      location.pathname.startsWith('/call/') || location.pathname.startsWith('/call-room/');
+    if (!isCallRoute) {
+      return (
+        <SetNameScreen
+          userId={user.uid}
+          onComplete={() => {
+            setAuthState('correct-role');
+            setUser(null);
+          }}
+        />
+      );
+    }
   }
 
   if (authState === 'wrong-role') {

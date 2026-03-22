@@ -1,21 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 import { BackToDashboard } from '@/components/shared/BackToDashboard';
 import { useContactStore } from '@/stores/contactStore';
-import { generateRoomId } from '@/utils/generateRoomId';
+import { generateRoomId, generateLinkedRoomId } from '@/utils/generateRoomId';
 import { compressImage, blobToDataUrl } from '@/utils/compressImage';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { EasyCallText } from '@/components/shared/EasyCallText';
+import { LinkedUserPicker } from './LinkedUserPicker';
+import { useLinkedUserNames } from '@/hooks/useLinkedUserNames';
 import type { Contact } from '@/types/user';
 
 interface ManageContactsProps {
   elderlyUserId: string;
+  caregiverUserId: string;
 }
 
-export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
+export function ManageContacts({ elderlyUserId, caregiverUserId }: ManageContactsProps) {
   const { t } = useTranslation();
   const contacts = useContactStore((s) => s.contacts);
   const addContact = useContactStore((s) => s.addContact);
@@ -24,12 +27,17 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
 
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showLinkedPicker, setShowLinkedPicker] = useState(false);
   const [newName, setNewName] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const contactUserIds = useMemo(() => contacts.map((c) => c.contactUserId), [contacts]);
+  const existingContactUserIds = useMemo(() => contactUserIds.filter((id) => id), [contactUserIds]);
+  const linkedUserNames = useLinkedUserNames(existingContactUserIds);
 
   useEffect(() => {
     return subscribeToContacts(elderlyUserId);
@@ -92,6 +100,17 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
     }
   };
 
+  const handleAddLinkedUser = async (userId: string, linkedDisplayName: string) => {
+    const maxOrder = contacts.reduce((max, c) => Math.max(max, c.displayOrder), -1);
+    await addContact(elderlyUserId, {
+      name: linkedDisplayName,
+      photoURL: null,
+      jitsiRoomId: generateLinkedRoomId(elderlyUserId, userId),
+      contactUserId: userId,
+      displayOrder: maxOrder + 1,
+    });
+  };
+
   const handleConfirmDelete = async () => {
     if (!confirmDeleteId || isDeleting) return;
     setIsDeleting(true);
@@ -121,13 +140,22 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
           : t('manageContacts.title')}
       </EasyCallText>
 
-      <EasyCallButton
-        variant="primary"
-        onClick={() => setShowAddForm(!showAddForm)}
-        aria-label={t('manageContacts.addContact')}
-      >
-        {t('manageContacts.addContact')}
-      </EasyCallButton>
+      <div className="flex gap-3">
+        <EasyCallButton
+          variant="primary"
+          onClick={() => setShowAddForm(!showAddForm)}
+          aria-label={t('manageContacts.addContact')}
+        >
+          {t('manageContacts.addContact')}
+        </EasyCallButton>
+        <EasyCallButton
+          variant="secondary"
+          onClick={() => setShowLinkedPicker(!showLinkedPicker)}
+          aria-label={t('manageContacts.addFromMembers')}
+        >
+          {t('manageContacts.addFromMembers')}
+        </EasyCallButton>
+      </div>
 
       {error && (
         <div role="alert" className="alert alert-error">
@@ -183,31 +211,51 @@ export function ManageContacts({ elderlyUserId }: ManageContactsProps) {
         </div>
       )}
 
+      {showLinkedPicker && (
+        <LinkedUserPicker
+          elderlyUserId={elderlyUserId}
+          caregiverUserId={caregiverUserId}
+          existingContactUserIds={existingContactUserIds}
+          onAdd={handleAddLinkedUser}
+        />
+      )}
+
       <div className="flex flex-col gap-3">
-        {contacts.map((contact: Contact) => (
-          <div
-            key={contact.id}
-            className="card card-body bg-base-200 flex-row items-center justify-between gap-3"
-          >
-            <EasyCallText as="span" variant="button" className="font-bold">
-              {contact.name}
-            </EasyCallText>
-            <EasyCallButton
-              variant="danger"
-              onClick={() => setConfirmDeleteId(contact.id)}
-              disabled={isDeleting}
-              aria-label={t('manageContacts.removeContact', { name: contact.name })}
+        {contacts.map((contact: Contact) => {
+          const resolvedName = contact.contactUserId
+            ? linkedUserNames.get(contact.contactUserId)
+            : undefined;
+          const contactDisplayName = resolvedName || contact.name;
+          return (
+            <div
+              key={contact.id}
+              className="card card-body bg-base-200 flex-row items-center justify-between gap-3"
             >
-              {t('manageContacts.remove')}
-            </EasyCallButton>
-          </div>
-        ))}
+              <EasyCallText as="span" variant="button" className="font-bold">
+                {contactDisplayName}
+              </EasyCallText>
+              <EasyCallButton
+                variant="danger"
+                onClick={() => setConfirmDeleteId(contact.id)}
+                disabled={isDeleting}
+                aria-label={t('manageContacts.removeContact', { name: contactDisplayName })}
+              >
+                {t('manageContacts.remove')}
+              </EasyCallButton>
+            </div>
+          );
+        })}
       </div>
 
       <ConfirmDialog
         open={confirmDeleteId !== null}
         message={t('manageContacts.confirmRemove', {
-          name: contactToDelete?.name ?? t('manageContacts.thisContact'),
+          name:
+            (contactToDelete?.contactUserId
+              ? linkedUserNames.get(contactToDelete.contactUserId)
+              : undefined) ??
+            contactToDelete?.name ??
+            t('manageContacts.thisContact'),
         })}
         onConfirm={() => {
           void handleConfirmDelete();

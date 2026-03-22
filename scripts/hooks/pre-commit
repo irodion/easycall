@@ -20,8 +20,7 @@ else
   exit 1
 fi
 
-STAGED_FILES=$(git diff --cached --name-only -z --diff-filter=ACMR)
-if [ -n "$STAGED_FILES" ]; then
+if git diff --cached --name-only --diff-filter=ACMR | grep -q .; then
   echo "Checking formatting..."
 
   # Only stash if there are unstaged changes to tracked files.
@@ -33,10 +32,9 @@ if [ -n "$STAGED_FILES" ]; then
     STASHED=$?
   fi
 
-  # Use NUL-delimited paths for space-safe handling.
-  # --ignore-unknown lets Prettier skip non-supported files.
-  echo "$STAGED_FILES" | xargs -0 npx prettier --write --ignore-unknown
-  echo "$STAGED_FILES" | xargs -0 git add
+  # Pipe NUL-delimited paths directly to xargs (echo loses NUL bytes).
+  git diff --cached --name-only -z --diff-filter=ACMR | xargs -0 npx prettier --write --ignore-unknown
+  git diff --cached --name-only -z --diff-filter=ACMR | xargs -0 git add
 
   if [ "$STASHED" -eq 0 ]; then
     git stash pop --quiet 2>/dev/null || true

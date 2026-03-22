@@ -104,7 +104,8 @@
     "removeFailed": "Kontakt konnte nicht entfernt werden: {{error}}",
     "saveNewContact": "Neuen Kontakt speichern",
     "cancelAdd": "Hinzufügen abbrechen",
-    "choosePhoto": "Foto auswählen"
+    "choosePhoto": "Foto auswählen",
+    "addFromMembers": "Aus Mitgliedern hinzufügen"
   },
   "elderlySettings": {
     "fontSize": "Schriftgröße",
@@ -314,5 +315,24 @@
       "step2": "Klicken Sie auf das Menü (drei Punkte) in der Adressleiste",
       "step3": "Wählen Sie \"EasyCall deinstallieren\" und bestätigen Sie"
     }
+  },
+  "setName": {
+    "title": "Wie heißen Sie?",
+    "description": "Geben Sie Ihren Namen ein, damit andere Sie erkennen können.",
+    "namePlaceholder": "Ihren Namen eingeben",
+    "nameLabel": "Ihr Name",
+    "save": "Weiter",
+    "saving": "Speichern...",
+    "error": "Name konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "nameRequired": "Bitte geben Sie Ihren Namen ein"
+  },
+  "linkedUserPicker": {
+    "title": "Aus Mitgliedern hinzufügen",
+    "noAvailableUsers": "Alle verknüpften Mitglieder wurden bereits als Kontakte hinzugefügt.",
+    "addUser": "{{name}} hinzufügen",
+    "adding": "Hinzufügen...",
+    "addFailed": "Kontakt konnte nicht hinzugefügt werden: {{error}}",
+    "memberFallback": "Mitglied",
+    "needsName": "Muss zuerst einen Namen festlegen"
   }
 }

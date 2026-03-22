@@ -55,6 +55,10 @@ vi.mock('@/services/firebase', () => ({
   db: {},
 }));
 
+vi.mock('@/hooks/useLinkedUserNames', () => ({
+  useLinkedUserNames: vi.fn(() => new Map()),
+}));
+
 describe('ManageContacts', () => {
   beforeEach(() => {
     mockRemoveContact.mockClear();
@@ -63,7 +67,7 @@ describe('ManageContacts', () => {
 
   it('renders back to dashboard link', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     const backLink = screen.getByRole('link', { name: /back to dashboard/i });
     expect(backLink).toBeInTheDocument();
     expect(backLink.getAttribute('href')).toBe('/caregiver');
@@ -71,47 +75,47 @@ describe('ManageContacts', () => {
 
   it('shows identity header with elderly user display name', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     expect(await screen.findByText(/contacts for grandma rose/i)).toBeInTheDocument();
   });
 
   it('renders list of contacts', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('Bob')).toBeInTheDocument();
   });
 
   it('shows Add Contact button', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     expect(screen.getByRole('button', { name: /add contact/i })).toBeInTheDocument();
   });
 
   it('clicking Add Contact reveals name input', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     fireEvent.click(screen.getByRole('button', { name: /add contact/i }));
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 
   it('shows remove button for each contact', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     const removeButtons = screen.getAllByRole('button', { name: /remove/i });
     expect(removeButtons).toHaveLength(2);
   });
 
   it('clicking remove shows ConfirmDialog', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     fireEvent.click(screen.getAllByRole('button', { name: /remove/i })[0]!);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('cancelling ConfirmDialog does NOT call removeContact', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     fireEvent.click(screen.getAllByRole('button', { name: /remove/i })[0]!);
     fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(mockRemoveContact).not.toHaveBeenCalled();
@@ -119,7 +123,7 @@ describe('ManageContacts', () => {
 
   it('confirming ConfirmDialog calls removeContact', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
     fireEvent.click(screen.getAllByRole('button', { name: /remove/i })[0]!);
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
@@ -130,7 +134,7 @@ describe('ManageContacts', () => {
   it('shows error when addContact throws', async () => {
     mockAddContact.mockRejectedValueOnce(new Error('Firestore error'));
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
 
     fireEvent.click(screen.getByRole('button', { name: /add contact/i }));
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Charlie' } });
@@ -143,7 +147,7 @@ describe('ManageContacts', () => {
 
   it('save button is disabled when name is whitespace-only', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
 
     fireEvent.click(screen.getByRole('button', { name: /add contact/i }));
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '   ' } });
@@ -154,7 +158,7 @@ describe('ManageContacts', () => {
   it('shows error when removeContact throws', async () => {
     mockRemoveContact.mockRejectedValueOnce(new Error('Delete failed'));
     const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
 
     fireEvent.click(screen.getAllByRole('button', { name: /remove/i })[0]!);
     await act(async () => {
@@ -166,7 +170,9 @@ describe('ManageContacts', () => {
 
   it('passes vitest-axe', async () => {
     const { ManageContacts } = await import('./ManageContacts');
-    const { container } = renderWithProviders(<ManageContacts elderlyUserId="elderly-1" />);
+    const { container } = renderWithProviders(
+      <ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />,
+    );
     expect(await axe(container)).toHaveNoViolations();
   });
 });

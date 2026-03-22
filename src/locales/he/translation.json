@@ -104,7 +104,8 @@
     "removeFailed": "שגיאה בהסרת איש קשר: {{error}}",
     "saveNewContact": "שמור איש קשר חדש",
     "cancelAdd": "בטל הוספה",
-    "choosePhoto": "בחר תמונה"
+    "choosePhoto": "בחר תמונה",
+    "addFromMembers": "הוסף מחברים"
   },
   "elderlySettings": {
     "fontSize": "גודל גופן",
@@ -314,5 +315,24 @@
       "step2": "לחץ על התפריט (שלוש נקודות) בשורת הכתובת",
       "step3": "בחר \"הסר את EasyCall\" ואשר"
     }
+  },
+  "setName": {
+    "title": "מה שמך?",
+    "description": "הזן את שמך כדי שאחרים יוכלו לזהות אותך.",
+    "namePlaceholder": "הזן את שמך",
+    "nameLabel": "השם שלך",
+    "save": "המשך",
+    "saving": "שומר...",
+    "error": "שגיאה בשמירת השם. נסה שוב.",
+    "nameRequired": "אנא הזן את שמך"
+  },
+  "linkedUserPicker": {
+    "title": "הוסף מחברים",
+    "noAvailableUsers": "כל החברים המקושרים כבר נוספו כאנשי קשר.",
+    "addUser": "הוסף את {{name}}",
+    "adding": "מוסיף...",
+    "addFailed": "שגיאה בהוספת איש קשר: {{error}}",
+    "memberFallback": "חבר",
+    "needsName": "צריך להגדיר את שמו קודם"
   }
 }
