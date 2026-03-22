@@ -54,8 +54,9 @@ jobs:
             echo "::error::JAAS secrets (JAAS_APP_ID, JAAS_KEY_ID, JAAS_PRIVATE_KEY) must be set in GitHub Secrets"
             exit 1
           fi
+          ESCAPED_KEY=$(echo "$JAAS_PRIVATE_KEY" | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
           printf 'JAAS_APP_ID=%s\nJAAS_KEY_ID=%s\nJAAS_PRIVATE_KEY=%s\n' \
-            "$JAAS_APP_ID" "$JAAS_KEY_ID" "$JAAS_PRIVATE_KEY" > functions/.env
+            "$JAAS_APP_ID" "$JAAS_KEY_ID" "$ESCAPED_KEY" > functions/.env
         env:
           JAAS_APP_ID: ${{ secrets.JAAS_APP_ID }}
           JAAS_KEY_ID: ${{ secrets.JAAS_KEY_ID }}
