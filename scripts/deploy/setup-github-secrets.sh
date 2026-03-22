@@ -66,8 +66,8 @@ fi
 echo ""
 echo -e "${YELLOW}JaaS secrets for Cloud Functions (from https://jaas.8x8.vc/#/apikeys):${NC}"
 if [ -f "functions/.env" ]; then
-  for var in JAAS_APP_ID JAAS_KEY_ID JAAS_PRIVATE_KEY; do
-    val=$(grep "${var}=" functions/.env 2>/dev/null | cut -d= -f2- || true)
+  for var in JAAS_APP_ID JAAS_KEY_ID; do
+    val=$(grep "^[[:space:]]*${var}=" functions/.env 2>/dev/null | cut -d= -f2- | xargs || true)
     if [ -n "$val" ]; then
       gh secret set "$var" --body "$val"
       ok "Set $var (from functions/.env)"
@@ -75,6 +75,15 @@ if [ -f "functions/.env" ]; then
       warn "$var not found in functions/.env — skipping (set manually with: gh secret set $var)"
     fi
   done
+
+  # JAAS_PRIVATE_KEY needs special handling — it's multi-line PEM
+  PRIVATE_KEY=$(sed -n '/^[[:space:]]*JAAS_PRIVATE_KEY=/,/-----END PRIVATE KEY-----/p' functions/.env | sed '1s/^[[:space:]]*JAAS_PRIVATE_KEY=//' | tr -d '"')
+  if [ -n "$PRIVATE_KEY" ]; then
+    gh secret set JAAS_PRIVATE_KEY --body "$PRIVATE_KEY"
+    ok "Set JAAS_PRIVATE_KEY (from functions/.env)"
+  else
+    warn "JAAS_PRIVATE_KEY not found in functions/.env — skipping (set manually with: gh secret set JAAS_PRIVATE_KEY)"
+  fi
 else
   warn "functions/.env not found — set JAAS secrets manually:"
   echo "    gh secret set JAAS_APP_ID --body '<value>'"

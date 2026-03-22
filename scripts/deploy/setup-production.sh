@@ -93,12 +93,37 @@ else
   ok "functions/.env created"
 fi
 
-header "Step 7: Deploy Cloud Functions"
-(cd functions && pnpm install --frozen-lockfile)
+header "Step 7: Set up IAM roles for CI/CD deploy"
+echo "  Granting required IAM roles to firebase-adminsdk service account..."
+SA_EMAIL="firebase-adminsdk-fbsvc@${PROJECT_ID}.iam.gserviceaccount.com"
+if command -v gcloud &>/dev/null; then
+  for role in roles/firebase.admin roles/cloudfunctions.admin roles/firebasehosting.admin \
+              roles/firebaserules.admin roles/iam.serviceAccountUser roles/artifactregistry.admin; do
+    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+      --member="serviceAccount:$SA_EMAIL" \
+      --role="$role" \
+      --condition=None --quiet --format="none" 2>/dev/null && ok "Granted $role" || warn "Could not grant $role"
+  done
+  gcloud services enable cloudbilling.googleapis.com --project="$PROJECT_ID" --quiet 2>/dev/null \
+    && ok "Cloud Billing API enabled" || warn "Could not enable Cloud Billing API"
+else
+  warn "gcloud CLI not found — set IAM roles manually in Google Cloud Console"
+  echo "  Required roles for $SA_EMAIL:"
+  echo "    - Firebase Admin"
+  echo "    - Cloud Functions Admin"
+  echo "    - Firebase Hosting Admin"
+  echo "    - Firebase Rules Admin"
+  echo "    - Service Account User"
+  echo "    - Artifact Registry Admin"
+  echo "  Also enable Cloud Billing API for the project."
+fi
+
+header "Step 8: Deploy Cloud Functions"
+(cd functions && pnpm install --frozen-lockfile && pnpm run build)
 firebase deploy --only functions --project "$PROJECT_ID"
 ok "Cloud Functions deployed"
 
-header "Step 8: Get Firebase config for .env.production"
+header "Step 9: Get Firebase config for .env.production"
 echo ""
 echo "  Run the following to get your web app config:"
 echo "  firebase apps:sdkconfig web --project $PROJECT_ID"
@@ -112,7 +137,7 @@ if firebase apps:list --project "$PROJECT_ID" 2>/dev/null | grep -q "WEB"; then
   firebase apps:sdkconfig web --project "$PROJECT_ID" 2>/dev/null || true
 fi
 
-header "Step 9: GitHub Secrets Setup"
+header "Step 10: GitHub Secrets Setup"
 echo "  Set these secrets in your GitHub repo (Settings → Secrets → Actions):"
 echo ""
 echo "  Firebase/App secrets (from Firebase Console):"
