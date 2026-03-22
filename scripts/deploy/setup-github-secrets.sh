@@ -76,8 +76,8 @@ if [ -f "functions/.env" ]; then
     fi
   done
 
-  # JAAS_PRIVATE_KEY needs special handling — it's multi-line PEM
-  PRIVATE_KEY=$(sed -n '/^[[:space:]]*JAAS_PRIVATE_KEY=/,/-----END PRIVATE KEY-----/p' functions/.env | sed '1s/^[[:space:]]*JAAS_PRIVATE_KEY=//' | tr -d '"')
+  # JAAS_PRIVATE_KEY needs special handling — may be multi-line PEM or single-line with \n escapes
+  PRIVATE_KEY=$(grep -E '^[[:space:]]*JAAS_PRIVATE_KEY=' functions/.env | sed 's/^[[:space:]]*JAAS_PRIVATE_KEY=//' | tr -d '"')
   if [ -n "$PRIVATE_KEY" ]; then
     gh secret set JAAS_PRIVATE_KEY --body "$PRIVATE_KEY"
     ok "Set JAAS_PRIVATE_KEY (from functions/.env)"
