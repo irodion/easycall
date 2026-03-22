@@ -1342,7 +1342,7 @@ firebase init
 # Select: Firestore, Functions (TypeScript), Hosting (skip — using CF Pages)
 
 # Deploy functions
-cd functions && npm install && cd ..
+cd functions && pnpm install && pnpm run build && cd ..
 firebase deploy --only functions
 
 # Deploy Firestore rules and indexes
