@@ -508,8 +508,11 @@ export const unlinkElderlyUser = onCall({ enforceAppCheck: true }, async (reques
       }
       try {
         await batch.commit();
-      } catch (err) {
-        console.error(`Best-effort cleanup batch failed for user ${elderlyUserId}:`, err);
+      } catch {
+        // nosemgrep: no-console-log-sensitive — logs userId and batch index, not PII
+        console.error(
+          `Best-effort cleanup batch ${i / BATCH_LIMIT + 1} failed for user ${elderlyUserId}`,
+        );
       }
     }
   }
