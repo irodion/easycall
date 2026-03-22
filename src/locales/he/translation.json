@@ -91,7 +91,13 @@
     "manageContacts": "ניהול אנשי קשר",
     "backToDashboard": "חזרה ללוח הבקרה",
     "noLinkedUsers": "אין חברים מקושרים עדיין",
-    "noLinkedUsersHint": "לחצו על \"קשר חבר\" כדי להתאים למכשיר של חבר."
+    "noLinkedUsersHint": "לחצו על \"קשר חבר\" כדי להתאים למכשיר של חבר.",
+    "settings": "הגדרות",
+    "unlinkUser": "נתק",
+    "unlinkUserLabel": "נתק את {{name}}",
+    "confirmUnlink": "לנתק את {{name}} ולאפס את החשבון? פעולה זו תמחק את כל אנשי הקשר, היסטוריית השיחות וההגדרות. יהיה צורך להגדיר מחדש.",
+    "unlinking": "מנתק...",
+    "unlinkFailed": "הניתוק נכשל: {{error}}"
   },
   "manageContacts": {
     "title": "ניהול אנשי קשר",

@@ -91,7 +91,13 @@
     "manageContacts": "Kontakte verwalten",
     "backToDashboard": "Zurück zum Dashboard",
     "noLinkedUsers": "Noch keine verknüpften Mitglieder",
-    "noLinkedUsersHint": "Tippen Sie auf \"Mitglied verknüpfen\" um sich mit dem Gerät eines Mitglieds zu verbinden."
+    "noLinkedUsersHint": "Tippen Sie auf \"Mitglied verknüpfen\" um sich mit dem Gerät eines Mitglieds zu verbinden.",
+    "settings": "Einstellungen",
+    "unlinkUser": "Trennen",
+    "unlinkUserLabel": "{{name}} trennen",
+    "confirmUnlink": "{{name}} trennen und Konto zurücksetzen? Alle Kontakte, Anrufliste und Einstellungen werden gelöscht. Eine Neueinrichtung ist erforderlich.",
+    "unlinking": "Wird getrennt...",
+    "unlinkFailed": "Trennung fehlgeschlagen: {{error}}"
   },
   "manageContacts": {
     "title": "Kontakte verwalten",

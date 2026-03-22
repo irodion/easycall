@@ -356,6 +356,168 @@ export const validatePairingCode = onCall({ enforceAppCheck: true }, async (requ
 });
 
 // ---------------------------------------------------------------------------
+// unlinkElderlyUser
+//
+// Called by the caregiver dashboard to unlink a member and reset their account.
+// Atomically removes the caregiver link from both sides, deletes all member
+// data (contacts, call history, active/incoming calls), resets settings to
+// defaults, and writes an audit log entry.
+// ---------------------------------------------------------------------------
+const DEFAULT_SETTINGS = {
+  fontSize: 'large',
+  highContrast: false,
+  ringtoneVolume: 80,
+  autoAnswer: false,
+  appLockEnabled: false,
+  appLockPinHash: null,
+  language: 'en',
+};
+
+async function deleteSubcollectionDocs(
+  db: Firestore,
+  parentPath: string,
+  subcollection: string,
+): Promise<FirebaseFirestore.DocumentReference[]> {
+  const snap = await db.collection(`${parentPath}/${subcollection}`).get();
+  return snap.docs.map((d) => d.ref);
+}
+
+/**
+ * Add the critical unlink operations to a batch: remove all caregiver links,
+ * clear active/incoming calls, reset user doc to defaults, and write audit log.
+ */
+function addCriticalUnlinkOps(
+  batch: FirebaseFirestore.WriteBatch,
+  db: Firestore,
+  userPath: string,
+  elderlyUserId: string,
+  caregiverUid: string,
+  elderlyDisplayName: string,
+  allCaregiverRefs: FirebaseFirestore.DocumentReference[],
+): void {
+  for (const cgRef of allCaregiverRefs) {
+    batch.delete(cgRef);
+    batch.set(
+      db.collection('users').doc(cgRef.id),
+      { linkedElderlyUsers: FieldValue.arrayRemove(elderlyUserId) },
+      { merge: true },
+    );
+  }
+  batch.delete(db.doc(`${userPath}/activeCall/current`));
+  batch.delete(db.doc(`${userPath}/incomingCall/current`));
+  batch.set(
+    db.doc(userPath),
+    { settings: DEFAULT_SETTINGS, displayName: '', onboardingComplete: false, pushTokens: [] },
+    { merge: true },
+  );
+  batch.set(db.collection('auditLog').doc(), {
+    action: 'unlink_elderly_user',
+    caregiverUid,
+    elderlyUserId,
+    elderlyDisplayName,
+    timestamp: FieldValue.serverTimestamp(),
+  });
+}
+
+export const unlinkElderlyUser = onCall({ enforceAppCheck: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required.');
+  }
+
+  const data = extractData(request);
+  const { elderlyUserId } = data as { elderlyUserId?: unknown };
+
+  if (typeof elderlyUserId !== 'string' || !elderlyUserId) {
+    throw new HttpsError('invalid-argument', 'elderlyUserId is required.');
+  }
+
+  const caregiverUid = request.auth.uid;
+  const db = getFirestore();
+
+  // Verify role and linkage in parallel
+  const [, linkDoc, elderlyDoc] = await Promise.all([
+    requireCaregiver(db, caregiverUid),
+    db.collection('users').doc(elderlyUserId).collection('caregivers').doc(caregiverUid).get(),
+    db.doc(`users/${elderlyUserId}`).get(),
+  ]);
+
+  if (!linkDoc.exists) {
+    throw new HttpsError('not-found', 'You are not linked to this member.');
+  }
+
+  const elderlyDisplayName =
+    typeof elderlyDoc.data()?.['displayName'] === 'string'
+      ? (elderlyDoc.data()!['displayName'] as string)
+      : '';
+
+  const userPath = `users/${elderlyUserId}`;
+
+  // Fetch all subcollection docs in parallel
+  const [contactRefs, historyRefs, allCaregiverRefs] = await Promise.all([
+    deleteSubcollectionDocs(db, userPath, 'contacts'),
+    deleteSubcollectionDocs(db, userPath, 'callHistory'),
+    // Fetch ALL caregiver links — a member may have multiple caregivers.
+    // We must remove every link so no caregiver retains a dangling reference.
+    deleteSubcollectionDocs(db, userPath, 'caregivers'),
+  ]);
+
+  const allRefs = [...contactRefs, ...historyRefs];
+  // Each caregiver = 2 ops (delete + arrayRemove set). Fixed ops = 4 (activeCall,
+  // incomingCall, reset user doc, audit log). Caregiver delete refs are separate.
+  const criticalOps = allCaregiverRefs.length * 2 + 4;
+  const BATCH_LIMIT = 490;
+
+  if (allRefs.length + criticalOps <= BATCH_LIMIT) {
+    const batch = db.batch();
+    addCriticalUnlinkOps(
+      batch,
+      db,
+      userPath,
+      elderlyUserId,
+      caregiverUid,
+      elderlyDisplayName,
+      allCaregiverRefs,
+    );
+    for (const ref of allRefs) {
+      batch.delete(ref);
+    }
+    await batch.commit();
+  } else {
+    // Commit critical operations first (unlink, reset, audit) so a later
+    // failure only leaves orphaned subcollection docs — not deleted data
+    // with intact caregiver links.
+    const criticalBatch = db.batch();
+    addCriticalUnlinkOps(
+      criticalBatch,
+      db,
+      userPath,
+      elderlyUserId,
+      caregiverUid,
+      elderlyDisplayName,
+      allCaregiverRefs,
+    );
+    await criticalBatch.commit();
+
+    // Best-effort cleanup — failures are swallowed because the unlink already
+    // succeeded and orphaned docs are inaccessible (security rules require a link).
+    for (let i = 0; i < allRefs.length; i += BATCH_LIMIT) {
+      const chunk = allRefs.slice(i, i + BATCH_LIMIT);
+      const batch = db.batch();
+      for (const ref of chunk) {
+        batch.delete(ref);
+      }
+      try {
+        await batch.commit();
+      } catch (err) {
+        console.error(`Best-effort cleanup batch failed for user ${elderlyUserId}:`, err);
+      }
+    }
+  }
+
+  return { success: true };
+});
+
+// ---------------------------------------------------------------------------
 // generateJitsiJwt
 //
 // Issues a JaaS JWT only after verifying the requesting user is a legitimate

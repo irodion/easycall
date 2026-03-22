@@ -15,6 +15,15 @@ export async function validatePairingCode(code: string): Promise<{ elderlyUserId
   return (await fn({ code })).data;
 }
 
+export async function unlinkElderlyUser(elderlyUserId: string): Promise<void> {
+  const functions = getFunctions(app);
+  const fn = httpsCallable<{ elderlyUserId: string }, { success: boolean }>(
+    functions,
+    'unlinkElderlyUser',
+  );
+  await fn({ elderlyUserId });
+}
+
 interface InitiateCallParams {
   elderlyUserId: string;
   callerId: string;

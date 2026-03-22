@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { renderWithProviders } from '@/test/helpers';
 
@@ -10,6 +10,8 @@ const mockPresenceMap = new Map<string, PresenceInfo>();
 vi.mock('@/hooks/useContactsPresence', () => ({
   useContactsPresence: () => mockPresenceMap,
 }));
+
+const mockUnlinkElderlyUser = vi.fn();
 
 describe('Dashboard', () => {
   let getDocs: ReturnType<typeof vi.fn>;
@@ -23,6 +25,7 @@ describe('Dashboard', () => {
     collection = vi.fn().mockReturnValue('collection-ref');
     doc = vi.fn().mockReturnValue('doc-ref');
     mockPresenceMap.clear();
+    mockUnlinkElderlyUser.mockReset();
 
     vi.resetModules();
     vi.doMock('firebase/firestore', () => ({
@@ -37,6 +40,9 @@ describe('Dashboard', () => {
     vi.doMock('@/services/firebase', () => ({
       db: {},
       auth: { currentUser: { uid: 'caregiver-1', providerData: [] } },
+    }));
+    vi.doMock('@/services/callSignaling', () => ({
+      unlinkElderlyUser: mockUnlinkElderlyUser,
     }));
   });
 
@@ -163,7 +169,6 @@ describe('Dashboard', () => {
     renderWithProviders(<Dashboard userId="caregiver-1" />);
 
     // Should stop loading despite error — spinner should disappear
-    const { waitFor } = await import('@testing-library/react');
     await waitFor(() => {
       expect(screen.queryByRole('status')).not.toBeInTheDocument();
     });
@@ -234,5 +239,100 @@ describe('Dashboard', () => {
 
     await screen.findByText('Grandma');
     expect(screen.getByText(/Last seen/)).toBeInTheDocument();
+  });
+
+  describe('unlink flow', () => {
+    it('each user card has an Unlink button', async () => {
+      setupLinkedUserMocks();
+
+      const { Dashboard } = await import('./Dashboard');
+      renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+      const unlinkBtn = await screen.findByRole('button', { name: /unlink grandma/i });
+      expect(unlinkBtn).toBeInTheDocument();
+    });
+
+    it('clicking Unlink opens confirmation dialog', async () => {
+      setupLinkedUserMocks();
+
+      const { Dashboard } = await import('./Dashboard');
+      renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+      const unlinkBtn = await screen.findByRole('button', { name: /unlink grandma/i });
+      fireEvent.click(unlinkBtn);
+
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(screen.getByText(/unlink grandma and reset/i)).toBeInTheDocument();
+    });
+
+    it('cancelling closes the dialog without side effects', async () => {
+      setupLinkedUserMocks();
+
+      const { Dashboard } = await import('./Dashboard');
+      renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+      const unlinkBtn = await screen.findByRole('button', { name: /unlink grandma/i });
+      fireEvent.click(unlinkBtn);
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      const cancelBtn = screen.getByRole('button', { name: /cancel/i });
+      fireEvent.click(cancelBtn);
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(mockUnlinkElderlyUser).not.toHaveBeenCalled();
+    });
+
+    it('confirming calls unlinkElderlyUser and removes user from list', async () => {
+      setupLinkedUserMocks();
+      mockUnlinkElderlyUser.mockResolvedValue(undefined);
+
+      const { Dashboard } = await import('./Dashboard');
+      renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+      const unlinkBtn = await screen.findByRole('button', { name: /unlink grandma/i });
+      fireEvent.click(unlinkBtn);
+
+      const confirmBtn = screen.getByRole('button', { name: /confirm/i });
+      fireEvent.click(confirmBtn);
+
+      await waitFor(() => {
+        expect(mockUnlinkElderlyUser).toHaveBeenCalledWith('elderly-1');
+      });
+
+      // User should be removed from the list
+      await waitFor(() => {
+        expect(screen.queryByText('Grandma')).not.toBeInTheDocument();
+      });
+    });
+
+    it('shows error alert when unlink fails', async () => {
+      setupLinkedUserMocks();
+      mockUnlinkElderlyUser.mockRejectedValue(new Error('Network error'));
+
+      const { Dashboard } = await import('./Dashboard');
+      renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+      const unlinkBtn = await screen.findByRole('button', { name: /unlink grandma/i });
+      fireEvent.click(unlinkBtn);
+
+      const confirmBtn = screen.getByRole('button', { name: /confirm/i });
+      fireEvent.click(confirmBtn);
+
+      const alert = await screen.findByRole('alert');
+      expect(alert).toBeInTheDocument();
+      expect(alert.textContent).toMatch(/failed to unlink/i);
+    });
+
+    it('passes vitest-axe with linked users', async () => {
+      setupLinkedUserMocks();
+
+      const { Dashboard } = await import('./Dashboard');
+      const { container } = renderWithProviders(<Dashboard userId="caregiver-1" />);
+
+      await screen.findByText('Grandma');
+      expect(await axe(container)).toHaveNoViolations();
+    });
   });
 });
