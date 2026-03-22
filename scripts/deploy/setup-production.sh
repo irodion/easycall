@@ -16,11 +16,13 @@ echo -e "${BLUE}╔════════════════════�
 echo -e "${BLUE}║   EasyCall Production Setup Assistant   ║${NC}"
 echo -e "${BLUE}╚═════════════════════════════════════════╝${NC}"
 
-# Check firebase CLI
-if ! command -v firebase &>/dev/null; then
-  echo -e "${RED}firebase CLI not found. Install: npm install -g firebase-tools${NC}"
-  exit 1
-fi
+# Check required CLIs
+for cmd in firebase pnpm; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo -e "${RED}$cmd not found. Install it before running this script.${NC}"
+    exit 1
+  fi
+done
 
 header "Step 1: Firebase Authentication"
 if firebase projects:list --limit 1 &>/dev/null; then
@@ -93,12 +95,60 @@ else
   ok "functions/.env created"
 fi
 
-header "Step 7: Deploy Cloud Functions"
-(cd functions && pnpm install --frozen-lockfile)
+header "Step 7: Set up IAM roles for CI/CD deploy"
+echo "  Granting required IAM roles to the deploy service account..."
+
+# Determine service account email — prefer extracting from JSON key if available
+SA_EMAIL=""
+read -r -p "  Path to service account JSON key (or Enter to use default): " SA_KEY_PATH
+if [ -n "$SA_KEY_PATH" ] && [ -f "$SA_KEY_PATH" ]; then
+  SA_EMAIL=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['client_email'])" "$SA_KEY_PATH" 2>/dev/null || true)
+fi
+if [ -z "$SA_EMAIL" ]; then
+  SA_EMAIL="firebase-adminsdk-fbsvc@${PROJECT_ID}.iam.gserviceaccount.com"
+  warn "Using default service account: $SA_EMAIL"
+  echo "  If CI uses a different service account, re-run with the JSON key path."
+else
+  ok "Service account from key: $SA_EMAIL"
+fi
+
+if command -v gcloud &>/dev/null; then
+  for role in roles/firebase.admin roles/cloudfunctions.admin roles/firebasehosting.admin \
+              roles/firebaserules.admin roles/iam.serviceAccountUser roles/artifactregistry.admin; do
+    if gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+      --member="serviceAccount:$SA_EMAIL" \
+      --role="$role" \
+      --condition=None --quiet --format="none" 2>/dev/null; then
+      ok "Granted $role"
+    else
+      echo -e "  ${RED}✗ Failed to grant $role — check permissions${NC}"
+      exit 1
+    fi
+  done
+  if gcloud services enable cloudbilling.googleapis.com --project="$PROJECT_ID" --quiet 2>/dev/null; then
+    ok "Cloud Billing API enabled"
+  else
+    echo -e "  ${RED}✗ Failed to enable Cloud Billing API${NC}"
+    exit 1
+  fi
+else
+  warn "gcloud CLI not found — set IAM roles manually in Google Cloud Console"
+  echo "  Required roles for $SA_EMAIL:"
+  echo "    - Firebase Admin"
+  echo "    - Cloud Functions Admin"
+  echo "    - Firebase Hosting Admin"
+  echo "    - Firebase Rules Admin"
+  echo "    - Service Account User"
+  echo "    - Artifact Registry Admin"
+  echo "  Also enable Cloud Billing API for the project."
+fi
+
+header "Step 8: Deploy Cloud Functions"
+(cd functions && pnpm install --frozen-lockfile && pnpm run build)
 firebase deploy --only functions --project "$PROJECT_ID"
 ok "Cloud Functions deployed"
 
-header "Step 8: Get Firebase config for .env.production"
+header "Step 9: Get Firebase config for .env.production"
 echo ""
 echo "  Run the following to get your web app config:"
 echo "  firebase apps:sdkconfig web --project $PROJECT_ID"
@@ -112,7 +162,7 @@ if firebase apps:list --project "$PROJECT_ID" 2>/dev/null | grep -q "WEB"; then
   firebase apps:sdkconfig web --project "$PROJECT_ID" 2>/dev/null || true
 fi
 
-header "Step 9: GitHub Secrets Setup"
+header "Step 10: GitHub Secrets Setup"
 echo "  Set these secrets in your GitHub repo (Settings → Secrets → Actions):"
 echo ""
 echo "  Firebase/App secrets (from Firebase Console):"

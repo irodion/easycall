@@ -31,6 +31,13 @@ else
   warn "gh not found — optional, needed only for GitHub secrets setup"
 fi
 
+# gcloud is optional — needed for IAM role setup in setup-production.sh
+if command -v gcloud &>/dev/null; then
+  ok "gcloud ($(command -v gcloud))"
+else
+  warn "gcloud not found — optional, needed for IAM role setup during production setup"
+fi
+
 # Check node version >= 20
 NODE_MAJOR=$(node -v | sed 's/v\([0-9]*\).*/\1/')
 if [ "$NODE_MAJOR" -ge 20 ]; then
