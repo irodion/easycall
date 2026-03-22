@@ -3,12 +3,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockDoc = vi.fn();
 const mockSetDoc = vi.fn().mockResolvedValue(undefined);
 const mockUpdateDoc = vi.fn().mockResolvedValue(undefined);
+const mockDeleteDoc = vi.fn().mockResolvedValue(undefined);
 const mockServerTimestamp = vi.fn(() => 'SERVER_TIMESTAMP');
 
 vi.mock('firebase/firestore', () => ({
   doc: (...args: unknown[]) => mockDoc(...args),
   setDoc: (...args: unknown[]) => mockSetDoc(...args),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
+  deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
   serverTimestamp: () => mockServerTimestamp(),
 }));
 
@@ -23,7 +25,12 @@ vi.mock('@/services/firebase', () => ({
 }));
 
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { initiateCall, declineCall, validatePairingCode } from './callSignaling';
+import {
+  initiateCall,
+  declineCall,
+  clearIncomingCallDoc,
+  validatePairingCode,
+} from './callSignaling';
 
 const mockGetFunctions = vi.mocked(getFunctions);
 const mockHttpsCallable = vi.mocked(httpsCallable);
@@ -102,6 +109,27 @@ describe('callSignaling', () => {
         'current',
       );
       expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', { status: 'declined' });
+    });
+  });
+
+  describe('clearIncomingCallDoc', () => {
+    it('calls deleteDoc on the correct ref', async () => {
+      await clearIncomingCallDoc('elderly-1');
+
+      expect(mockDoc).toHaveBeenCalledWith(
+        { type: 'mock-db' },
+        'users',
+        'elderly-1',
+        'incomingCall',
+        'current',
+      );
+      expect(mockDeleteDoc).toHaveBeenCalledWith('doc-ref');
+    });
+
+    it('does not throw if deleteDoc fails', async () => {
+      mockDeleteDoc.mockRejectedValueOnce(new Error('Not found'));
+
+      await expect(clearIncomingCallDoc('elderly-1')).resolves.toBeUndefined();
     });
   });
 

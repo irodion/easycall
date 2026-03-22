@@ -31,6 +31,11 @@ vi.mock('firebase/firestore', () => ({
       toDate: () => new Date(ms),
     }),
   },
+  doc: vi.fn().mockReturnValue('doc-ref'),
+  setDoc: vi.fn().mockResolvedValue(undefined),
+  deleteDoc: vi.fn().mockResolvedValue(undefined),
+  updateDoc: vi.fn().mockResolvedValue(undefined),
+  serverTimestamp: vi.fn(() => 'SERVER_TIMESTAMP'),
 }));
 
 vi.mock('firebase/functions', () => ({

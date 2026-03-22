@@ -12,8 +12,10 @@ vi.mock('react-router', async () => {
 });
 
 const mockDeclineCall = vi.fn().mockResolvedValue(undefined);
+const mockClearIncomingCallDoc = vi.fn().mockResolvedValue(undefined);
 vi.mock('@/services/callSignaling', () => ({
   declineCall: (...args: unknown[]) => mockDeclineCall(...args),
+  clearIncomingCallDoc: (...args: unknown[]) => mockClearIncomingCallDoc(...args),
 }));
 
 // Mock Audio constructor globally

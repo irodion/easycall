@@ -1,4 +1,4 @@
-import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, db } from '@/services/firebase';
 
@@ -26,6 +26,12 @@ interface InitiateCallParams {
 export async function initiateCall(params: InitiateCallParams): Promise<void> {
   const { elderlyUserId, callerId, callerName, callerPhotoURL, jitsiRoomId } = params;
   const ref = incomingCallRef(elderlyUserId);
+  // Delete any stale doc first (previous declined/answered call) so create rule applies
+  try {
+    await deleteDoc(ref);
+  } catch {
+    // May not exist or caller may lack delete permission — safe to ignore
+  }
   // nosemgrep: no-unvalidated-firestore-input — params are typed, Firestore rules enforce schema
   await setDoc(ref, {
     callerId,
@@ -40,4 +46,14 @@ export async function initiateCall(params: InitiateCallParams): Promise<void> {
 export async function declineCall(elderlyUserId: string): Promise<void> {
   const ref = incomingCallRef(elderlyUserId);
   await updateDoc(ref, { status: 'declined' });
+}
+
+/** Delete the incomingCall signaling doc (used after answer, decline, or hangup). */
+export async function clearIncomingCallDoc(elderlyUserId: string): Promise<void> {
+  const ref = incomingCallRef(elderlyUserId);
+  try {
+    await deleteDoc(ref);
+  } catch {
+    // Doc may already be deleted by the other party — safe to ignore
+  }
 }
