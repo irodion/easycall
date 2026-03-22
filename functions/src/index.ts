@@ -724,10 +724,7 @@ export async function syncDisplayNameToContacts(
   if (!afterName || afterName === beforeName) return 0;
 
   // Find all contacts across all users that reference this UID
-  const contactsSnap = await db
-    .collectionGroup('contacts')
-    .where('contactUserId', '==', uid)
-    .get();
+  const contactsSnap = await db.collectionGroup('contacts').where('contactUserId', '==', uid).get();
 
   if (contactsSnap.empty) return 0;
 
