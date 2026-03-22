@@ -332,6 +332,7 @@
     "addUser": "{{name}} hinzufügen",
     "adding": "Hinzufügen...",
     "addFailed": "Kontakt konnte nicht hinzugefügt werden: {{error}}",
-    "memberFallback": "Mitglied"
+    "memberFallback": "Mitglied",
+    "needsName": "Muss zuerst einen Namen festlegen"
   }
 }

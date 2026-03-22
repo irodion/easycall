@@ -336,6 +336,7 @@
     "addUser": "Add {{name}}",
     "adding": "Adding...",
     "addFailed": "Failed to add contact: {{error}}",
-    "memberFallback": "Member"
+    "memberFallback": "Member",
+    "needsName": "Needs to set their name first"
   }
 }

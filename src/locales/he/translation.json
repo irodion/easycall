@@ -332,6 +332,7 @@
     "addUser": "הוסף את {{name}}",
     "adding": "מוסיף...",
     "addFailed": "שגיאה בהוספת איש קשר: {{error}}",
-    "memberFallback": "חבר"
+    "memberFallback": "חבר",
+    "needsName": "צריך להגדיר את שמו קודם"
   }
 }

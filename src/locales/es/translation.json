@@ -332,6 +332,7 @@
     "addUser": "Agregar a {{name}}",
     "adding": "Agregando...",
     "addFailed": "Error al agregar contacto: {{error}}",
-    "memberFallback": "Miembro"
+    "memberFallback": "Miembro",
+    "needsName": "Necesita establecer su nombre primero"
   }
 }

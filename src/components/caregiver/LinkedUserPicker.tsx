@@ -9,6 +9,7 @@ import { EasyCallText } from '@/components/shared/EasyCallText';
 interface LinkedUser {
   uid: string;
   displayName: string;
+  hasName: boolean;
 }
 
 interface LinkedUserPickerProps {
@@ -70,12 +71,11 @@ export function LinkedUserPicker({
             snap.docs.map((d) => {
               const data = d.data();
               const name = data['displayName'];
+              const hasName = typeof name === 'string' && name.trim() !== '';
               return {
                 uid: d.id,
-                displayName:
-                  typeof name === 'string' && name.trim()
-                    ? name
-                    : t('linkedUserPicker.memberFallback'),
+                displayName: hasName ? name : t('linkedUserPicker.memberFallback'),
+                hasName,
               };
             }),
           );
@@ -152,13 +152,20 @@ export function LinkedUserPicker({
               key={user.uid}
               className="flex items-center justify-between gap-3 p-2 rounded-lg bg-base-100"
             >
-              <EasyCallText as="span" variant="body" className="font-semibold">
-                {user.displayName}
-              </EasyCallText>
+              <div className="flex flex-col">
+                <EasyCallText as="span" variant="body" className="font-semibold">
+                  {user.displayName}
+                </EasyCallText>
+                {!user.hasName && (
+                  <EasyCallText as="span" variant="body" className="text-base-content/50 text-sm">
+                    {t('linkedUserPicker.needsName')}
+                  </EasyCallText>
+                )}
+              </div>
               <EasyCallButton
                 variant="primary"
                 onClick={() => void handleAdd(user)}
-                disabled={addingId !== null}
+                disabled={addingId !== null || !user.hasName}
                 aria-label={t('linkedUserPicker.addUser', { name: user.displayName })}
               >
                 {addingId === user.uid ? t('linkedUserPicker.adding') : t('common.save')}
