@@ -37,6 +37,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Audit log: written exclusively by Cloud Functions (admin SDK).
+    // Caregivers can read entries where they are the actor.
+    match /auditLog/{entryId} {
+      allow read: if request.auth != null
+        && resource.data.caregiverUid == request.auth.uid;
+      allow write: if false;
+    }
+
     match /users/{userId} {
       // Users can read their own profile, or a linked caregiver can read it
       // (needed for the caregiver dashboard to show elderly user names/status)

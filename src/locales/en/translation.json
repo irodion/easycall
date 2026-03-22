@@ -92,7 +92,13 @@
     "manageContacts": "Manage Contacts",
     "backToDashboard": "Back to Dashboard",
     "noLinkedUsers": "No linked members yet",
-    "noLinkedUsersHint": "Tap \"Link Member\" to pair with a member's device."
+    "noLinkedUsersHint": "Tap \"Link Member\" to pair with a member's device.",
+    "settings": "Settings",
+    "unlinkUser": "Unlink",
+    "unlinkUserLabel": "Unlink {{name}}",
+    "confirmUnlink": "Unlink {{name}} and reset their account? This will remove all their contacts, call history, and settings. They will need to set up again.",
+    "unlinking": "Unlinking...",
+    "unlinkFailed": "Failed to unlink: {{error}}"
   },
   "manageContacts": {
     "title": "Manage Contacts",

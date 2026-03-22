@@ -5,10 +5,13 @@ import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firesto
 import { db } from '@/services/firebase';
 import { formatRelativeTime, timestampFromMillis } from '@/utils/formatTime';
 import { EasyCallText } from '@/components/shared/EasyCallText';
+import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { StatusIndicator } from '@/components/shared/StatusIndicator';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { presenceTextStyles, presenceI18nKeys } from '@/components/shared/presenceStyles';
 import { useContactsPresence } from '@/hooks/useContactsPresence';
 import { chunkArray } from '@/utils/chunkArray';
+import { unlinkElderlyUser } from '@/services/callSignaling';
 import { AccountBanner } from './AccountBanner';
 import type { EasyCallUser } from '@/types/user';
 
@@ -22,6 +25,9 @@ export function Dashboard({ userId }: DashboardProps) {
   const { t } = useTranslation();
   const [linkedUsers, setLinkedUsers] = useState<LinkedUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmUnlinkId, setConfirmUnlinkId] = useState<string | null>(null);
+  const [isUnlinking, setIsUnlinking] = useState(false);
+  const [unlinkError, setUnlinkError] = useState<string | null>(null);
   const linkedUserIds = useMemo(() => linkedUsers.map((u) => u.uid), [linkedUsers]);
   const presenceMap = useContactsPresence(linkedUserIds);
 
@@ -83,6 +89,24 @@ export function Dashboard({ userId }: DashboardProps) {
     };
   }, [userId]);
 
+  const unlinkTargetName = linkedUsers.find((u) => u.uid === confirmUnlinkId)?.displayName ?? '';
+
+  async function handleConfirmUnlink() {
+    if (!confirmUnlinkId || isUnlinking) return;
+    setIsUnlinking(true);
+    setUnlinkError(null);
+    try {
+      await unlinkElderlyUser(confirmUnlinkId);
+      setLinkedUsers((prev) => prev.filter((u) => u.uid !== confirmUnlinkId));
+      setConfirmUnlinkId(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setUnlinkError(t('dashboard.unlinkFailed', { error: message }));
+    } finally {
+      setIsUnlinking(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 via-base-100 to-base-100 p-6 flex flex-col gap-6">
       <EasyCallText as="h1" variant="heading">
@@ -98,6 +122,12 @@ export function Dashboard({ userId }: DashboardProps) {
       >
         + {t('dashboard.linkUser')}
       </Link>
+
+      {unlinkError && (
+        <p role="alert" className="text-error text-[length:var(--text-body)]">
+          {unlinkError}
+        </p>
+      )}
 
       {loading ? (
         <div role="status" aria-label={t('common.loading')}>
@@ -139,7 +169,7 @@ export function Dashboard({ userId }: DashboardProps) {
                     {t('presence.lastSeen', { time: formatRelativeTime(user.lastSeen) })}
                   </EasyCallText>
                 ) : null}
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Link
                     to={`/caregiver/manage/${user.uid}`}
                     className="btn btn-primary touch-target-min min-h-14 font-bold text-[length:var(--text-button)]"
@@ -147,12 +177,41 @@ export function Dashboard({ userId }: DashboardProps) {
                   >
                     {t('dashboard.manageContacts')}
                   </Link>
+                  <Link
+                    to={`/caregiver/settings/${user.uid}`}
+                    className="btn btn-secondary touch-target-min min-h-14 font-bold text-[length:var(--text-button)]"
+                    aria-label={t('dashboard.settings')}
+                  >
+                    {t('dashboard.settings')}
+                  </Link>
+                  <EasyCallButton
+                    variant="danger"
+                    onClick={() => setConfirmUnlinkId(user.uid)}
+                    aria-label={t('dashboard.unlinkUserLabel', { name: user.displayName })}
+                  >
+                    {t('dashboard.unlinkUser')}
+                  </EasyCallButton>
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmUnlinkId !== null}
+        message={
+          isUnlinking
+            ? t('dashboard.unlinking')
+            : t('dashboard.confirmUnlink', { name: unlinkTargetName })
+        }
+        onConfirm={() => void handleConfirmUnlink()}
+        onCancel={() => {
+          if (isUnlinking) return;
+          setConfirmUnlinkId(null);
+          setUnlinkError(null);
+        }}
+      />
     </div>
   );
 }

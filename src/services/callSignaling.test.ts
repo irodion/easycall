@@ -30,6 +30,7 @@ import {
   declineCall,
   clearIncomingCallDoc,
   validatePairingCode,
+  unlinkElderlyUser,
 } from './callSignaling';
 
 const mockGetFunctions = vi.mocked(getFunctions);
@@ -145,6 +146,20 @@ describe('callSignaling', () => {
       expect(mockHttpsCallable).toHaveBeenCalledWith('functions-instance', 'validatePairingCode');
       expect(mockCallable).toHaveBeenCalledWith({ code: '123456' });
       expect(result).toEqual({ elderlyUserId: 'elderly-42' });
+    });
+  });
+
+  describe('unlinkElderlyUser', () => {
+    it('calls httpsCallable with correct function name and payload', async () => {
+      const mockCallable = vi.fn().mockResolvedValue({ data: { success: true } });
+      mockGetFunctions.mockReturnValue('functions-instance' as never);
+      mockHttpsCallable.mockReturnValue(mockCallable as never);
+
+      await unlinkElderlyUser('elderly-99');
+
+      expect(mockGetFunctions).toHaveBeenCalledWith({});
+      expect(mockHttpsCallable).toHaveBeenCalledWith('functions-instance', 'unlinkElderlyUser');
+      expect(mockCallable).toHaveBeenCalledWith({ elderlyUserId: 'elderly-99' });
     });
   });
 });

@@ -91,7 +91,13 @@
     "manageContacts": "Administrar Contactos",
     "backToDashboard": "Volver al Panel",
     "noLinkedUsers": "Aún no hay miembros vinculados",
-    "noLinkedUsersHint": "Toque \"Vincular Miembro\" para emparejar con el dispositivo de un miembro."
+    "noLinkedUsersHint": "Toque \"Vincular Miembro\" para emparejar con el dispositivo de un miembro.",
+    "settings": "Ajustes",
+    "unlinkUser": "Desvincular",
+    "unlinkUserLabel": "Desvincular {{name}}",
+    "confirmUnlink": "¿Desvincular a {{name}} y restablecer su cuenta? Se eliminarán todos sus contactos, historial de llamadas y ajustes. Deberá configurar nuevamente.",
+    "unlinking": "Desvinculando...",
+    "unlinkFailed": "Error al desvincular: {{error}}"
   },
   "manageContacts": {
     "title": "Administrar Contactos",
