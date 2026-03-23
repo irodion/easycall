@@ -128,7 +128,7 @@ export function OnboardingFlow({ user, onComplete }: OnboardingFlowProps) {
               : t('onboarding.linkToElderly')}
           </h2>
           {user.role === 'elderly' ? (
-            <PairingCodeDisplay userId={user.uid} />
+            <PairingCodeDisplay userId={user.uid} onLinked={() => void handleFinish()} />
           ) : (
             <PairElderlyUser onSuccess={() => void handleFinish()} />
           )}

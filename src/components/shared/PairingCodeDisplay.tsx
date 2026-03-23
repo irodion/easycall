@@ -4,11 +4,12 @@ import { EasyCallButton } from '@/components/shared/EasyCallButton';
 
 interface PairingCodeDisplayProps {
   userId: string;
+  onLinked?: () => void;
 }
 
-export function PairingCodeDisplay({ userId }: PairingCodeDisplayProps) {
+export function PairingCodeDisplay({ userId, onLinked }: PairingCodeDisplayProps) {
   const { t } = useTranslation();
-  const { code, error, formattedCountdown, refresh } = usePairingCode(userId);
+  const { code, error, formattedCountdown, refresh } = usePairingCode(userId, { onLinked });
 
   return (
     <div className="flex flex-col items-center gap-[var(--space-md)]">

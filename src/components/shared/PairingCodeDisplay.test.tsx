@@ -29,6 +29,7 @@ describe('PairingCodeDisplay', () => {
     mockUsePairingCode.mockReturnValue({
       code: null,
       error: true,
+      linked: false,
       secondsRemaining: 600,
       formattedCountdown: '10:00',
       refresh: mockRefresh,
@@ -43,6 +44,7 @@ describe('PairingCodeDisplay', () => {
     mockUsePairingCode.mockReturnValue({
       code: null,
       error: true,
+      linked: false,
       secondsRemaining: 600,
       formattedCountdown: '10:00',
       refresh: mockRefresh,
@@ -58,6 +60,7 @@ describe('PairingCodeDisplay', () => {
     mockUsePairingCode.mockReturnValue({
       code: null,
       error: false,
+      linked: false,
       secondsRemaining: 600,
       formattedCountdown: '10:00',
       refresh: mockRefresh,
@@ -71,6 +74,7 @@ describe('PairingCodeDisplay', () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
       error: false,
+      linked: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
@@ -84,6 +88,7 @@ describe('PairingCodeDisplay', () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
       error: false,
+      linked: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
@@ -97,6 +102,7 @@ describe('PairingCodeDisplay', () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
       error: false,
+      linked: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
@@ -112,6 +118,7 @@ describe('PairingCodeDisplay', () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
       error: false,
+      linked: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
@@ -122,10 +129,17 @@ describe('PairingCodeDisplay', () => {
     expect(codeElement).toBeInTheDocument();
   });
 
+  it('passes onLinked callback to usePairingCode', () => {
+    const onLinked = vi.fn();
+    renderWithProviders(<PairingCodeDisplay userId="user-1" onLinked={onLinked} />);
+    expect(mockUsePairingCode).toHaveBeenCalledWith('user-1', { onLinked });
+  });
+
   it('passes vitest-axe', async () => {
     mockUsePairingCode.mockReturnValue({
       code: '123456',
       error: false,
+      linked: false,
       secondsRemaining: 540,
       formattedCountdown: '09:00',
       refresh: mockRefresh,
