@@ -18,15 +18,21 @@ vi.mock('@/services/callSignaling', () => ({
   clearIncomingCallDoc: (...args: unknown[]) => mockClearIncomingCallDoc(...args),
 }));
 
-// Mock Audio constructor globally
-const mockPlay = vi.fn().mockResolvedValue(undefined);
-const mockPause = vi.fn();
-class MockAudio {
-  loop = false;
-  play = mockPlay;
-  pause = mockPause;
-}
-vi.stubGlobal('Audio', MockAudio);
+// Mock ringtone utility
+const mockRingtonePlay = vi.fn();
+const mockRingtonePause = vi.fn();
+const mockRingtoneSetVolume = vi.fn();
+const mockCreateRingtone = vi.fn();
+vi.mock('@/utils/ringtone', () => ({
+  createRingtone: (...args: unknown[]) => {
+    mockCreateRingtone(...args);
+    return {
+      play: mockRingtonePlay,
+      pause: mockRingtonePause,
+      setVolume: mockRingtoneSetVolume,
+    };
+  },
+}));
 
 import { IncomingCallScreen } from './IncomingCallScreen';
 
@@ -41,7 +47,7 @@ describe('IncomingCallScreen', () => {
   });
 
   it('renders nothing when isRinging=false', () => {
-    const { container } = renderWithProviders(<IncomingCallScreen />);
+    const { container } = renderWithProviders(<IncomingCallScreen ringtoneVolume={80} />);
     expect(container.innerHTML).toBe('');
   });
 
@@ -208,6 +214,56 @@ describe('IncomingCallScreen', () => {
 
     expect(mockDeclineCall).toHaveBeenCalledWith('user-1');
     expect(useCallStore.getState().isRinging).toBe(false);
+  });
+
+  it('creates ringtone with the provided volume and plays it', () => {
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: '',
+        roomId: 'room-1',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    renderWithProviders(<IncomingCallScreen ringtoneVolume={60} />);
+
+    expect(mockCreateRingtone).toHaveBeenCalledWith(60);
+    expect(mockRingtonePlay).toHaveBeenCalled();
+  });
+
+  it('pauses ringtone on unmount', () => {
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: '',
+        roomId: 'room-1',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    const { unmount } = renderWithProviders(<IncomingCallScreen ringtoneVolume={80} />);
+    unmount();
+
+    expect(mockRingtonePause).toHaveBeenCalled();
+  });
+
+  it('uses default volume of 80 when no prop provided', () => {
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: '',
+        roomId: 'room-1',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    renderWithProviders(<IncomingCallScreen />);
+
+    expect(mockCreateRingtone).toHaveBeenCalledWith(80);
   });
 
   it('passes vitest-axe accessibility audit', async () => {
