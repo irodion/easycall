@@ -171,8 +171,12 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         });
 
         api.addListener('readyToClose', () => {
-          void writeHistory();
-          if (mounted) void navigate('/elderly');
+          const cleanup: Promise<unknown>[] = [writeHistory(), clearActiveCall(user.uid)];
+          if (contactId && contact!.contactUserId)
+            cleanup.push(clearIncomingCallDoc(contact!.contactUserId));
+          void Promise.all(cleanup).then(() => {
+            if (mounted) void navigate('/elderly');
+          });
         });
 
         let participantCount = 0;

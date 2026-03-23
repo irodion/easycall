@@ -17,6 +17,14 @@ vi.mock('@/services/callHistory', () => ({
   writeCallHistoryEntry: (...args: unknown[]) => mockWriteCallHistoryEntry(...args),
 }));
 
+const mockClearIncomingCallDoc = vi.fn().mockResolvedValue(undefined);
+const mockInitiateCall = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('@/services/callSignaling', () => ({
+  initiateCall: (...args: unknown[]) => mockInitiateCall(...args),
+  clearIncomingCallDoc: (...args: unknown[]) => mockClearIncomingCallDoc(...args),
+}));
+
 vi.mock('@/services/jitsi', () => ({
   loadJitsiApi: vi.fn().mockResolvedValue(undefined),
   getJaasAppId: vi.fn().mockReturnValue('vpaas-magic-cookie-test123'),
@@ -301,6 +309,46 @@ describe('CallScreen', () => {
   it('works without setInCall prop (optional — no crash)', async () => {
     // Should not throw when setInCall is undefined
     await expect(renderLoaded('/call/contact-1')).resolves.toBeTruthy();
+  });
+
+  it('preserves activeCall after participantLeft so rejoin prompt can appear', async () => {
+    await renderLoaded();
+    mockClearActiveCall.mockClear();
+
+    // Simulate: participant joins, then leaves (could be intentional or network drop)
+    await act(async () => {
+      lastApiInstance?._emit('participantJoined', {});
+    });
+
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        lastApiInstance?._emit('participantLeft', {});
+      });
+
+      // Advance past the 3-second auto-navigate timer
+      await act(async () => {
+        vi.advanceTimersByTime(3000);
+      });
+      // activeCall must NOT be cleared — it powers the rejoin prompt for accidental disconnects
+      expect(mockClearActiveCall).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('clears activeCall and signaling doc on readyToClose event', async () => {
+    await renderLoaded();
+    mockClearActiveCall.mockClear();
+    mockClearIncomingCallDoc.mockClear();
+
+    await act(async () => {
+      lastApiInstance?._emit('readyToClose', {});
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    expect(mockClearActiveCall).toHaveBeenCalledWith('user-1');
+    expect(mockClearIncomingCallDoc).toHaveBeenCalledWith(mockContact.contactUserId);
   });
 
   describe('connection quality indicator', () => {
