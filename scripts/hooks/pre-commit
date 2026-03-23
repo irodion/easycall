@@ -8,7 +8,7 @@ fi
 
 echo "Running semgrep security scan..."
 if command -v semgrep >/dev/null 2>&1; then
-  semgrep --config auto --config .semgrep.yml --error --severity ERROR --quiet
+  semgrep --config auto --config .semgrep.yml --error --quiet
   if [ $? -ne 0 ]; then
     echo "ERROR: Semgrep found security issues. Fix them before committing."
     exit 1
