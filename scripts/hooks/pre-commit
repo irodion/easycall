@@ -8,7 +8,7 @@ fi
 
 echo "Running semgrep security scan..."
 if command -v semgrep >/dev/null 2>&1; then
-  semgrep --config auto --config .semgrep.yml --error --severity ERROR --quiet
+  semgrep --config auto --config .semgrep.yml --error --quiet
   if [ $? -ne 0 ]; then
     echo "ERROR: Semgrep found security issues. Fix them before committing."
     exit 1
@@ -47,6 +47,13 @@ if git diff --cached --name-only | grep -qE '^(pnpm-lock\.yaml|package\.json)$';
   echo ""
   echo "⚠ Dependencies changed — run 'pnpm security:deps' to check for vulnerabilities."
   echo ""
+fi
+
+echo "Running lint..."
+pnpm lint
+if [ $? -ne 0 ]; then
+  echo "ERROR: Lint failed. Fix errors before committing."
+  exit 1
 fi
 
 echo "Running tests before commit..."

@@ -14,8 +14,15 @@ vi.mock('@/components/elderly/PermissionCheck', () => ({
 }));
 
 vi.mock('@/components/shared/PairingCodeDisplay', () => ({
-  PairingCodeDisplay: ({ userId }: { userId: string }) => (
-    <div data-testid="pairing-code-display">Pairing code for {userId}</div>
+  PairingCodeDisplay: ({ userId, onLinked }: { userId: string; onLinked?: () => void }) => (
+    <div data-testid="pairing-code-display">
+      Pairing code for {userId}
+      {onLinked && (
+        <button data-testid="simulate-link" onClick={onLinked}>
+          Simulate Link
+        </button>
+      )}
+    </div>
   ),
 }));
 
@@ -155,6 +162,23 @@ describe('OnboardingFlow', () => {
 
     expect(onComplete).not.toHaveBeenCalled();
     expect(screen.getByRole('alert')).toHaveTextContent(/failed to complete setup/i);
+  });
+
+  it('auto-completes onboarding when elderly user is linked by caregiver', async () => {
+    const u = userEvent.setup();
+    const user = createMockUser({ role: 'elderly' });
+    renderWithProviders(<OnboardingFlow user={user} onComplete={onComplete} />);
+
+    // Navigate through all steps to step 4
+    await u.click(screen.getByRole('button', { name: /next/i }));
+    await u.click(screen.getByRole('button', { name: /grant permissions/i }));
+    await u.click(screen.getByRole('button', { name: /next/i }));
+
+    // Simulate caregiver linking
+    await u.click(screen.getByTestId('simulate-link'));
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', { onboardingComplete: true });
+    expect(onComplete).toHaveBeenCalled();
   });
 
   it('passes vitest-axe on step 1', async () => {

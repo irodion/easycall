@@ -1,9 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
+let snapshotCallback: ((snap: { empty: boolean }) => void) | null = null;
+const mockUnsubscribe = vi.fn();
+const mockOnSnapshot = vi.fn((_q: unknown, cb: (snap: { empty: boolean }) => void) => {
+  snapshotCallback = cb;
+  cb({ empty: true });
+  return mockUnsubscribe;
+});
+
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn(() => 'doc-ref'),
   setDoc: vi.fn().mockResolvedValue(undefined),
+  collection: vi.fn(() => 'collection-ref'),
+  query: vi.fn((...args: unknown[]) => args[0]),
+  limit: vi.fn(() => 'limit-1'),
+  onSnapshot: (...args: unknown[]) =>
+    mockOnSnapshot(...(args as Parameters<typeof mockOnSnapshot>)),
 }));
 
 vi.mock('@/services/firebase', () => ({
@@ -34,6 +47,7 @@ describe('usePairingCode', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    snapshotCallback = null;
   });
 
   afterEach(() => {
@@ -100,6 +114,39 @@ describe('usePairingCode', () => {
     expect(result.current.code).toMatch(/^\d{6}$/);
     expect(result.current.secondsRemaining).toBe(600);
     expect(typeof firstCode).toBe('string');
+  });
+
+  it('calls onLinked callback when caregivers collection becomes non-empty', async () => {
+    const onLinked = vi.fn();
+    renderHook(() => usePairingCode('user-1', { onLinked }));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    expect(onLinked).not.toHaveBeenCalled();
+
+    act(() => {
+      snapshotCallback?.({ empty: false });
+    });
+
+    expect(onLinked).toHaveBeenCalledTimes(1);
+  });
+
+  it('unsubscribes from onSnapshot after detecting link', async () => {
+    const onLinked = vi.fn();
+    renderHook(() => usePairingCode('user-1', { onLinked }));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    act(() => {
+      snapshotCallback?.({ empty: false });
+    });
+
+    expect(mockUnsubscribe).toHaveBeenCalled();
+  });
+
+  it('does not subscribe to onSnapshot when no onLinked callback', async () => {
+    renderHook(() => usePairingCode('user-1'));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+
+    expect(mockOnSnapshot).not.toHaveBeenCalled();
   });
 
   it('cleans up timers on unmount', async () => {

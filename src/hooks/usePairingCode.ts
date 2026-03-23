@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 
 export function generateCode(): string {
@@ -20,7 +20,11 @@ async function saveCode(userId: string): Promise<string> {
 
 const AUTO_REFRESH_MS = 10 * 60 * 1000;
 
-export function usePairingCode(userId: string | null) {
+interface UsePairingCodeOptions {
+  onLinked?: () => void;
+}
+
+export function usePairingCode(userId: string | null, options?: UsePairingCodeOptions) {
   const [code, setCode] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(600);
@@ -28,10 +32,15 @@ export function usePairingCode(userId: string | null) {
   const countdownRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const mountedRef = useRef(true);
   const userIdRef = useRef(userId);
+  const onLinkedRef = useRef(options?.onLinked);
 
   useEffect(() => {
     userIdRef.current = userId;
   }, [userId]);
+
+  useEffect(() => {
+    onLinkedRef.current = options?.onLinked;
+  }, [options?.onLinked]);
 
   function restartCountdown() {
     if (countdownRef.current) clearInterval(countdownRef.current);
@@ -103,6 +112,26 @@ export function usePairingCode(userId: string | null) {
       setError(true);
     }
   };
+
+  // Detect caregiver linking via caregivers subcollection
+  useEffect(() => {
+    if (!userId || !onLinkedRef.current) return;
+    const q = query(collection(db, 'users', userId, 'caregivers'), limit(1));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        if (!snap.empty) {
+          unsub();
+          onLinkedRef.current?.();
+        }
+      },
+      (err) => {
+        // nosemgrep: no-console-log-sensitive — logs Firestore listener error, no sensitive data
+        console.error('Failed to listen for caregiver linking:', err);
+      },
+    );
+    return unsub;
+  }, [userId]);
 
   const formattedCountdown = `${String(Math.floor(secondsRemaining / 60)).padStart(2, '0')}:${String(secondsRemaining % 60).padStart(2, '0')}`;
 
