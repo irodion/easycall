@@ -172,6 +172,9 @@ export function CallScreen({ setInCall }: CallScreenProps) {
 
         api.addListener('readyToClose', () => {
           void writeHistory();
+          void clearActiveCall(user.uid);
+          if (contactId && contact!.contactUserId)
+            void clearIncomingCallDoc(contact!.contactUserId);
           if (mounted) void navigate('/elderly');
         });
 

@@ -303,6 +303,44 @@ describe('CallScreen', () => {
     await expect(renderLoaded('/call/contact-1')).resolves.toBeTruthy();
   });
 
+  it('preserves activeCall after participantLeft so rejoin prompt can appear', async () => {
+    await renderLoaded();
+    mockClearActiveCall.mockClear();
+
+    // Simulate: participant joins, then leaves (could be intentional or network drop)
+    await act(async () => {
+      lastApiInstance?._emit('participantJoined', {});
+    });
+
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        lastApiInstance?._emit('participantLeft', {});
+      });
+
+      // Advance past the 3-second auto-navigate timer
+      await act(async () => {
+        vi.advanceTimersByTime(3000);
+      });
+      // activeCall must NOT be cleared — it powers the rejoin prompt for accidental disconnects
+      expect(mockClearActiveCall).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('clears activeCall on readyToClose event', async () => {
+    await renderLoaded();
+    mockClearActiveCall.mockClear();
+
+    await act(async () => {
+      lastApiInstance?._emit('readyToClose', {});
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    expect(mockClearActiveCall).toHaveBeenCalledWith('user-1');
+  });
+
   describe('connection quality indicator', () => {
     it('registers connectionQuality event listener', async () => {
       await renderLoaded();
