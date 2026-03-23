@@ -1,5 +1,10 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import i18n, { loadLanguage, RTL_LANGUAGES, SUPPORTED_LANGUAGES } from './i18n';
+import i18n, {
+  loadLanguage,
+  RTL_LANGUAGES,
+  SUPPORTED_LANGUAGES,
+  detectBrowserLanguage,
+} from './i18n';
 
 describe('i18n', () => {
   afterEach(async () => {
@@ -77,5 +82,86 @@ describe('i18n', () => {
   it('loadLanguage loads German', async () => {
     await loadLanguage('de');
     expect(i18n.hasResourceBundle('de', 'translation')).toBe(true);
+  });
+});
+
+describe('detectBrowserLanguage', () => {
+  const originalLanguages = navigator.languages;
+  const originalLanguage = navigator.language;
+
+  afterEach(() => {
+    Object.defineProperty(navigator, 'languages', {
+      value: originalLanguages,
+      configurable: true,
+    });
+    Object.defineProperty(navigator, 'language', {
+      value: originalLanguage,
+      configurable: true,
+    });
+  });
+
+  it('returns es when browser prefers es-MX', () => {
+    Object.defineProperty(navigator, 'languages', {
+      value: ['es-MX', 'en'],
+      configurable: true,
+    });
+    expect(detectBrowserLanguage()).toBe('es');
+  });
+
+  it('returns de when browser prefers de-AT', () => {
+    Object.defineProperty(navigator, 'languages', {
+      value: ['de-AT'],
+      configurable: true,
+    });
+    expect(detectBrowserLanguage()).toBe('de');
+  });
+
+  it('returns he when browser prefers he-IL', () => {
+    Object.defineProperty(navigator, 'languages', {
+      value: ['he-IL'],
+      configurable: true,
+    });
+    expect(detectBrowserLanguage()).toBe('he');
+  });
+
+  it('falls back to navigator.language when languages is unavailable', () => {
+    Object.defineProperty(navigator, 'languages', {
+      value: undefined,
+      configurable: true,
+    });
+    Object.defineProperty(navigator, 'language', {
+      value: 'ru',
+      configurable: true,
+    });
+    expect(detectBrowserLanguage()).toBe('ru');
+  });
+
+  it('returns en when no supported language matches', () => {
+    Object.defineProperty(navigator, 'languages', {
+      value: ['fr', 'ja'],
+      configurable: true,
+    });
+    expect(detectBrowserLanguage()).toBe('en');
+  });
+
+  it('returns first supported match from languages list', () => {
+    Object.defineProperty(navigator, 'languages', {
+      value: ['fr', 'ru', 'de'],
+      configurable: true,
+    });
+    expect(detectBrowserLanguage()).toBe('ru');
+  });
+
+  it('returns en when languages is empty', () => {
+    Object.defineProperty(navigator, 'languages', {
+      value: [],
+      configurable: true,
+    });
+    expect(detectBrowserLanguage()).toBe('en');
+  });
+
+  it('returns en for default jsdom environment (en-US)', () => {
+    // jsdom sets navigator.language to 'en-US' by default
+    expect(detectBrowserLanguage()).toBe('en');
   });
 });
