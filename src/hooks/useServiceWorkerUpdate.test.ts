@@ -100,69 +100,73 @@ describe('useServiceWorkerUpdate', () => {
   it('triggers immediate update check on registration', () => {
     renderHook(() => useServiceWorkerUpdate());
 
+    const mockUpdate = vi.fn().mockResolvedValue(undefined);
     const mockRegistration = {
       installing: null,
-      update: vi.fn().mockResolvedValue(undefined),
+      update: mockUpdate,
     } as unknown as ServiceWorkerRegistration;
 
     capturedOptions?.onRegisteredSW?.('sw.js', mockRegistration);
 
     // Should call update immediately on registration
-    expect(mockRegistration.update).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
   });
 
   it('checks for updates on visibilitychange (visible) with min interval', () => {
     renderHook(() => useServiceWorkerUpdate());
 
+    const mockUpdate = vi.fn().mockResolvedValue(undefined);
     const mockRegistration = {
       installing: null,
-      update: vi.fn().mockResolvedValue(undefined),
+      update: mockUpdate,
     } as unknown as ServiceWorkerRegistration;
 
     // Trigger onRegisteredSW (calls update immediately)
     capturedOptions?.onRegisteredSW?.('sw.js', mockRegistration);
-    vi.mocked(mockRegistration.update).mockClear();
+    mockUpdate.mockClear();
 
     // Simulate app coming to foreground
     Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
     visibilityChangeHandler?.();
 
     // Should NOT call update again — min interval hasn't passed
-    expect(mockRegistration.update).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
 
     // Advance past the minimum interval (1 hour)
     vi.advanceTimersByTime(60 * 60 * 1000 + 1);
 
     // Now simulate another foreground event
     visibilityChangeHandler?.();
-    expect(mockRegistration.update).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
   });
 
   it('skips immediate update check when offline', () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     renderHook(() => useServiceWorkerUpdate());
 
+    const mockUpdate = vi.fn().mockResolvedValue(undefined);
     const mockRegistration = {
       installing: null,
-      update: vi.fn().mockResolvedValue(undefined),
+      update: mockUpdate,
     } as unknown as ServiceWorkerRegistration;
 
     capturedOptions?.onRegisteredSW?.('sw.js', mockRegistration);
 
     // Should NOT call update when offline
-    expect(mockRegistration.update).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it('skips visibilitychange update check when offline', () => {
     renderHook(() => useServiceWorkerUpdate());
 
+    const mockUpdate = vi.fn().mockResolvedValue(undefined);
     const mockRegistration = {
       installing: null,
-      update: vi.fn().mockResolvedValue(undefined),
+      update: mockUpdate,
     } as unknown as ServiceWorkerRegistration;
 
     capturedOptions?.onRegisteredSW?.('sw.js', mockRegistration);
-    vi.mocked(mockRegistration.update).mockClear();
+    mockUpdate.mockClear();
 
     // Advance past min interval
     vi.advanceTimersByTime(60 * 60 * 1000 + 1);
@@ -173,7 +177,7 @@ describe('useServiceWorkerUpdate', () => {
     Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
     visibilityChangeHandler?.();
 
-    expect(mockRegistration.update).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it('skips update check when SW is installing', () => {
