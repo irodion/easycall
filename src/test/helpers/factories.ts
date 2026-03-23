@@ -33,6 +33,7 @@ export function createMockUser(overrides: Partial<EasyCallUser> = {}): EasyCallU
       appLockEnabled: false,
       appLockPinHash: null,
       language: 'en',
+      restrictedNetworkMode: false,
     },
     pushTokens: [],
     onboardingComplete: false,

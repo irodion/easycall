@@ -38,6 +38,7 @@ const defaultSettings = {
   autoAnswer: false,
   appLockEnabled: false,
   appLockPinHash: null,
+  restrictedNetworkMode: false,
 };
 
 describe('ElderlyUserSettings', () => {
@@ -276,5 +277,32 @@ describe('ElderlyUserSettings', () => {
     await user.click(screen.getByRole('button', { name: /save pin/i }));
 
     expect(screen.getByRole('alert')).toHaveTextContent(/exactly 4 digits/i);
+  });
+
+  it('renders restricted network mode toggle', () => {
+    renderAndEmit();
+    expect(screen.getByRole('checkbox', { name: /restricted network/i })).toBeInTheDocument();
+  });
+
+  it('restricted network toggle is off by default', () => {
+    renderAndEmit();
+    const toggle = screen.getByRole('checkbox', { name: /restricted network/i });
+    expect(toggle).not.toBeChecked();
+  });
+
+  it('toggling restricted network mode writes to Firestore', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderAndEmit();
+    const toggle = screen.getByRole('checkbox', { name: /restricted network/i });
+    await user.click(toggle);
+    expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', {
+      settings: expect.objectContaining({ restrictedNetworkMode: true }),
+    });
+  });
+
+  it('restricted network toggle shows enabled when on', () => {
+    renderAndEmit({ ...defaultSettings, restrictedNetworkMode: true });
+    const toggle = screen.getByRole('checkbox', { name: /restricted network/i });
+    expect(toggle).toBeChecked();
   });
 });

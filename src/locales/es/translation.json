@@ -136,7 +136,11 @@
     "savePin": "Guardar PIN",
     "language": "Idioma",
     "settingsFor": "Configuración de {{name}}",
-    "loadError": "No se pudieron cargar las configuraciones. Verifique los permisos e inténtelo de nuevo."
+    "loadError": "No se pudieron cargar las configuraciones. Verifique los permisos e inténtelo de nuevo.",
+    "restrictedNetwork": "Modo de red restringida",
+    "restrictedNetworkHint": "Activar si las llamadas no se conectan. Fuerza conexiones de retransmisión que funcionan a través de cortafuegos.",
+    "restrictedNetworkEnabled": "Activado — las llamadas usan servidores de retransmisión",
+    "restrictedNetworkDisabled": "Desactivado — las llamadas usan conexiones directas"
   },
   "presence": {
     "online": "En línea",

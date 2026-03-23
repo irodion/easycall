@@ -136,7 +136,11 @@
     "savePin": "PIN speichern",
     "language": "Sprache",
     "settingsFor": "Einstellungen für {{name}}",
-    "loadError": "Einstellungen konnten nicht geladen werden. Überprüfen Sie die Berechtigungen und versuchen Sie es erneut."
+    "loadError": "Einstellungen konnten nicht geladen werden. Überprüfen Sie die Berechtigungen und versuchen Sie es erneut.",
+    "restrictedNetwork": "Eingeschränkter Netzwerkmodus",
+    "restrictedNetworkHint": "Aktivieren, wenn Anrufe keine Verbindung herstellen. Erzwingt Relay-Verbindungen, die durch Firewalls funktionieren.",
+    "restrictedNetworkEnabled": "Aktiviert — Anrufe nutzen Relay-Server",
+    "restrictedNetworkDisabled": "Deaktiviert — Anrufe nutzen direkte Verbindungen"
   },
   "presence": {
     "online": "Online",

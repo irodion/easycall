@@ -136,7 +136,11 @@
     "savePin": "שמור PIN",
     "language": "שפה",
     "settingsFor": "הגדרות עבור {{name}}",
-    "loadError": "לא ניתן לטעון הגדרות. בדקו הרשאות ונסו שוב."
+    "loadError": "לא ניתן לטעון הגדרות. בדקו הרשאות ונסו שוב.",
+    "restrictedNetwork": "מצב רשת מוגבלת",
+    "restrictedNetworkHint": "הפעילו אם שיחות לא מתחברות. מאלץ חיבורי ממסר שעובדים דרך חומות אש.",
+    "restrictedNetworkEnabled": "מופעל — שיחות משתמשות בשרתי ממסר",
+    "restrictedNetworkDisabled": "כבוי — שיחות משתמשות בחיבורים ישירים"
   },
   "presence": {
     "online": "מחובר",

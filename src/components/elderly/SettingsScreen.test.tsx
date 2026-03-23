@@ -43,6 +43,7 @@ const defaultSettings: UserSettings = {
   appLockEnabled: false,
   appLockPinHash: null,
   language: 'en',
+  restrictedNetworkMode: false,
 };
 
 describe('SettingsScreen', () => {
