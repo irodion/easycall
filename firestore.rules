@@ -50,8 +50,9 @@ service cloud.firestore {
       // (needed for the caregiver dashboard to show elderly user names/status)
       allow read: if request.auth.uid == userId
         || isCaregiverOf(userId, request.auth.uid);
-      // Users can update their own profile but cannot change their role once set
-      allow update: if request.auth.uid == userId
+      // Users can update their own profile but cannot change their role once set.
+      // Linked caregivers can also update settings (e.g. font size, restricted network mode).
+      allow update: if (request.auth.uid == userId || isCaregiverOf(userId, request.auth.uid))
         && (!('role' in resource.data) || request.resource.data.role == resource.data.role);
       allow delete: if request.auth.uid == userId;
       // New user creation: role must be 'elderly' (caregiver goes through Cloud Function).
