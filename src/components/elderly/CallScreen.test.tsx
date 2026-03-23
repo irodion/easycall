@@ -17,6 +17,14 @@ vi.mock('@/services/callHistory', () => ({
   writeCallHistoryEntry: (...args: unknown[]) => mockWriteCallHistoryEntry(...args),
 }));
 
+const mockClearIncomingCallDoc = vi.fn().mockResolvedValue(undefined);
+const mockInitiateCall = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('@/services/callSignaling', () => ({
+  initiateCall: (...args: unknown[]) => mockInitiateCall(...args),
+  clearIncomingCallDoc: (...args: unknown[]) => mockClearIncomingCallDoc(...args),
+}));
+
 vi.mock('@/services/jitsi', () => ({
   loadJitsiApi: vi.fn().mockResolvedValue(undefined),
   getJaasAppId: vi.fn().mockReturnValue('vpaas-magic-cookie-test123'),
@@ -329,9 +337,10 @@ describe('CallScreen', () => {
     }
   });
 
-  it('clears activeCall on readyToClose event', async () => {
+  it('clears activeCall and signaling doc on readyToClose event', async () => {
     await renderLoaded();
     mockClearActiveCall.mockClear();
+    mockClearIncomingCallDoc.mockClear();
 
     await act(async () => {
       lastApiInstance?._emit('readyToClose', {});
@@ -339,6 +348,7 @@ describe('CallScreen', () => {
     });
 
     expect(mockClearActiveCall).toHaveBeenCalledWith('user-1');
+    expect(mockClearIncomingCallDoc).toHaveBeenCalledWith(mockContact.contactUserId);
   });
 
   describe('connection quality indicator', () => {

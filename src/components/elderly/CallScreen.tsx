@@ -171,11 +171,12 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         });
 
         api.addListener('readyToClose', () => {
-          void writeHistory();
-          void clearActiveCall(user.uid);
+          const cleanup: Promise<unknown>[] = [writeHistory(), clearActiveCall(user.uid)];
           if (contactId && contact!.contactUserId)
-            void clearIncomingCallDoc(contact!.contactUserId);
-          if (mounted) void navigate('/elderly');
+            cleanup.push(clearIncomingCallDoc(contact!.contactUserId));
+          void Promise.all(cleanup).then(() => {
+            if (mounted) void navigate('/elderly');
+          });
         });
 
         let participantCount = 0;
