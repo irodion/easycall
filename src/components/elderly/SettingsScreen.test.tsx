@@ -195,6 +195,25 @@ describe('SettingsScreen', () => {
     expect(screen.getByRole('button', { name: /how to remove/i })).toBeInTheDocument();
   });
 
+  it('displays P2P connection mode when restrictedNetworkMode is false', () => {
+    renderWithProviders(
+      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+    );
+    expect(screen.getByTestId('connection-mode-section')).toBeInTheDocument();
+    expect(screen.getByText('Direct (P2P)')).toBeInTheDocument();
+  });
+
+  it('displays Relay connection mode when restrictedNetworkMode is true', () => {
+    renderWithProviders(
+      <SettingsScreen
+        settings={{ ...defaultSettings, restrictedNetworkMode: true }}
+        userId="user-1"
+        displayName="Test User"
+      />,
+    );
+    expect(screen.getByText('Relay')).toBeInTheDocument();
+  });
+
   it('passes vitest-axe accessibility check', async () => {
     const { container } = renderWithProviders(
       <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,

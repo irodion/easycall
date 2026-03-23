@@ -48,7 +48,10 @@
     "installApp": "Install App",
     "yourName": "Your Name",
     "changeName": "Change your name",
-    "noName": "Not set"
+    "noName": "Not set",
+    "connectionMode": "Connection Mode",
+    "connectionModeP2P": "Direct (P2P)",
+    "connectionModeRelay": "Relay"
   },
   "permissions": {
     "checking": "Checking camera and microphone permissions",

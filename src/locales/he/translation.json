@@ -48,7 +48,10 @@
     "installApp": "התקן אפליקציה",
     "yourName": "השם שלך",
     "changeName": "שנה את השם שלך",
-    "noName": "לא הוגדר"
+    "noName": "לא הוגדר",
+    "connectionMode": "מצב חיבור",
+    "connectionModeP2P": "ישיר (P2P)",
+    "connectionModeRelay": "ממסר"
   },
   "permissions": {
     "checking": "בודק הרשאות מצלמה ומיקרופון",
