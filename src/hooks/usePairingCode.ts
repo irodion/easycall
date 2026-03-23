@@ -33,11 +33,14 @@ export function usePairingCode(userId: string | null, options?: UsePairingCodeOp
   const mountedRef = useRef(true);
   const userIdRef = useRef(userId);
   const onLinkedRef = useRef(options?.onLinked);
-  onLinkedRef.current = options?.onLinked;
 
   useEffect(() => {
     userIdRef.current = userId;
   }, [userId]);
+
+  useEffect(() => {
+    onLinkedRef.current = options?.onLinked;
+  }, [options?.onLinked]);
 
   function restartCountdown() {
     if (countdownRef.current) clearInterval(countdownRef.current);

@@ -3,13 +3,11 @@ import { renderHook, act } from '@testing-library/react';
 
 let snapshotCallback: ((snap: { empty: boolean }) => void) | null = null;
 const mockUnsubscribe = vi.fn();
-const mockOnSnapshot = vi.fn(
-  (_q: unknown, cb: (snap: { empty: boolean }) => void, _err?: unknown) => {
-    snapshotCallback = cb;
-    cb({ empty: true });
-    return mockUnsubscribe;
-  },
-);
+const mockOnSnapshot = vi.fn((_q: unknown, cb: (snap: { empty: boolean }) => void) => {
+  snapshotCallback = cb;
+  cb({ empty: true });
+  return mockUnsubscribe;
+});
 
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn(() => 'doc-ref'),
