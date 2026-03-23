@@ -23,7 +23,14 @@ export function useServiceWorkerUpdate(): void {
 
   useRegisterSW({
     onRegisteredSW(_swUrl, registration) {
-      if (registration) registrationRef.current = registration;
+      if (registration) {
+        registrationRef.current = registration;
+        // Immediate update check on first load so returning users pick up
+        // new deployments without waiting for the 1-hour visibility throttle.
+        if (!registration.installing && navigator.onLine) {
+          void registration.update();
+        }
+      }
     },
   });
 
