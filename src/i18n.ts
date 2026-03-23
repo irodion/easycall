@@ -14,6 +14,27 @@ export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]['code'];
 
 export const RTL_LANGUAGES: SupportedLanguage[] = ['he'];
 
+function isSupportedLanguage(lang: string): lang is SupportedLanguage {
+  return SUPPORTED_LANGUAGES.some((l) => l.code === lang);
+}
+
+export function detectBrowserLanguage(): SupportedLanguage {
+  const candidates =
+    typeof navigator !== 'undefined' && Array.isArray(navigator.languages)
+      ? navigator.languages
+      : typeof navigator !== 'undefined' && navigator.language
+        ? [navigator.language]
+        : [];
+
+  for (const tag of candidates) {
+    const base = tag.split('-')[0]?.toLowerCase();
+    if (base && isSupportedLanguage(base)) {
+      return base;
+    }
+  }
+  return 'en';
+}
+
 const languageResources: Partial<
   Record<SupportedLanguage, () => Promise<{ default: Record<string, unknown> }>>
 > = {
@@ -24,16 +45,12 @@ const languageResources: Partial<
 };
 
 void i18n.use(initReactI18next).init({
-  lng: 'en',
+  lng: detectBrowserLanguage(),
   fallbackLng: 'en',
   supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
   interpolation: { escapeValue: false },
   resources: { en: { translation: en } },
 });
-
-function isSupportedLanguage(lang: string): lang is SupportedLanguage {
-  return SUPPORTED_LANGUAGES.some((l) => l.code === lang);
-}
 
 export async function loadLanguage(lang: string): Promise<void> {
   if (!isSupportedLanguage(lang)) {
