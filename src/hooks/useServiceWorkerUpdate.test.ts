@@ -121,7 +121,7 @@ describe('useServiceWorkerUpdate', () => {
 
     // Trigger onRegisteredSW (calls update immediately)
     capturedOptions?.onRegisteredSW?.('sw.js', mockRegistration);
-    mockRegistration.update.mockClear();
+    vi.mocked(mockRegistration.update).mockClear();
 
     // Simulate app coming to foreground
     Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
@@ -162,7 +162,7 @@ describe('useServiceWorkerUpdate', () => {
     } as unknown as ServiceWorkerRegistration;
 
     capturedOptions?.onRegisteredSW?.('sw.js', mockRegistration);
-    mockRegistration.update.mockClear();
+    vi.mocked(mockRegistration.update).mockClear();
 
     // Advance past min interval
     vi.advanceTimersByTime(60 * 60 * 1000 + 1);
