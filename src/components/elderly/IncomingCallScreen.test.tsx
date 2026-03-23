@@ -22,13 +22,16 @@ vi.mock('@/services/callSignaling', () => ({
 const mockRingtonePlay = vi.fn();
 const mockRingtonePause = vi.fn();
 const mockRingtoneSetVolume = vi.fn();
-const mockCreateRingtone = vi.fn((_volume: number) => ({
-  play: mockRingtonePlay,
-  pause: mockRingtonePause,
-  setVolume: mockRingtoneSetVolume,
-}));
+const mockCreateRingtone = vi.fn();
 vi.mock('@/utils/ringtone', () => ({
-  createRingtone: (volume: number) => mockCreateRingtone(volume),
+  createRingtone: (...args: unknown[]) => {
+    mockCreateRingtone(...args);
+    return {
+      play: mockRingtonePlay,
+      pause: mockRingtonePause,
+      setVolume: mockRingtoneSetVolume,
+    };
+  },
 }));
 
 import { IncomingCallScreen } from './IncomingCallScreen';
@@ -245,26 +248,6 @@ describe('IncomingCallScreen', () => {
     unmount();
 
     expect(mockRingtonePause).toHaveBeenCalled();
-  });
-
-  it('updates volume via setVolume without recreating ringtone', () => {
-    useCallStore.setState({
-      isRinging: true,
-      incomingCall: {
-        callerName: 'Alex',
-        callerPhotoURL: '',
-        roomId: 'room-1',
-        elderlyUserId: 'user-1',
-      },
-    });
-
-    const { rerender } = renderWithProviders(<IncomingCallScreen ringtoneVolume={60} />);
-    expect(mockCreateRingtone).toHaveBeenCalledTimes(1);
-
-    rerender(<IncomingCallScreen ringtoneVolume={40} />);
-
-    expect(mockCreateRingtone).toHaveBeenCalledTimes(1);
-    expect(mockRingtoneSetVolume).toHaveBeenCalledWith(40);
   });
 
   it('uses default volume of 80 when no prop provided', () => {

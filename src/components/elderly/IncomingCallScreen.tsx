@@ -40,12 +40,7 @@ export function IncomingCallScreen({ ringtoneVolume = 80 }: IncomingCallScreenPr
         timeoutRef.current = null;
       }
     };
-  }, [isRinging, clearIncomingCall]);
-
-  // Update volume without recreating the ringtone
-  useEffect(() => {
-    ringtoneRef.current?.setVolume(ringtoneVolume);
-  }, [ringtoneVolume]);
+  }, [isRinging, clearIncomingCall, ringtoneVolume]);
 
   if (!isRinging || !incomingCall) return null;
 
