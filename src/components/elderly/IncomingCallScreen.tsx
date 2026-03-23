@@ -4,14 +4,19 @@ import { useTranslation } from 'react-i18next';
 import { useCallStore } from '@/stores/callStore';
 import { clearIncomingCallDoc, declineCall } from '@/services/callSignaling';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { createRingtone, type Ringtone } from '@/utils/ringtone';
 
-export function IncomingCallScreen() {
+interface IncomingCallScreenProps {
+  ringtoneVolume?: number;
+}
+
+export function IncomingCallScreen({ ringtoneVolume = 80 }: IncomingCallScreenProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isRinging = useCallStore((s) => s.isRinging);
   const incomingCall = useCallStore((s) => s.incomingCall);
   const clearIncomingCall = useCallStore((s) => s.clearIncomingCall);
-  const audioRef = useRef<{ play: () => void; pause: () => void } | null>(null);
+  const ringtoneRef = useRef<Ringtone | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, isRinging && !!incomingCall);
@@ -19,24 +24,28 @@ export function IncomingCallScreen() {
   useEffect(() => {
     if (!isRinging) return;
 
-    const audio = new Audio('/ringtone.mp3');
-    audio.loop = true;
-    void audio.play();
-    audioRef.current = audio;
+    const ringtone = createRingtone(ringtoneVolume);
+    ringtone.play();
+    ringtoneRef.current = ringtone;
 
     timeoutRef.current = setTimeout(() => {
       clearIncomingCall();
     }, 60_000);
 
     return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
+      ringtoneRef.current?.pause();
+      ringtoneRef.current = null;
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
     };
   }, [isRinging, clearIncomingCall]);
+
+  // Update volume without recreating the ringtone
+  useEffect(() => {
+    ringtoneRef.current?.setVolume(ringtoneVolume);
+  }, [ringtoneVolume]);
 
   if (!isRinging || !incomingCall) return null;
 
