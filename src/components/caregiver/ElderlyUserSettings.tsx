@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import { db } from '@/services/firebase';
@@ -9,6 +9,11 @@ import { DEFAULT_USER_SETTINGS } from '@/types/user';
 import { hashPin } from '@/utils/pinHash';
 import { LanguageSelector } from '@/components/shared/LanguageSelector';
 import type { UserSettings } from '@/types/user';
+
+const PAGE_CLASS =
+  'min-h-screen bg-gradient-to-b from-base-200/30 to-base-100 flex flex-col p-[var(--space-md)]';
+const PAGE_STYLE = { paddingBottom: 'max(1.25rem, var(--safe-bottom, 0px))' } as const;
+const FONT_SIZE_LABEL_ID = 'font-size-label';
 
 interface ElderlyUserSettingsProps {
   elderlyUserId: string;
@@ -25,6 +30,10 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   const [pinConfirm, setPinConfirm] = useState('');
   const [pinError, setPinError] = useState<string | null>(null);
   const [pinSaving, setPinSaving] = useState(false);
+  const [localVolume, setLocalVolume] = useState<number | null>(null);
+  const volumeCommitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
 
   // Reset state when elderlyUserId changes (prop-to-state pattern)
   const [prevElderlyUserId, setPrevElderlyUserId] = useState(elderlyUserId);
@@ -32,6 +41,11 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
     setPrevElderlyUserId(elderlyUserId);
     setLoadError(null);
     setSettings(null);
+    setLocalVolume(null);
+    if (volumeCommitRef.current) {
+      clearTimeout(volumeCommitRef.current);
+      volumeCommitRef.current = null;
+    }
   }
 
   useEffect(() => {
@@ -68,9 +82,16 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
     };
   }, [elderlyUserId, t, retryToken]);
 
+  // Clean up pending volume commit on unmount
+  useEffect(() => {
+    return () => {
+      if (volumeCommitRef.current) clearTimeout(volumeCommitRef.current);
+    };
+  }, []);
+
   if (loadError) {
     return (
-      <div className="flex flex-col items-center gap-[var(--space-md)] p-[var(--space-md)]">
+      <div className={`${PAGE_CLASS} items-center gap-[var(--space-md)]`} style={PAGE_STYLE}>
         <BackToDashboard />
         <p role="alert" className="text-error text-[length:var(--text-body)]">
           {loadError}
@@ -84,7 +105,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
 
   if (!settings) {
     return (
-      <div className="flex flex-col p-[var(--space-md)] gap-[var(--space-md)]">
+      <div className={`${PAGE_CLASS} gap-[var(--space-md)]`} style={PAGE_STYLE}>
         <BackToDashboard />
         <div className="flex justify-center" role="status" aria-label={t('common.loading')}>
           <span className="loading loading-spinner loading-lg" aria-hidden="true" />
@@ -94,78 +115,135 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
   }
 
   const updateSettings = async (partial: Partial<UserSettings>) => {
-    const previous = settings;
-    const updated = { ...settings, ...partial };
+    const current = settingsRef.current;
+    if (!current) return;
+    const updated = { ...current, ...partial };
     setSettings(updated);
     const ref = doc(db, 'users', elderlyUserId);
     try {
       await updateDoc(ref, { settings: updated });
     } catch {
-      setSettings(previous);
+      setSettings(current);
       throw new Error('Settings write failed');
     }
   };
 
+  const commitVolume = (value: number) => {
+    if (volumeCommitRef.current) clearTimeout(volumeCommitRef.current);
+    volumeCommitRef.current = setTimeout(() => {
+      void updateSettings({ ringtoneVolume: value });
+      setLocalVolume(null);
+      volumeCommitRef.current = null;
+    }, 300);
+  };
+
+  const handleSavePin = async () => {
+    if (pin.length !== 4) {
+      setPinError(t('elderlySettings.pinLengthError'));
+      return;
+    }
+    if (pin !== pinConfirm) {
+      setPinError(t('elderlySettings.pinMismatchError'));
+      return;
+    }
+    setPinSaving(true);
+    try {
+      const hash = await hashPin(pin, elderlyUserId);
+      await updateSettings({ appLockEnabled: true, appLockPinHash: hash });
+      setPendingLockEnabled(false);
+      setPin('');
+      setPinConfirm('');
+      setPinError(null);
+    } catch {
+      setPinError(t('elderlySettings.pinSaveError'));
+    } finally {
+      setPinSaving(false);
+    }
+  };
+
+  const displayedVolume = localVolume ?? settings.ringtoneVolume;
+
   return (
-    <div className="flex flex-col gap-[var(--space-lg)] p-[var(--space-md)]">
+    <div className={`${PAGE_CLASS} gap-[var(--space-lg)]`} style={PAGE_STYLE}>
       <BackToDashboard />
-      {displayName && (
-        <EasyCallText as="h1" variant="heading">
-          {t('elderlySettings.settingsFor', { name: displayName })}
-        </EasyCallText>
-      )}
-      <fieldset>
-        <legend className="text-[length:var(--text-heading)] font-bold mb-[var(--space-sm)]">
+
+      <EasyCallText as="h1" variant="heading">
+        {displayName
+          ? t('elderlySettings.settingsFor', { name: displayName })
+          : t('settings.title')}
+      </EasyCallText>
+
+      <section>
+        <EasyCallText as="h2" variant="button" className="font-bold mb-3" id={FONT_SIZE_LABEL_ID}>
           {t('elderlySettings.fontSize')}
-        </legend>
-        <div className="flex gap-[var(--space-sm)]">
+        </EasyCallText>
+        <div role="radiogroup" aria-labelledby={FONT_SIZE_LABEL_ID} className="flex flex-col gap-3">
           {(['large', 'x-large'] as const).map((size) => (
-            <EasyCallButton
+            <label
               key={size}
-              variant={settings.fontSize === size ? 'primary' : 'secondary'}
-              onClick={() => updateSettings({ fontSize: size })}
+              htmlFor={`elderly-font-${size}`}
+              className="flex items-center gap-3 cursor-pointer min-h-14 min-w-14"
             >
-              {size === 'large' ? t('elderlySettings.large') : t('elderlySettings.xLarge')}
-            </EasyCallButton>
+              <input
+                id={`elderly-font-${size}`}
+                type="radio"
+                name="elderly-fontSize"
+                value={size}
+                checked={settings.fontSize === size}
+                onChange={() => void updateSettings({ fontSize: size })}
+                className="radio radio-primary"
+              />
+              <EasyCallText as="span" variant="body">
+                {size === 'large' ? t('elderlySettings.large') : t('elderlySettings.xLarge')}
+              </EasyCallText>
+            </label>
           ))}
         </div>
-      </fieldset>
+      </section>
 
-      <div className="flex flex-col gap-[var(--space-sm)]">
-        <label htmlFor="ringtone-volume" className="text-[length:var(--text-heading)] font-bold">
-          {t('elderlySettings.ringtoneVolume')}
+      <section>
+        <label htmlFor="ringtone-volume">
+          <EasyCallText as="span" variant="button" className="font-bold">
+            {t('elderlySettings.ringtoneVolume')}
+          </EasyCallText>
         </label>
-        <input
-          id="ringtone-volume"
-          type="range"
-          min="0"
-          max="100"
-          step="5"
-          value={settings.ringtoneVolume}
-          onChange={(e) => updateSettings({ ringtoneVolume: Number(e.target.value) })}
-          className="range range-primary touch-target-min"
-          aria-label={t('elderlySettings.ringtoneVolume')}
-        />
-        <span className="text-[length:var(--text-body)] text-center">
-          {t('elderlySettings.volumePercent', { value: settings.ringtoneVolume })}
-        </span>
-      </div>
+        <div className="flex flex-col gap-[var(--space-sm)] mt-3">
+          <input
+            id="ringtone-volume"
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            value={displayedVolume}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              setLocalVolume(value);
+              commitVolume(value);
+            }}
+            className="range range-primary touch-target-min"
+            aria-label={t('elderlySettings.ringtoneVolume')}
+          />
+          <EasyCallText as="span" variant="body" className="text-center">
+            {t('elderlySettings.volumePercent', { value: displayedVolume })}
+          </EasyCallText>
+        </div>
+      </section>
 
-      <fieldset>
-        <legend className="text-[length:var(--text-heading)] font-bold mb-[var(--space-sm)]">
+      <section>
+        <EasyCallText as="h2" variant="button" className="font-bold mb-3">
           {t('elderlySettings.appLock')}
-        </legend>
+        </EasyCallText>
         <label className="flex items-center gap-[var(--space-sm)] cursor-pointer min-h-14">
           <input
             type="checkbox"
-            className="toggle toggle-primary min-h-14 min-w-14"
+            className="toggle toggle-primary"
             checked={settings.appLockEnabled || pendingLockEnabled}
             onChange={(e) => {
               if (e.target.checked) {
                 setPendingLockEnabled(true);
               } else {
                 setPendingLockEnabled(false);
-                updateSettings({ appLockEnabled: false, appLockPinHash: null });
+                void updateSettings({ appLockEnabled: false, appLockPinHash: null });
                 setPin('');
                 setPinConfirm('');
                 setPinError(null);
@@ -173,17 +251,19 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
             }}
             aria-label={t('elderlySettings.enableAppLock')}
           />
-          <span className="text-[length:var(--text-body)]">
+          <EasyCallText as="span" variant="body">
             {settings.appLockEnabled || pendingLockEnabled
               ? t('elderlySettings.enabled')
               : t('elderlySettings.disabled')}
-          </span>
+          </EasyCallText>
         </label>
 
         {(settings.appLockEnabled || pendingLockEnabled) && (
           <div className="flex flex-col gap-[var(--space-sm)] mt-[var(--space-sm)]">
-            <label htmlFor="lock-pin" className="text-[length:var(--text-body)] font-bold">
-              {t('elderlySettings.setPin')}
+            <label htmlFor="lock-pin">
+              <EasyCallText as="span" variant="body" className="font-bold">
+                {t('elderlySettings.setPin')}
+              </EasyCallText>
             </label>
             <input
               id="lock-pin"
@@ -200,8 +280,10 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
               placeholder={t('elderlySettings.pinPlaceholder')}
               aria-label={t('elderlySettings.setPin')}
             />
-            <label htmlFor="lock-pin-confirm" className="text-[length:var(--text-body)] font-bold">
-              {t('elderlySettings.confirmPin')}
+            <label htmlFor="lock-pin-confirm">
+              <EasyCallText as="span" variant="body" className="font-bold">
+                {t('elderlySettings.confirmPin')}
+              </EasyCallText>
             </label>
             <input
               id="lock-pin-confirm"
@@ -223,43 +305,16 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
                 {pinError}
               </p>
             )}
-            <EasyCallButton
-              onClick={() => {
-                if (pin.length !== 4) {
-                  setPinError(t('elderlySettings.pinLengthError'));
-                  return;
-                }
-                if (pin !== pinConfirm) {
-                  setPinError(t('elderlySettings.pinMismatchError'));
-                  return;
-                }
-                setPinSaving(true);
-                void (async () => {
-                  try {
-                    const hash = await hashPin(pin, elderlyUserId);
-                    await updateSettings({ appLockEnabled: true, appLockPinHash: hash });
-                    setPendingLockEnabled(false);
-                    setPin('');
-                    setPinConfirm('');
-                    setPinError(null);
-                  } catch {
-                    setPinError(t('elderlySettings.pinSaveError'));
-                  } finally {
-                    setPinSaving(false);
-                  }
-                })();
-              }}
-              disabled={pinSaving}
-            >
+            <EasyCallButton onClick={() => void handleSavePin()} disabled={pinSaving}>
               {t('elderlySettings.savePin')}
             </EasyCallButton>
           </div>
         )}
-      </fieldset>
+      </section>
 
       <LanguageSelector
         value={settings.language}
-        onChange={(language) => updateSettings({ language })}
+        onChange={(language) => void updateSettings({ language })}
         name="elderly-language"
       />
     </div>
