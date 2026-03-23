@@ -102,9 +102,9 @@ async function checkEmulators(): Promise<void> {
   ] as const) {
     try {
       await fetch(url);
-    } catch {
+    } catch (err) {
       throw new Error(
-        `${name} not reachable at ${url}.\nRun: firebase emulators:start --only auth,firestore`,
+        `${name} not reachable at ${url}: ${err instanceof Error ? err.message : err}\nRun: firebase emulators:start --only auth,firestore`,
       );
     }
   }
