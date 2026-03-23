@@ -50,7 +50,7 @@
     "changeName": "Cambiar tu nombre",
     "noName": "No establecido",
     "connectionMode": "Modo de conexión",
-    "connectionModeP2P": "Directa (P2P)",
+    "connectionModeP2P": "Directo (P2P)",
     "connectionModeRelay": "Relé"
   },
   "permissions": {
