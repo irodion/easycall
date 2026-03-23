@@ -48,7 +48,10 @@
     "installApp": "Установить приложение",
     "yourName": "Ваше имя",
     "changeName": "Изменить имя",
-    "noName": "Не указано"
+    "noName": "Не указано",
+    "connectionMode": "Режим подключения",
+    "connectionModeP2P": "Прямое (P2P)",
+    "connectionModeRelay": "Через сервер"
   },
   "permissions": {
     "checking": "Проверка разрешений камеры и микрофона",

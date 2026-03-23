@@ -210,6 +210,19 @@ export function SettingsScreen({ settings, userId, displayName }: SettingsScreen
         <PairingCodeDisplay userId={userId} />
       </section>
 
+      <section data-testid="connection-mode-section">
+        <EasyCallText as="h2" variant="button" className="font-bold mb-2">
+          {t('settings.connectionMode')}
+        </EasyCallText>
+        <div className="flex items-center gap-2 px-4 py-3 bg-base-200 rounded-xl min-h-14">
+          <EasyCallText as="span" variant="body">
+            {settings.restrictedNetworkMode
+              ? t('settings.connectionModeRelay')
+              : t('settings.connectionModeP2P')}
+          </EasyCallText>
+        </div>
+      </section>
+
       {/* Bottom actions — pushed down via mt-auto */}
       <div className="mt-auto flex flex-col gap-3">
         <Link
