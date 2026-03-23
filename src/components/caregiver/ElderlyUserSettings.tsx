@@ -42,6 +42,11 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
     setLoadError(null);
     setSettings(null);
     setLocalVolume(null);
+    setPendingLockEnabled(false);
+    setPin('');
+    setPinConfirm('');
+    setPinError(null);
+    setPinSaving(false);
     if (volumeCommitRef.current) {
       clearTimeout(volumeCommitRef.current);
       volumeCommitRef.current = null;

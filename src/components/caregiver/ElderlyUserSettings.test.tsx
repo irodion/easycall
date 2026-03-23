@@ -158,6 +158,32 @@ describe('ElderlyUserSettings', () => {
     expect(mockUpdateDoc).not.toHaveBeenCalled();
   });
 
+  it('clears app-lock draft state when elderlyUserId changes', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const { rerender } = renderAndEmit();
+
+    // Start a PIN setup flow for elderly-1
+    await user.click(screen.getByRole('checkbox', { name: /enable app lock/i }));
+    await user.type(screen.getByLabelText(/set pin/i), '12');
+
+    // PIN fields should be visible
+    expect(screen.getByLabelText(/set pin/i)).toHaveValue('12');
+
+    // Switch to a different elderly user
+    rerender(<ElderlyUserSettings elderlyUserId="elderly-2" />);
+    act(() => {
+      capturedCallback!({
+        exists: () => true,
+        data: () => ({ settings: defaultSettings }),
+      });
+    });
+
+    // PIN fields should be gone (pendingLockEnabled cleared, lock defaults to off)
+    expect(screen.queryByLabelText(/set pin/i)).not.toBeInTheDocument();
+    // Toggle should be unchecked (new user has appLockEnabled: false)
+    expect(screen.getByRole('checkbox', { name: /enable app lock/i })).not.toBeChecked();
+  });
+
   it('shows loading state before data arrives', () => {
     renderWithProviders(<ElderlyUserSettings elderlyUserId="elderly-1" />);
     expect(screen.getByRole('status')).toBeInTheDocument();
