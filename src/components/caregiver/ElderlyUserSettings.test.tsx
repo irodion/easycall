@@ -291,11 +291,10 @@ describe('ElderlyUserSettings', () => {
   });
 
   it('toggling restricted network mode writes to Firestore', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderAndEmit();
     const toggle = screen.getByRole('checkbox', { name: /restricted network/i });
-    await act(async () => {
-      fireEvent.click(toggle);
-    });
+    await user.click(toggle);
     expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', {
       settings: expect.objectContaining({ restrictedNetworkMode: true }),
     });

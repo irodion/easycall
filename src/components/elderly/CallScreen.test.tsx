@@ -103,16 +103,31 @@ describe('CallScreen', () => {
 
   const mockSetInCall = vi.fn();
 
-  async function renderLoaded(path = '/call/contact-1', setInCall?: (inCall: boolean) => void) {
+  async function renderLoaded(
+    path = '/call/contact-1',
+    options?: { setInCall?: (inCall: boolean) => void; restrictedNetworkMode?: boolean },
+  ) {
     const { CallScreen } = await import('./CallScreen');
+    const setInCall = options?.setInCall;
+    const restrictedNetworkMode = options?.restrictedNetworkMode;
     let result: ReturnType<typeof render>;
     await act(async () => {
       result = render(
         <I18nextProvider i18n={i18n}>
           <MemoryRouter initialEntries={[path]}>
             <Routes>
-              <Route path="/call/:contactId" element={<CallScreen setInCall={setInCall} />} />
-              <Route path="/call-room/:roomId" element={<CallScreen setInCall={setInCall} />} />
+              <Route
+                path="/call/:contactId"
+                element={
+                  <CallScreen setInCall={setInCall} restrictedNetworkMode={restrictedNetworkMode} />
+                }
+              />
+              <Route
+                path="/call-room/:roomId"
+                element={
+                  <CallScreen setInCall={setInCall} restrictedNetworkMode={restrictedNetworkMode} />
+                }
+              />
             </Routes>
           </MemoryRouter>
         </I18nextProvider>,
@@ -157,19 +172,7 @@ describe('CallScreen', () => {
   });
 
   it('applies restricted network config when restrictedNetworkMode is true', async () => {
-    const { CallScreen } = await import('./CallScreen');
-    await act(async () => {
-      render(
-        <I18nextProvider i18n={i18n}>
-          <MemoryRouter initialEntries={['/call/contact-1']}>
-            <Routes>
-              <Route path="/call/:contactId" element={<CallScreen restrictedNetworkMode />} />
-            </Routes>
-          </MemoryRouter>
-        </I18nextProvider>,
-      );
-      await new Promise((r) => setTimeout(r, 50));
-    });
+    await renderLoaded('/call/contact-1', { restrictedNetworkMode: true });
     const config = lastApiInstance?.options?.configOverwrite;
     expect((config?.['p2p'] as Record<string, unknown>)?.['enabled']).toBe(false);
     expect(config?.['webrtcIceTransportPolicy']).toBe('relay');
@@ -320,13 +323,13 @@ describe('CallScreen', () => {
 
   it('calls setInCall(true) on mount', async () => {
     mockSetInCall.mockClear();
-    await renderLoaded('/call/contact-1', mockSetInCall);
+    await renderLoaded('/call/contact-1', { setInCall: mockSetInCall });
     expect(mockSetInCall).toHaveBeenCalledWith(true);
   });
 
   it('calls setInCall(false) on unmount', async () => {
     mockSetInCall.mockClear();
-    const { unmount } = await renderLoaded('/call/contact-1', mockSetInCall);
+    const { unmount } = await renderLoaded('/call/contact-1', { setInCall: mockSetInCall });
     mockSetInCall.mockClear();
     await act(async () => {
       unmount();
