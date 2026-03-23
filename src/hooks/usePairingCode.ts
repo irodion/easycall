@@ -126,6 +126,7 @@ export function usePairingCode(userId: string | null, options?: UsePairingCodeOp
         }
       },
       (err) => {
+        // nosemgrep: no-console-log-sensitive — logs Firestore listener error, no sensitive data
         console.error('Failed to listen for caregiver linking:', err);
       },
     );
