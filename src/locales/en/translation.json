@@ -137,7 +137,11 @@
     "savePin": "Save PIN",
     "language": "Language",
     "loadError": "Unable to load settings. Check permissions and try again.",
-    "settingsFor": "Settings for {{name}}"
+    "settingsFor": "Settings for {{name}}",
+    "restrictedNetwork": "Restricted Network Mode",
+    "restrictedNetworkHint": "Enable if calls fail to connect. Forces relay connections that work through firewalls.",
+    "restrictedNetworkEnabled": "Enabled — calls use relay servers",
+    "restrictedNetworkDisabled": "Disabled — calls use direct connections"
   },
   "onboarding": {
     "welcome": "Welcome to EasyCall",

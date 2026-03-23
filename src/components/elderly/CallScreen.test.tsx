@@ -148,6 +148,34 @@ describe('CallScreen', () => {
     expect((config?.['prejoinConfig'] as Record<string, unknown>)?.['enabled']).toBe(false);
   });
 
+  it('does not apply restricted network config by default', async () => {
+    await renderLoaded();
+    const config = lastApiInstance?.options?.configOverwrite;
+    expect(config?.['p2p']).toBeUndefined();
+    expect(config?.['webrtcIceTransportPolicy']).toBeUndefined();
+    expect(config?.['openBridgeChannel']).toBeUndefined();
+  });
+
+  it('applies restricted network config when restrictedNetworkMode is true', async () => {
+    const { CallScreen } = await import('./CallScreen');
+    await act(async () => {
+      render(
+        <I18nextProvider i18n={i18n}>
+          <MemoryRouter initialEntries={['/call/contact-1']}>
+            <Routes>
+              <Route path="/call/:contactId" element={<CallScreen restrictedNetworkMode />} />
+            </Routes>
+          </MemoryRouter>
+        </I18nextProvider>,
+      );
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    const config = lastApiInstance?.options?.configOverwrite;
+    expect((config?.['p2p'] as Record<string, unknown>)?.['enabled']).toBe(false);
+    expect(config?.['webrtcIceTransportPolicy']).toBe('relay');
+    expect(config?.['openBridgeChannel']).toBe('websocket');
+  });
+
   it('renders end call button', async () => {
     await renderLoaded();
     expect(screen.getByRole('button', { name: /end call/i })).toBeInTheDocument();

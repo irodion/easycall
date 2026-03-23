@@ -317,6 +317,29 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
         )}
       </section>
 
+      <section>
+        <EasyCallText as="h2" variant="button" className="font-bold mb-3">
+          {t('elderlySettings.restrictedNetwork')}
+        </EasyCallText>
+        <p className="text-[length:var(--text-body)] text-base-content/70 mb-3">
+          {t('elderlySettings.restrictedNetworkHint')}
+        </p>
+        <label className="flex items-center gap-[var(--space-sm)] cursor-pointer min-h-14">
+          <input
+            type="checkbox"
+            className="toggle toggle-primary"
+            checked={settings.restrictedNetworkMode}
+            onChange={(e) => void updateSettings({ restrictedNetworkMode: e.target.checked })}
+            aria-label={t('elderlySettings.restrictedNetwork')}
+          />
+          <EasyCallText as="span" variant="body">
+            {settings.restrictedNetworkMode
+              ? t('elderlySettings.restrictedNetworkEnabled')
+              : t('elderlySettings.restrictedNetworkDisabled')}
+          </EasyCallText>
+        </label>
+      </section>
+
       <LanguageSelector
         value={settings.language}
         onChange={(language) => void updateSettings({ language })}

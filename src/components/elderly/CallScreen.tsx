@@ -21,9 +21,10 @@ const CONTROLS_SAFE_AREA_STYLE = { paddingBottom: 'max(1.5rem, var(--safe-bottom
 
 interface CallScreenProps {
   setInCall?: (inCall: boolean) => void;
+  restrictedNetworkMode?: boolean;
 }
 
-export function CallScreen({ setInCall }: CallScreenProps) {
+export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps) {
   const { t } = useTranslation();
   const { contactId, roomId } = useParams<{ contactId?: string; roomId?: string }>();
   const navigate = useNavigate();
@@ -43,6 +44,10 @@ export function CallScreen({ setInCall }: CallScreenProps) {
   const beforeUnloadRef = useRef<((e: BeforeUnloadEvent) => void) | null>(null);
   const contactNameRef = useRef<string>('');
   const contactIdRef = useRef<string>('');
+  const restrictedNetworkRef = useRef(restrictedNetworkMode);
+  useEffect(() => {
+    restrictedNetworkRef.current = restrictedNetworkMode;
+  }, [restrictedNetworkMode]);
 
   const contacts = useContactStore((s) => s.contacts);
   const subscribeToContacts = useContactStore((s) => s.subscribeToContacts);
@@ -113,14 +118,20 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         if (!mounted || !containerRef.current) return;
 
         const appId = getJaasAppId();
+        const configOverwrite: Record<string, unknown> = {
+          toolbarButtons: [],
+          prejoinConfig: { enabled: false },
+        };
+        if (restrictedNetworkRef.current) {
+          configOverwrite['p2p'] = { enabled: false };
+          configOverwrite['webrtcIceTransportPolicy'] = 'relay';
+          configOverwrite['openBridgeChannel'] = 'websocket';
+        }
         const api = new window.JitsiMeetExternalAPI('8x8.vc', {
           roomName: `${appId}/${jitsiRoomId}`,
           parentNode: containerRef.current,
           jwt: data.token,
-          configOverwrite: {
-            toolbarButtons: [],
-            prejoinConfig: { enabled: false },
-          },
+          configOverwrite,
           interfaceConfigOverwrite: {
             SHOW_JITSI_WATERMARK: false,
           },
@@ -253,7 +264,8 @@ export function CallScreen({ setInCall }: CallScreenProps) {
         apiRef.current = null;
       }
     };
-  }, [contact, navigate, setInCall, writeHistory]);
+    // restrictedNetworkMode is read via ref — changing it mid-call must not remount the conference
+  }, [contact, contactId, navigate, setInCall, writeHistory]);
 
   const handleHangup = () => {
     void writeHistory();

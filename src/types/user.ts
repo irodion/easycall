@@ -30,6 +30,7 @@ export interface UserSettings {
   appLockEnabled: boolean;
   appLockPinHash: string | null;
   language: SupportedLanguage;
+  restrictedNetworkMode: boolean;
 }
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
@@ -40,6 +41,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   appLockEnabled: false,
   appLockPinHash: null,
   language: 'en',
+  restrictedNetworkMode: false,
 };
 
 export interface Contact {

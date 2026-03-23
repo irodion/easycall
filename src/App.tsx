@@ -141,8 +141,24 @@ function AuthenticatedApp() {
                 path="/elderly/history"
                 element={userId ? <CallHistory userId={userId} /> : null}
               />
-              <Route path="/call/:contactId" element={<CallScreen setInCall={setInCall} />} />
-              <Route path="/call-room/:roomId" element={<CallScreen setInCall={setInCall} />} />
+              <Route
+                path="/call/:contactId"
+                element={
+                  <CallScreen
+                    setInCall={setInCall}
+                    restrictedNetworkMode={settings.restrictedNetworkMode}
+                  />
+                }
+              />
+              <Route
+                path="/call-room/:roomId"
+                element={
+                  <CallScreen
+                    setInCall={setInCall}
+                    restrictedNetworkMode={settings.restrictedNetworkMode}
+                  />
+                }
+              />
             </Route>
             <Route element={<AuthGuard requiredRole="caregiver" />}>
               <Route path="/caregiver" element={userId ? <Dashboard userId={userId} /> : null} />
