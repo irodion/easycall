@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ref, onValue, onDisconnect, set, serverTimestamp } from 'firebase/database';
 import type { DatabaseReference } from 'firebase/database';
 import { rtdb } from '@/services/firebase';
@@ -13,10 +13,30 @@ function presencePayload(state: PresenceState): RtdbPresencePayload {
   return { state, lastChanged: serverTimestamp() };
 }
 
+/** Base delay for exponential backoff (ms) */
+const RETRY_BASE_MS = 2_000;
+/** Maximum backoff delay (ms) */
+const RETRY_MAX_MS = 60_000;
+/** Maximum retry attempts before giving up until userId changes */
+const MAX_RETRIES = 5;
+
+function backoffDelay(attempt: number): number {
+  return Math.min(RETRY_BASE_MS * 2 ** attempt, RETRY_MAX_MS);
+}
+
 export function usePresence(userId: string | null): { setInCall: (inCall: boolean) => void } {
   const statusRefRef = useRef<DatabaseReference | null>(null);
   const inCallRef = useRef(false);
+  const [retryKey, setRetryKey] = useState(0);
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Reset retry counter when userId changes
+  useEffect(() => {
+    retryCountRef.current = 0;
+  }, [userId]);
+
+  // Listener effect — re-runs on retryKey changes without offline teardown
   useEffect(() => {
     if (!userId) {
       statusRefRef.current = null;
@@ -26,25 +46,58 @@ export function usePresence(userId: string | null): { setInCall: (inCall: boolea
     const statusRef = ref(rtdb, `/status/${userId}`);
     statusRefRef.current = statusRef;
     const connectedRef = ref(rtdb, '.info/connected');
+    let cancelled = false;
 
-    const unsubscribe = onValue(connectedRef, (snap) => {
-      if (snap.val() !== true) return;
+    const unsubscribe = onValue(
+      connectedRef,
+      (snap) => {
+        // Successful listener — reset retry counter
+        retryCountRef.current = 0;
 
-      void onDisconnect(statusRef)
-        .set(presencePayload('offline'))
-        .then(() => {
-          // Don't overwrite 'in-call' on reconnect
-          if (!inCallRef.current) {
-            void set(statusRef, presencePayload('online'));
-          }
-        });
-    });
+        if (snap.val() !== true) return;
+
+        void onDisconnect(statusRef)
+          .set(presencePayload('offline'))
+          .then(() => {
+            if (cancelled) return;
+            // Don't overwrite 'in-call' on reconnect
+            if (!inCallRef.current) {
+              void set(statusRef, presencePayload('online'));
+            }
+          });
+      },
+      () => {
+        // Error callback — listener cancelled by Firebase SDK.
+        // Schedule retry with exponential backoff.
+        if (!cancelled && retryCountRef.current < MAX_RETRIES) {
+          const delay = backoffDelay(retryCountRef.current);
+          retryCountRef.current += 1;
+          retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null;
+            setRetryKey((k) => k + 1);
+          }, delay);
+        }
+      },
+    );
 
     return () => {
+      cancelled = true;
       unsubscribe();
-      // Use locally-captured statusRef (not statusRefRef.current) to ensure
-      // cleanup always writes to the correct ref, even if a subsequent effect
-      // run has already set statusRefRef.current = null.
+      if (retryTimerRef.current !== null) {
+        clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = null;
+      }
+    };
+  }, [userId, retryKey]);
+
+  // Offline teardown — only runs when userId changes or component unmounts.
+  // Separated from the listener effect so retryKey-driven re-subscriptions
+  // don't write the user offline or clear inCallRef.
+  useEffect(() => {
+    if (!userId) return;
+    const statusRef = ref(rtdb, `/status/${userId}`);
+
+    return () => {
       void set(statusRef, presencePayload('offline'));
       void onDisconnect(statusRef).cancel();
       statusRefRef.current = null;
