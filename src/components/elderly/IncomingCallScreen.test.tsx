@@ -311,4 +311,20 @@ describe('IncomingCallScreen', () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
+
+  it('passes vitest-axe accessibility audit in relay mode', async () => {
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: 'https://example.com/alex.jpg',
+        roomId: 'room-1',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    const { container } = renderWithProviders(<IncomingCallScreen restrictedNetworkMode={true} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
 });
