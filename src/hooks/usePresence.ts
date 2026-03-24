@@ -59,6 +59,7 @@ export function usePresence(userId: string | null): { setInCall: (inCall: boolea
         void onDisconnect(statusRef)
           .set(presencePayload('offline'))
           .then(() => {
+            if (cancelled) return;
             // Don't overwrite 'in-call' on reconnect
             if (!inCallRef.current) {
               void set(statusRef, presencePayload('online'));

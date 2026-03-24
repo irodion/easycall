@@ -294,6 +294,43 @@ describe('usePresence', () => {
     expect(mockOnValue.mock.calls.length).toBe(callsBefore);
   });
 
+  it('does not write online from stale .then() after userId changes', async () => {
+    // Make onDisconnect.set() return a controllable promise
+    let resolveOnDisconnect!: () => void;
+    mockOnDisconnectSet.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        resolveOnDisconnect = resolve;
+      }),
+    );
+
+    const { rerender } = await importAndRender('user-1');
+
+    // Trigger .info/connected → registers onDisconnect, .then() is pending
+    await act(async () => {
+      onValueCallback!({ val: () => true });
+    });
+    mockSet.mockClear();
+
+    // Change userId — cleanup runs, sets cancelled = true
+    rerender({ uid: 'user-2' });
+    mockSet.mockClear();
+
+    // Now resolve the stale onDisconnect promise from user-1's effect
+    await act(async () => {
+      resolveOnDisconnect();
+      await Promise.resolve();
+    });
+
+    // The stale .then() should NOT have written 'online' to user-1's ref
+    const onlineCalls = mockSet.mock.calls.filter(
+      (call) =>
+        call[1] &&
+        typeof call[1] === 'object' &&
+        (call[1] as Record<string, unknown>).state === 'online',
+    );
+    expect(onlineCalls).toHaveLength(0);
+  });
+
   it('does not write offline or clear inCallRef when retrying after error', async () => {
     const { result } = await importAndRender('user-1');
 
