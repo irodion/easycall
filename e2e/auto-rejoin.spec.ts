@@ -80,6 +80,85 @@ async function seedActiveCall(
   if (!res.ok) throw new Error(`Failed to seed activeCall: ${res.status} ${await res.text()}`);
 }
 
+async function seedContact(
+  uid: string,
+  contactId: string,
+  name: string,
+  jitsiRoomId = 'easycall-contact1-abc123',
+): Promise<void> {
+  const res = await fetch(
+    `${FIRESTORE_EMULATOR}/v1/projects/${PROJECT_ID}/databases/(default)/documents/users/${uid}/contacts/${contactId}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...EMULATOR_AUTH_HEADER },
+      body: JSON.stringify({
+        fields: {
+          name: { stringValue: name },
+          photoURL: { nullValue: null },
+          jitsiRoomId: { stringValue: jitsiRoomId },
+          contactUserId: { stringValue: 'user-other-1' },
+          displayOrder: { integerValue: '1' },
+          createdAt: { timestampValue: new Date().toISOString() },
+        },
+      }),
+    },
+  );
+  if (!res.ok) throw new Error(`Failed to seed contact: ${res.status} ${await res.text()}`);
+}
+
+// Jitsi mock that exposes instance on window for event emission from Playwright
+const MOCK_JITSI_SCRIPT = `
+window.JitsiMeetExternalAPI = class MockJitsiAPI {
+  constructor(domain, options) {
+    this._listeners = new Map();
+    this.domain = domain;
+    this.options = options;
+    window.__jitsiMockInstance = this;
+    setTimeout(() => {
+      const fns = this._listeners.get('videoConferenceJoined') || [];
+      fns.forEach(fn => fn({ roomName: options && options.roomName }));
+    }, 200);
+  }
+  addListener(event, fn) {
+    if (!this._listeners.has(event)) this._listeners.set(event, []);
+    this._listeners.get(event).push(fn);
+  }
+  removeListener(event, fn) {
+    const fns = this._listeners.get(event) || [];
+    this._listeners.set(event, fns.filter(f => f !== fn));
+  }
+  executeCommand(cmd) {
+    if (cmd === 'hangup') {
+      setTimeout(() => {
+        const fns = this._listeners.get('readyToClose') || [];
+        fns.forEach(fn => fn());
+      }, 100);
+    }
+  }
+  dispose() { this._listeners.clear(); }
+  isAudioMuted() { return Promise.resolve(false); }
+  isVideoMuted() { return Promise.resolve(false); }
+};
+`;
+
+async function emitJitsiEvent(
+  page: import('@playwright/test').Page,
+  event: string,
+  data: Record<string, unknown> = {},
+): Promise<void> {
+  await page.evaluate(
+    ({ event, data }) => {
+      const instance = (window as unknown as Record<string, unknown>).__jitsiMockInstance as
+        | { _listeners: Map<string, Array<(data: unknown) => void>> }
+        | undefined;
+      if (!instance) throw new Error('Jitsi mock instance not found on window');
+      const fns = instance._listeners.get(event) || [];
+      fns.forEach((fn) => fn(data));
+    },
+    { event, data },
+  );
+}
+
 async function checkEmulators(): Promise<void> {
   for (const [name, url] of [
     ['Firestore emulator', FIRESTORE_EMULATOR],
@@ -222,6 +301,42 @@ test.describe('Auto-Rejoin on Disconnect (emulators)', () => {
   test('no rejoin prompt when no activeCall document exists', async ({ page }) => {
     await page.goto('/elderly');
     await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Return to call with/)).not.toBeVisible({ timeout: 3000 });
+  });
+
+  test('no rejoin prompt after other participant leaves the call', async ({ page }) => {
+    const uid = (page as unknown as { _testUid: string })._testUid;
+    await seedContact(uid, 'contact-1', 'Alice');
+
+    // Mock Jitsi (with __jitsiMockInstance) + JWT
+    await page.route(/external_api\.js/, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/javascript',
+        body: MOCK_JITSI_SCRIPT,
+      }),
+    );
+    await page.route('**/generateJitsiJwt**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: { token: 'test-jwt' } }),
+      }),
+    );
+
+    // Navigate to call screen
+    await page.goto('/call/contact-1');
+    await expect(page.getByRole('button', { name: /end call/i })).toBeVisible({ timeout: 15000 });
+
+    // Simulate: other participant joins, then leaves (caller hung up)
+    await emitJitsiEvent(page, 'participantJoined', {});
+    await emitJitsiEvent(page, 'participantLeft', {});
+
+    // Should show "call ended" then auto-navigate to home after 3s
+    await expect(page.getByText(/call ended/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'Contacts' })).toBeVisible({ timeout: 10000 });
+
+    // The rejoin prompt must NOT appear — the other person left, nobody to rejoin with
     await expect(page.getByText(/Return to call with/)).not.toBeVisible({ timeout: 3000 });
   });
 });

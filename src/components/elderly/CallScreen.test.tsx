@@ -342,11 +342,11 @@ describe('CallScreen', () => {
     await expect(renderLoaded('/call/contact-1')).resolves.toBeTruthy();
   });
 
-  it('preserves activeCall after participantLeft so rejoin prompt can appear', async () => {
+  it('clears activeCall after 3s grace period when last participant leaves', async () => {
     await renderLoaded();
     mockClearActiveCall.mockClear();
 
-    // Simulate: participant joins, then leaves (could be intentional or network drop)
+    // Simulate: participant joins, then leaves — the other party hung up
     await act(async () => {
       lastApiInstance?._emit('participantJoined', {});
     });
@@ -357,11 +357,49 @@ describe('CallScreen', () => {
         lastApiInstance?._emit('participantLeft', {});
       });
 
-      // Advance past the 3-second auto-navigate timer
+      // Not cleared immediately — grace period for transient disconnects
+      expect(mockClearActiveCall).not.toHaveBeenCalled();
+
+      // After the 3-second timer, activeCall is cleared
       await act(async () => {
         vi.advanceTimersByTime(3000);
       });
-      // activeCall must NOT be cleared — it powers the rejoin prompt for accidental disconnects
+      // Flush the Promise.all microtask
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockClearActiveCall).toHaveBeenCalledWith('user-1');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not clear activeCall if participant rejoins within grace period', async () => {
+    await renderLoaded();
+    mockClearActiveCall.mockClear();
+
+    await act(async () => {
+      lastApiInstance?._emit('participantJoined', {});
+    });
+
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        lastApiInstance?._emit('participantLeft', {});
+      });
+
+      // Participant reconnects before 3s
+      await act(async () => {
+        vi.advanceTimersByTime(1000);
+      });
+      await act(async () => {
+        lastApiInstance?._emit('participantJoined', {});
+      });
+
+      // Advance past original timer — should have been cancelled
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
       expect(mockClearActiveCall).not.toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
