@@ -266,6 +266,36 @@ describe('IncomingCallScreen', () => {
     expect(mockCreateRingtone).toHaveBeenCalledWith(80);
   });
 
+  it('shows P2P connection mode label when restrictedNetworkMode is false', () => {
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: '',
+        roomId: 'room-1',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    renderWithProviders(<IncomingCallScreen restrictedNetworkMode={false} />);
+    expect(screen.getByText('Direct (P2P)')).toBeInTheDocument();
+  });
+
+  it('shows Relay connection mode label when restrictedNetworkMode is true', () => {
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: '',
+        roomId: 'room-1',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    renderWithProviders(<IncomingCallScreen restrictedNetworkMode={true} />);
+    expect(screen.getByText('Relay')).toBeInTheDocument();
+  });
+
   it('passes vitest-axe accessibility audit', async () => {
     useCallStore.setState({
       isRinging: true,
@@ -278,6 +308,22 @@ describe('IncomingCallScreen', () => {
     });
 
     const { container } = renderWithProviders(<IncomingCallScreen />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it('passes vitest-axe accessibility audit in relay mode', async () => {
+    useCallStore.setState({
+      isRinging: true,
+      incomingCall: {
+        callerName: 'Alex',
+        callerPhotoURL: 'https://example.com/alex.jpg',
+        roomId: 'room-1',
+        elderlyUserId: 'user-1',
+      },
+    });
+
+    const { container } = renderWithProviders(<IncomingCallScreen restrictedNetworkMode={true} />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
