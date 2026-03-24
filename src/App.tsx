@@ -177,7 +177,10 @@ function AuthenticatedApp() {
         </main>
         <InstallPrompt />
       </AppLock>
-      <IncomingCallScreen ringtoneVolume={settings.ringtoneVolume} />
+      <IncomingCallScreen
+        ringtoneVolume={settings.ringtoneVolume}
+        restrictedNetworkMode={settings.restrictedNetworkMode}
+      />
     </>
   );
 }

@@ -8,9 +8,13 @@ import { createRingtone, type Ringtone } from '@/utils/ringtone';
 
 interface IncomingCallScreenProps {
   ringtoneVolume?: number;
+  restrictedNetworkMode?: boolean;
 }
 
-export function IncomingCallScreen({ ringtoneVolume = 80 }: IncomingCallScreenProps) {
+export function IncomingCallScreen({
+  ringtoneVolume = 80,
+  restrictedNetworkMode = false,
+}: IncomingCallScreenProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isRinging = useCallStore((s) => s.isRinging);
@@ -104,6 +108,11 @@ export function IncomingCallScreen({ ringtoneVolume = 80 }: IncomingCallScreenPr
         <p className="text-[length:var(--text-heading)] font-bold">{incomingCall.callerName}</p>
         <p className="text-[length:var(--text-body)] text-[color:var(--color-text-secondary)] animate-pulse">
           {t('incomingCall.calling')}
+        </p>
+        <p className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)] mt-1">
+          {restrictedNetworkMode
+            ? t('settings.connectionModeRelay')
+            : t('settings.connectionModeP2P')}
         </p>
       </div>
 
