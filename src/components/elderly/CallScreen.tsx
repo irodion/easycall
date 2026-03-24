@@ -205,8 +205,12 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
           if (participantCount === 0) {
             setCallEnded(true);
             autoNavigateTimerRef.current = setTimeout(() => {
-              void writeHistory();
-              if (mounted) void navigate('/elderly');
+              // Clear activeCall only after the 3-second grace period — if the
+              // participant reconnects during this window, the timer is cancelled
+              // by participantJoined and the activeCall doc stays intact.
+              void Promise.all([writeHistory(), clearActiveCall(user.uid)]).then(() => {
+                if (mounted) void navigate('/elderly');
+              });
             }, 3000);
           }
         });
