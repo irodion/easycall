@@ -1,7 +1,12 @@
 /**
  * Ringtone with HTML Audio fallback to Web Audio API synthesis.
  * Pattern: two-tone "ring-ring" at 440/480 Hz, repeated every 3s.
+ *
+ * On mobile browsers, a pre-unlocked AudioContext (from audioUnlock.ts)
+ * is reused so the ringtone can play without a direct user gesture.
  */
+
+import { getUnlockedContext } from '@/utils/audioUnlock';
 
 export interface Ringtone {
   play: () => void;
@@ -12,6 +17,9 @@ export interface Ringtone {
 function clampVolume(v: number): number {
   return Math.max(0, Math.min(1, v / 100));
 }
+
+/** Vibration pattern: ring–pause–ring–pause–ring (Android only, no-op elsewhere). */
+const VIBRATE_PATTERN = [500, 200, 500, 200, 500, 200, 500];
 
 /**
  * @param volume 0–100 (maps to 0.0–1.0)
@@ -35,6 +43,7 @@ export function createRingtone(volume: number): Ringtone {
 
     return {
       play: () => {
+        navigator.vibrate?.(VIBRATE_PATTERN);
         if (useFallback) {
           getFallback().play();
           return;
@@ -48,6 +57,7 @@ export function createRingtone(volume: number): Ringtone {
         }
       },
       pause: () => {
+        navigator.vibrate?.(0);
         if (useFallback) {
           getFallback().pause();
         } else {
@@ -68,6 +78,7 @@ export function createRingtone(volume: number): Ringtone {
 
 function createSyntheticRingtone(volume: number): Ringtone {
   let ctx: AudioContext | null = null;
+  let isSharedCtx = false;
   let gainNode: GainNode | null = null;
   let intervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -93,12 +104,22 @@ function createSyntheticRingtone(volume: number): Ringtone {
     play: () => {
       if (ctx) return; // already playing
       try {
-        ctx = new AudioContext();
+        const shared = getUnlockedContext();
+        if (shared && shared.state !== 'closed') {
+          ctx = shared;
+          isSharedCtx = true;
+          // Resume in case it was suspended (e.g. page went to background on iOS)
+          if (ctx.state === 'suspended') void ctx.resume();
+        } else {
+          ctx = new AudioContext();
+          isSharedCtx = false;
+        }
         gainNode = ctx.createGain();
         gainNode.gain.value = volume;
         gainNode.connect(ctx.destination);
         ring();
         intervalId = setInterval(ring, 3000);
+        navigator.vibrate?.(VIBRATE_PATTERN);
       } catch {
         // AudioContext not available — silent no-op
       }
@@ -108,11 +129,16 @@ function createSyntheticRingtone(volume: number): Ringtone {
         clearInterval(intervalId);
         intervalId = null;
       }
-      if (ctx) {
-        void ctx.close().catch(() => {});
-        ctx = null;
+      if (gainNode) {
+        gainNode.disconnect();
         gainNode = null;
       }
+      if (ctx && !isSharedCtx) {
+        void ctx.close().catch(() => {});
+      }
+      ctx = null;
+      isSharedCtx = false;
+      navigator.vibrate?.(0);
     },
     setVolume: (v: number) => {
       if (gainNode) gainNode.gain.value = clampVolume(v);

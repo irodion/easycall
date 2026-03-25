@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createRingtone } from './ringtone';
 
+vi.mock('@/utils/audioUnlock', () => ({
+  getUnlockedContext: vi.fn(() => null),
+}));
+
 describe('createRingtone', () => {
   let audioInstances: Array<{
     loop: boolean;
@@ -26,6 +30,7 @@ describe('createRingtone', () => {
       }
     }
     vi.stubGlobal('Audio', MockAudio);
+    vi.stubGlobal('navigator', { vibrate: vi.fn() });
   });
 
   const lastAudio = () => audioInstances[audioInstances.length - 1]!;
@@ -61,6 +66,17 @@ describe('createRingtone', () => {
     expect(lastAudio().volume).toBeCloseTo(0.4);
   });
 
+  it('calls navigator.vibrate on play and stop vibration on pause', () => {
+    const ringtone = createRingtone(80);
+    ringtone.play();
+
+    expect(navigator.vibrate).toHaveBeenCalledWith([500, 200, 500, 200, 500, 200, 500]);
+
+    ringtone.pause();
+
+    expect(navigator.vibrate).toHaveBeenCalledWith(0);
+  });
+
   it('fallback uses latest volume after setVolume called before play rejects', async () => {
     let rejectPlay: (err: Error) => void;
     class DelayedFailAudio {
@@ -77,7 +93,7 @@ describe('createRingtone', () => {
     }
     vi.stubGlobal('Audio', DelayedFailAudio);
 
-    const mockGainNode = { gain: { value: 0 }, connect: vi.fn() };
+    const mockGainNode = { gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() };
     const mockOscillator = {
       type: 'sine',
       frequency: { value: 0 },
@@ -86,6 +102,7 @@ describe('createRingtone', () => {
       stop: vi.fn(),
     };
     const mockCtx = {
+      state: 'running',
       createGain: vi.fn(() => mockGainNode),
       createOscillator: vi.fn(() => mockOscillator),
       destination: {},
@@ -95,6 +112,7 @@ describe('createRingtone', () => {
     vi.stubGlobal(
       'AudioContext',
       class {
+        state = mockCtx.state;
         createGain = mockCtx.createGain;
         createOscillator = mockCtx.createOscillator;
         destination = mockCtx.destination;
@@ -129,7 +147,7 @@ describe('createRingtone', () => {
     }
     vi.stubGlobal('Audio', FailAudio);
 
-    const mockGainNode = { gain: { value: 0 }, connect: vi.fn() };
+    const mockGainNode = { gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() };
     const mockOscillator = {
       type: 'sine',
       frequency: { value: 0 },
@@ -138,6 +156,7 @@ describe('createRingtone', () => {
       stop: vi.fn(),
     };
     const mockCtx = {
+      state: 'running',
       createGain: vi.fn(() => mockGainNode),
       createOscillator: vi.fn(() => mockOscillator),
       destination: {},
@@ -147,6 +166,7 @@ describe('createRingtone', () => {
     vi.stubGlobal(
       'AudioContext',
       class {
+        state = mockCtx.state;
         createGain = mockCtx.createGain;
         createOscillator = mockCtx.createOscillator;
         destination = mockCtx.destination;
@@ -168,7 +188,7 @@ describe('createRingtone', () => {
   it('falls back to synthetic ringtone when Audio constructor is unavailable', () => {
     vi.stubGlobal('Audio', undefined);
 
-    const mockGainNode = { gain: { value: 0 }, connect: vi.fn() };
+    const mockGainNode = { gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() };
     const mockOscillator = {
       type: 'sine',
       frequency: { value: 0 },
@@ -177,6 +197,7 @@ describe('createRingtone', () => {
       stop: vi.fn(),
     };
     const mockCtx = {
+      state: 'running',
       createGain: vi.fn(() => mockGainNode),
       createOscillator: vi.fn(() => mockOscillator),
       destination: {},
@@ -186,6 +207,7 @@ describe('createRingtone', () => {
     vi.stubGlobal(
       'AudioContext',
       class {
+        state = mockCtx.state;
         createGain = mockCtx.createGain;
         createOscillator = mockCtx.createOscillator;
         destination = mockCtx.destination;
@@ -199,5 +221,138 @@ describe('createRingtone', () => {
 
     expect(mockCtx.createGain).toHaveBeenCalled();
     expect(mockGainNode.gain.value).toBeCloseTo(0.5);
+  });
+
+  describe('shared AudioContext', () => {
+    it('uses shared context from getUnlockedContext when available', async () => {
+      vi.stubGlobal('Audio', undefined);
+
+      const mockGainNode = { gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() };
+      const mockOscillator = {
+        type: 'sine',
+        frequency: { value: 0 },
+        connect: vi.fn(),
+        start: vi.fn(),
+        stop: vi.fn(),
+      };
+      const sharedCtx = {
+        state: 'running',
+        createGain: vi.fn(() => mockGainNode),
+        createOscillator: vi.fn(() => mockOscillator),
+        destination: {},
+        currentTime: 0,
+        close: vi.fn().mockResolvedValue(undefined),
+        resume: vi.fn().mockResolvedValue(undefined),
+      };
+
+      const { getUnlockedContext } = await import('@/utils/audioUnlock');
+      vi.mocked(getUnlockedContext).mockReturnValue(sharedCtx as unknown as AudioContext);
+
+      const ringtone = createRingtone(60);
+      ringtone.play();
+
+      expect(sharedCtx.createGain).toHaveBeenCalled();
+      expect(mockGainNode.gain.value).toBeCloseTo(0.6);
+    });
+
+    it('does not close shared context on pause', async () => {
+      vi.stubGlobal('Audio', undefined);
+
+      const mockGainNode = { gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() };
+      const mockOscillator = {
+        type: 'sine',
+        frequency: { value: 0 },
+        connect: vi.fn(),
+        start: vi.fn(),
+        stop: vi.fn(),
+      };
+      const sharedCtx = {
+        state: 'running',
+        createGain: vi.fn(() => mockGainNode),
+        createOscillator: vi.fn(() => mockOscillator),
+        destination: {},
+        currentTime: 0,
+        close: vi.fn().mockResolvedValue(undefined),
+        resume: vi.fn().mockResolvedValue(undefined),
+      };
+
+      const { getUnlockedContext } = await import('@/utils/audioUnlock');
+      vi.mocked(getUnlockedContext).mockReturnValue(sharedCtx as unknown as AudioContext);
+
+      const ringtone = createRingtone(60);
+      ringtone.play();
+      ringtone.pause();
+
+      expect(sharedCtx.close).not.toHaveBeenCalled();
+    });
+
+    it('resumes suspended shared context', async () => {
+      vi.stubGlobal('Audio', undefined);
+
+      const mockGainNode = { gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() };
+      const mockOscillator = {
+        type: 'sine',
+        frequency: { value: 0 },
+        connect: vi.fn(),
+        start: vi.fn(),
+        stop: vi.fn(),
+      };
+      const sharedCtx = {
+        state: 'suspended',
+        createGain: vi.fn(() => mockGainNode),
+        createOscillator: vi.fn(() => mockOscillator),
+        destination: {},
+        currentTime: 0,
+        close: vi.fn().mockResolvedValue(undefined),
+        resume: vi.fn().mockResolvedValue(undefined),
+      };
+
+      const { getUnlockedContext } = await import('@/utils/audioUnlock');
+      vi.mocked(getUnlockedContext).mockReturnValue(sharedCtx as unknown as AudioContext);
+
+      const ringtone = createRingtone(60);
+      ringtone.play();
+
+      expect(sharedCtx.resume).toHaveBeenCalled();
+    });
+
+    it('creates new context when shared context is closed', async () => {
+      vi.stubGlobal('Audio', undefined);
+
+      const sharedCtx = {
+        state: 'closed',
+      };
+
+      const { getUnlockedContext } = await import('@/utils/audioUnlock');
+      vi.mocked(getUnlockedContext).mockReturnValue(sharedCtx as unknown as AudioContext);
+
+      const mockGainNode = { gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() };
+      const mockOscillator = {
+        type: 'sine',
+        frequency: { value: 0 },
+        connect: vi.fn(),
+        start: vi.fn(),
+        stop: vi.fn(),
+      };
+      const newCtxClose = vi.fn().mockResolvedValue(undefined);
+      vi.stubGlobal(
+        'AudioContext',
+        class {
+          state = 'running';
+          createGain = vi.fn(() => mockGainNode);
+          createOscillator = vi.fn(() => mockOscillator);
+          destination = {};
+          currentTime = 0;
+          close = newCtxClose;
+        },
+      );
+
+      const ringtone = createRingtone(60);
+      ringtone.play();
+      ringtone.pause();
+
+      // Should close the locally-created context
+      expect(newCtxClose).toHaveBeenCalled();
+    });
   });
 });
