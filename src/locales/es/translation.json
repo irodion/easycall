@@ -41,7 +41,6 @@
     "large": "Grande",
     "extraLarge": "Muy Grande",
     "pairingCode": "Código de Emparejamiento",
-    "addContact": "Agregar Contacto",
     "language": "Idioma",
     "saveError": "Error al guardar los ajustes. Por favor inténtelo de nuevo.",
     "reviewSetup": "Revisar guía de configuración",
@@ -67,18 +66,6 @@
     "tryAgain": "Reintentar",
     "noCamera": "No se Encontró Cámara",
     "noCameraHint": "No se encontró cámara o micrófono. Por favor conecte una cámara y un micrófono e inténtelo de nuevo."
-  },
-  "addContact": {
-    "title": "Agregar Contacto",
-    "step1": "Paso 1: Nombre",
-    "contactName": "Nombre del Contacto",
-    "namePlaceholder": "Ingrese el nombre del contacto",
-    "addPhoto": "Agregar Foto",
-    "step2": "Paso 2: Foto (opcional)",
-    "preview": "Vista previa",
-    "choosePhoto": "Elegir foto",
-    "step3": "Paso 3: Confirmar",
-    "confirmTitle": "Confirmar"
   },
   "callHistory": {
     "title": "Historial de Llamadas",
@@ -110,18 +97,12 @@
   "manageContacts": {
     "title": "Administrar Contactos",
     "titleFor": "Contactos de {{name}}",
-    "addContact": "+ Agregar Contacto",
-    "contactName": "Nombre del contacto",
-    "namePlaceholder": "Nombre del contacto",
     "remove": "Eliminar",
     "confirmRemove": "¿Está seguro de que desea eliminar a {{name}}?",
     "removeContact": "Eliminar a {{name}}",
     "thisContact": "este contacto",
     "addFailed": "Error al agregar contacto: {{error}}",
     "removeFailed": "Error al eliminar contacto: {{error}}",
-    "saveNewContact": "Guardar nuevo contacto",
-    "cancelAdd": "Cancelar agregar",
-    "choosePhoto": "Elegir foto",
     "addFromMembers": "Agregar desde Miembros"
   },
   "elderlySettings": {

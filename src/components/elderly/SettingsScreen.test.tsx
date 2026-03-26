@@ -106,18 +106,6 @@ describe('SettingsScreen', () => {
     expect(screen.getByText('123456')).toBeInTheDocument();
   });
 
-  it('Add Contact button navigates to /elderly/add-contact', () => {
-    renderWithProviders(
-      <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
-      {
-        routerProps: { initialEntries: ['/elderly/settings'] },
-      },
-    );
-    const link = screen.getByRole('link', { name: /add contact/i });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', '/elderly/add-contact');
-  });
-
   it('Back button/link navigates to /elderly', () => {
     renderWithProviders(
       <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,

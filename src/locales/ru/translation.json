@@ -41,7 +41,6 @@
     "large": "Крупный",
     "extraLarge": "Очень крупный",
     "pairingCode": "Код сопряжения",
-    "addContact": "Добавить контакт",
     "language": "Язык",
     "saveError": "Не удалось сохранить настройки. Пожалуйста, попробуйте снова.",
     "reviewSetup": "Просмотреть руководство",
@@ -67,18 +66,6 @@
     "tryAgain": "Попробовать снова",
     "noCamera": "Камера не найдена",
     "noCameraHint": "Камера или микрофон не найдены. Пожалуйста, подключите камеру и микрофон и попробуйте снова."
-  },
-  "addContact": {
-    "title": "Добавить контакт",
-    "step1": "Шаг 1: Имя",
-    "contactName": "Имя контакта",
-    "namePlaceholder": "Введите имя контакта",
-    "addPhoto": "Добавить фото",
-    "step2": "Шаг 2: Фото (необязательно)",
-    "preview": "Предпросмотр",
-    "choosePhoto": "Выбрать фото",
-    "step3": "Шаг 3: Подтверждение",
-    "confirmTitle": "Подтвердить"
   },
   "callHistory": {
     "title": "История звонков",
@@ -110,18 +97,12 @@
   "manageContacts": {
     "title": "Управление контактами",
     "titleFor": "Контакты {{name}}",
-    "addContact": "+ Добавить контакт",
-    "contactName": "Имя контакта",
-    "namePlaceholder": "Имя контакта",
     "remove": "Удалить",
     "confirmRemove": "Вы уверены, что хотите удалить {{name}}?",
     "removeContact": "Удалить {{name}}",
     "thisContact": "этот контакт",
     "addFailed": "Не удалось добавить контакт: {{error}}",
     "removeFailed": "Не удалось удалить контакт: {{error}}",
-    "saveNewContact": "Сохранить новый контакт",
-    "cancelAdd": "Отменить добавление",
-    "choosePhoto": "Выбрать фото",
     "addFromMembers": "Добавить из участников"
   },
   "elderlySettings": {

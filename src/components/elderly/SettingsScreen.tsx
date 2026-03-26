@@ -261,14 +261,6 @@ export function SettingsScreen({ settings, userId, displayName }: SettingsScreen
 
       {/* Bottom actions — pushed down via mt-auto */}
       <div className="mt-auto flex flex-col gap-3">
-        <Link
-          to="/elderly/add-contact"
-          className="btn btn-primary min-h-14 w-full font-bold text-[length:var(--text-button)]"
-          aria-label={t('settings.addContact')}
-        >
-          {t('settings.addContact')}
-        </Link>
-
         <button
           type="button"
           onClick={() => void handleReviewSetup()}

@@ -41,7 +41,6 @@
     "large": "Groß",
     "extraLarge": "Sehr groß",
     "pairingCode": "Kopplungscode",
-    "addContact": "Kontakt hinzufügen",
     "language": "Sprache",
     "saveError": "Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "reviewSetup": "Einrichtung erneut ansehen",
@@ -67,18 +66,6 @@
     "tryAgain": "Erneut versuchen",
     "noCamera": "Keine Kamera gefunden",
     "noCameraHint": "Kamera oder Mikrofon nicht gefunden. Bitte schließen Sie eine Kamera und ein Mikrofon an und versuchen Sie es erneut."
-  },
-  "addContact": {
-    "title": "Kontakt hinzufügen",
-    "step1": "Schritt 1: Name",
-    "contactName": "Kontaktname",
-    "namePlaceholder": "Kontaktname eingeben",
-    "addPhoto": "Foto hinzufügen",
-    "step2": "Schritt 2: Foto (optional)",
-    "preview": "Vorschau",
-    "choosePhoto": "Foto auswählen",
-    "step3": "Schritt 3: Bestätigen",
-    "confirmTitle": "Bestätigen"
   },
   "callHistory": {
     "title": "Anrufverlauf",
@@ -110,18 +97,12 @@
   "manageContacts": {
     "title": "Kontakte verwalten",
     "titleFor": "Kontakte von {{name}}",
-    "addContact": "+ Kontakt hinzufügen",
-    "contactName": "Kontaktname",
-    "namePlaceholder": "Kontaktname",
     "remove": "Entfernen",
     "confirmRemove": "Sind Sie sicher, dass Sie {{name}} entfernen möchten?",
     "removeContact": "{{name}} entfernen",
     "thisContact": "diesen Kontakt",
     "addFailed": "Kontakt konnte nicht hinzugefügt werden: {{error}}",
     "removeFailed": "Kontakt konnte nicht entfernt werden: {{error}}",
-    "saveNewContact": "Neuen Kontakt speichern",
-    "cancelAdd": "Hinzufügen abbrechen",
-    "choosePhoto": "Foto auswählen",
     "addFromMembers": "Aus Mitgliedern hinzufügen"
   },
   "elderlySettings": {
