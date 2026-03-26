@@ -41,7 +41,6 @@
     "large": "גדול",
     "extraLarge": "גדול מאוד",
     "pairingCode": "קוד צימוד",
-    "addContact": "הוסף איש קשר",
     "language": "שפה",
     "saveError": "שמירת ההגדרות נכשלה. אנא נסה שוב.",
     "reviewSetup": "סקירת מדריך ההגדרה",
@@ -67,18 +66,6 @@
     "tryAgain": "נסה שוב",
     "noCamera": "לא נמצאה מצלמה",
     "noCameraHint": "לא נמצאו מצלמה או מיקרופון. אנא חבר מצלמה ומיקרופון ונסה שוב."
-  },
-  "addContact": {
-    "title": "הוסף איש קשר",
-    "step1": "שלב 1: שם",
-    "contactName": "שם איש הקשר",
-    "namePlaceholder": "הזן שם איש קשר",
-    "addPhoto": "הוסף תמונה",
-    "step2": "שלב 2: תמונה (אופציונלי)",
-    "preview": "תצוגה מקדימה",
-    "choosePhoto": "בחר תמונה",
-    "step3": "שלב 3: אישור",
-    "confirmTitle": "אישור"
   },
   "callHistory": {
     "title": "היסטוריית שיחות",
@@ -110,18 +97,12 @@
   "manageContacts": {
     "title": "ניהול אנשי קשר",
     "titleFor": "אנשי קשר של {{name}}",
-    "addContact": "+ הוסף איש קשר",
-    "contactName": "שם איש קשר",
-    "namePlaceholder": "שם איש קשר",
     "remove": "הסר",
     "confirmRemove": "האם אתה בטוח שברצונך להסיר את {{name}}?",
     "removeContact": "הסר את {{name}}",
     "thisContact": "איש קשר זה",
     "addFailed": "שגיאה בהוספת איש קשר: {{error}}",
     "removeFailed": "שגיאה בהסרת איש קשר: {{error}}",
-    "saveNewContact": "שמור איש קשר חדש",
-    "cancelAdd": "בטל הוספה",
-    "choosePhoto": "בחר תמונה",
     "addFromMembers": "הוסף מחברים"
   },
   "elderlySettings": {

@@ -15,7 +15,6 @@ import { useAppLock } from '@/hooks/useAppLock';
 import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate';
 import { HomeScreen } from '@/components/elderly/HomeScreen';
 import { SettingsScreen } from '@/components/elderly/SettingsScreen';
-import { AddContact } from '@/components/elderly/AddContact';
 import { CallScreen } from '@/components/elderly/CallScreen';
 import { CallHistory } from '@/components/elderly/CallHistory';
 import { Dashboard } from '@/components/caregiver/Dashboard';
@@ -133,10 +132,6 @@ function AuthenticatedApp() {
                     <SettingsScreen userId={userId} settings={settings} displayName={displayName} />
                   ) : null
                 }
-              />
-              <Route
-                path="/elderly/add-contact"
-                element={userId ? <AddContact userId={userId} /> : null}
               />
               <Route
                 path="/elderly/history"

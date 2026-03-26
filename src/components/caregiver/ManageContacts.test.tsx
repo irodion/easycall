@@ -25,10 +25,6 @@ vi.mock('@/stores/contactStore', () => ({
   ),
 }));
 
-vi.mock('@/utils/compressImage', () => ({
-  compressImage: vi.fn().mockResolvedValue(new Blob(['img'], { type: 'image/jpeg' })),
-}));
-
 const mockGetDoc = vi.fn().mockResolvedValue({
   exists: () => true,
   data: () => ({ displayName: 'Grandma Rose' }),
@@ -86,17 +82,11 @@ describe('ManageContacts', () => {
     expect(screen.getByText('Bob')).toBeInTheDocument();
   });
 
-  it('shows Add Contact button', async () => {
+  it('clicking Add from Members reveals LinkedUserPicker', async () => {
     const { ManageContacts } = await import('./ManageContacts');
     renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
-    expect(screen.getByRole('button', { name: /add contact/i })).toBeInTheDocument();
-  });
-
-  it('clicking Add Contact reveals name input', async () => {
-    const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
-    fireEvent.click(screen.getByRole('button', { name: /add contact/i }));
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /add from members/i }));
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
   });
 
   it('shows remove button for each contact', async () => {
@@ -129,30 +119,6 @@ describe('ManageContacts', () => {
       fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
     });
     expect(mockRemoveContact).toHaveBeenCalledWith('elderly-1', 'contact-1');
-  });
-
-  it('shows error when addContact throws', async () => {
-    mockAddContact.mockRejectedValueOnce(new Error('Firestore error'));
-    const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
-
-    fireEvent.click(screen.getByRole('button', { name: /add contact/i }));
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Charlie' } });
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /save/i }));
-    });
-
-    expect(screen.getByRole('alert')).toBeInTheDocument();
-  });
-
-  it('save button is disabled when name is whitespace-only', async () => {
-    const { ManageContacts } = await import('./ManageContacts');
-    renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
-
-    fireEvent.click(screen.getByRole('button', { name: /add contact/i }));
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: '   ' } });
-
-    expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
   });
 
   it('shows error when removeContact throws', async () => {
