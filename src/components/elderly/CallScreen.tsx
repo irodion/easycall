@@ -59,6 +59,13 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
     [contacts, contactId, roomId],
   );
 
+  // Keep a ref to the contact so callbacks inside the startCall effect can read
+  // up-to-date values without the effect itself re-running on every snapshot.
+  const contactRef = useRef(contact);
+  useEffect(() => {
+    contactRef.current = contact;
+  }, [contact]);
+
   // Ensure contacts are loaded (handles direct URL navigation / incoming call)
   useEffect(() => {
     const uid = auth.currentUser?.uid;
@@ -92,9 +99,23 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
     }
   }, []);
 
+  // Snapshot the contact fields at mount time. The effect depends on the
+  // contact's id (a stable string), NOT the contact object reference. This
+  // prevents Firestore onSnapshot updates from destroying and re-creating the
+  // Jitsi conference on every contacts-collection change.
+  const contactIdStable = contact?.id;
+  const jitsiRoomIdStable = contact?.jitsiRoomId;
+
   useEffect(() => {
-    if (!contact) return;
-    const { jitsiRoomId, name: contactName } = contact;
+    if (!contactIdStable || !jitsiRoomIdStable) return;
+
+    // Read remaining contact values from the ref — they are only needed for
+    // one-time operations (signaling, history) and must not trigger re-runs.
+    const c = contactRef.current!;
+    const contactName = c.name;
+    const contactDocId = c.id;
+    const contactUserId = c.contactUserId;
+    const jitsiRoomId = jitsiRoomIdStable;
 
     let mounted = true;
 
@@ -140,12 +161,12 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
         apiRef.current = api;
         callStartTimeRef.current = Date.now();
         contactNameRef.current = contactName;
-        contactIdRef.current = contact!.id;
+        contactIdRef.current = contactDocId;
         setInCall?.(true);
 
         if (user.uid) {
           void setActiveCall(user.uid, {
-            contactId: contact!.id,
+            contactId: contactDocId,
             contactName: contactName,
             jitsiRoomId,
             startedAt: Timestamp.now(),
@@ -154,9 +175,9 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
           // Signal the contact that they have an incoming call (outgoing calls only).
           // When answering via /call-room/:roomId, contactId is absent — skip signaling
           // to avoid ringing the original caller back.
-          if (contactId && contact!.contactUserId) {
+          if (contactId && contactUserId) {
             void initiateCall({
-              elderlyUserId: contact!.contactUserId,
+              elderlyUserId: contactUserId,
               callerId: user.uid,
               callerName: displayName,
               callerPhotoURL: user.photoURL ?? undefined,
@@ -183,8 +204,7 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
 
         api.addListener('readyToClose', () => {
           const cleanup: Promise<unknown>[] = [writeHistory(), clearActiveCall(user.uid)];
-          if (contactId && contact!.contactUserId)
-            cleanup.push(clearIncomingCallDoc(contact!.contactUserId));
+          if (contactId && contactUserId) cleanup.push(clearIncomingCallDoc(contactUserId));
           void Promise.all(cleanup).then(() => {
             if (mounted) void navigate('/elderly');
           });
@@ -269,7 +289,9 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
       }
     };
     // restrictedNetworkMode is read via ref — changing it mid-call must not remount the conference
-  }, [contact, contactId, navigate, setInCall, writeHistory]);
+    // contact fields (name, contactUserId) are read via contactRef — snapshot updates must not
+    // destroy the active Jitsi conference
+  }, [contactIdStable, jitsiRoomIdStable, contactId, navigate, setInCall, writeHistory]);
 
   const handleHangup = () => {
     void writeHistory();
