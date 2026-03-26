@@ -82,10 +82,11 @@ describe('ManageContacts', () => {
     expect(screen.getByText('Bob')).toBeInTheDocument();
   });
 
-  it('shows Add from Members button', async () => {
+  it('clicking Add from Members reveals LinkedUserPicker', async () => {
     const { ManageContacts } = await import('./ManageContacts');
     renderWithProviders(<ManageContacts elderlyUserId="elderly-1" caregiverUserId="caregiver-1" />);
-    expect(screen.getByRole('button', { name: /add from members/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /add from members/i }));
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
   });
 
   it('shows remove button for each contact', async () => {
