@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
+import '@/utils/audioUnlock';
 import { auth, db } from '@/services/firebase';
 import { AuthGuard } from '@/components/shared/AuthGuard';
 import { RoleSelector } from '@/components/shared/RoleSelector';
