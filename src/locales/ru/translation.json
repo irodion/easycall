@@ -51,7 +51,12 @@
     "noName": "Не указано",
     "connectionMode": "Режим подключения",
     "connectionModeP2P": "Прямое (P2P)",
-    "connectionModeRelay": "Через сервер"
+    "connectionModeRelay": "Через сервер",
+    "notifications": "Уведомления",
+    "notificationsEnabled": "Включены",
+    "notificationsBlocked": "Заблокированы",
+    "notificationsDefault": "Не настроено",
+    "notificationsUnsupported": "Не поддерживается"
   },
   "permissions": {
     "checking": "Проверка разрешений камеры и микрофона",
