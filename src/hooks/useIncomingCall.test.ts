@@ -295,6 +295,27 @@ describe('useIncomingCall', () => {
     expect(useCallStore.getState().isRinging).toBe(false);
   });
 
+  it('auto-declines when opened with ?action=decline-call but no roomId', () => {
+    window.history.replaceState({}, '', '/elderly?action=decline-call');
+
+    renderHook(() => useIncomingCall('user-1'));
+
+    capturedCallback!({
+      exists: () => true,
+      data: () => ({
+        status: 'ringing',
+        callerName: 'Alex',
+        callerPhotoURL: '',
+        jitsiRoomId: 'room-1',
+        timestamp: { toDate: () => new Date() },
+      }),
+    });
+
+    // Should auto-decline any ringing call when no roomId constraint
+    expect(declineCall).toHaveBeenCalledWith('user-1');
+    expect(useCallStore.getState().isRinging).toBe(false);
+  });
+
   it('does not auto-decline when roomId does not match', () => {
     window.history.replaceState({}, '', '/elderly?action=decline-call&roomId=room-1');
 

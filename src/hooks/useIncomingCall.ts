@@ -23,11 +23,13 @@ export function useIncomingCall(userId: string | null): void {
 
     // Check for decline intent passed via URL query param (from SW notification
     // Decline action when no client tab was open).
+    let shouldAutoDecline = false;
     let declineRoomId: string | null = null;
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('action') === 'decline-call') {
-        declineRoomId = params.get('roomId');
+        shouldAutoDecline = true;
+        declineRoomId = params.get('roomId'); // may be null if SW had no roomId
         params.delete('action');
         params.delete('roomId');
         const remaining = params.toString();
@@ -61,10 +63,11 @@ export function useIncomingCall(userId: string | null): void {
         }
 
         // Auto-decline if the app was opened with decline intent from SW notification.
-        // Only decline if the roomId matches to avoid rejecting a different call.
-        if (declineRoomId !== null) {
+        // Only decline if the roomId matches (or was absent) to avoid rejecting a different call.
+        if (shouldAutoDecline) {
+          shouldAutoDecline = false; // consume the intent
           const targetRoom = declineRoomId;
-          declineRoomId = null; // consume the intent
+          declineRoomId = null;
           if (!targetRoom || targetRoom === String(data.jitsiRoomId ?? '')) {
             void declineCall(userId)
               .then(() => clearIncomingCallDoc(userId))
