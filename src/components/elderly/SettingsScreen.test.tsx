@@ -217,6 +217,16 @@ describe('SettingsScreen', () => {
   });
 
   describe('notification status', () => {
+    const origNotification = globalThis.Notification;
+
+    afterEach(() => {
+      Object.defineProperty(globalThis, 'Notification', {
+        value: origNotification,
+        writable: true,
+        configurable: true,
+      });
+    });
+
     it('shows "Enabled" when permission granted and messaging supported', async () => {
       Object.defineProperty(globalThis, 'Notification', {
         value: { permission: 'granted' },
@@ -227,10 +237,10 @@ describe('SettingsScreen', () => {
       renderWithProviders(
         <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
       );
-      expect(screen.getByTestId('notification-status-section')).toBeInTheDocument();
       await waitFor(() => {
-        expect(screen.getByText('Enabled')).toBeInTheDocument();
+        expect(screen.getByTestId('notification-status-section')).toBeInTheDocument();
       });
+      expect(screen.getByText('Enabled')).toBeInTheDocument();
     });
 
     it('shows "Not supported" when permission granted but messaging unsupported', async () => {

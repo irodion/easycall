@@ -228,34 +228,36 @@ export function SettingsScreen({ settings, userId, displayName }: SettingsScreen
         </div>
       </section>
 
-      <section data-testid="notification-status-section">
-        <EasyCallText as="h2" variant="button" className="font-bold mb-2">
-          {t('settings.notifications')}
-        </EasyCallText>
-        <div className="flex items-center gap-2 px-4 py-3 bg-base-200 rounded-xl min-h-14">
-          <span
-            className={`inline-block w-3 h-3 rounded-full ${
-              messagingSupported === false || typeof Notification === 'undefined'
-                ? 'bg-warning'
-                : Notification.permission === 'granted'
-                  ? 'bg-success'
-                  : Notification.permission === 'denied'
-                    ? 'bg-error'
-                    : 'bg-warning'
-            }`}
-            aria-hidden="true"
-          />
-          <EasyCallText as="span" variant="body">
-            {messagingSupported === false || typeof Notification === 'undefined'
-              ? t('settings.notificationsUnsupported')
-              : Notification.permission === 'granted'
-                ? t('settings.notificationsEnabled')
-                : Notification.permission === 'denied'
-                  ? t('settings.notificationsBlocked')
-                  : t('settings.notificationsDefault')}
+      {messagingSupported !== null && (
+        <section data-testid="notification-status-section">
+          <EasyCallText as="h2" variant="button" className="font-bold mb-2">
+            {t('settings.notifications')}
           </EasyCallText>
-        </div>
-      </section>
+          <div className="flex items-center gap-2 px-4 py-3 bg-base-200 rounded-xl min-h-14">
+            <span
+              className={`inline-block w-3 h-3 rounded-full ${
+                !messagingSupported || typeof Notification === 'undefined'
+                  ? 'bg-warning'
+                  : Notification.permission === 'granted'
+                    ? 'bg-success'
+                    : Notification.permission === 'denied'
+                      ? 'bg-error'
+                      : 'bg-warning'
+              }`}
+              aria-hidden="true"
+            />
+            <EasyCallText as="span" variant="body">
+              {!messagingSupported || typeof Notification === 'undefined'
+                ? t('settings.notificationsUnsupported')
+                : Notification.permission === 'granted'
+                  ? t('settings.notificationsEnabled')
+                  : Notification.permission === 'denied'
+                    ? t('settings.notificationsBlocked')
+                    : t('settings.notificationsDefault')}
+            </EasyCallText>
+          </div>
+        </section>
+      )}
 
       {/* Bottom actions — pushed down via mt-auto */}
       <div className="mt-auto flex flex-col gap-3">
