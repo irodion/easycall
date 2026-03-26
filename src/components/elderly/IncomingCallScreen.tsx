@@ -78,44 +78,66 @@ export function IncomingCallScreen({
   return (
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-[var(--space-lg)] bg-gradient-to-b from-success/5 to-base-100 p-[var(--space-md)]"
+      className="fixed inset-0 z-50 flex flex-col items-center bg-neutral text-neutral-content"
+      style={{
+        paddingTop: 'max(var(--space-xl), var(--safe-top, 0px))',
+        paddingBottom: 'max(var(--space-xl), var(--safe-bottom, 0px))',
+        paddingLeft: 'var(--space-md)',
+        paddingRight: 'var(--space-md)',
+      }}
       role="alertdialog"
       aria-modal="true"
       aria-label={t('incomingCall.isCalling', { name: incomingCall.callerName })}
     >
-      <div className="relative">
-        <div
-          className="absolute inset-0 rounded-full bg-success/20 animate-pulse-ring"
-          aria-hidden="true"
-        />
-        {incomingCall.callerPhotoURL ? (
-          <img
-            src={incomingCall.callerPhotoURL}
-            alt={incomingCall.callerName}
-            className="relative min-w-[120px] min-h-[120px] w-[120px] h-[120px] rounded-full object-cover"
-          />
-        ) : (
+      {/* Caller info — centered in upper portion */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-[var(--space-lg)]">
+        <div className="relative">
+          {/* Outer ripple */}
           <div
-            className="relative min-w-[120px] min-h-[120px] w-[120px] h-[120px] rounded-full bg-primary flex items-center justify-center text-primary-content text-[length:var(--text-display)]"
+            className="absolute -inset-5 rounded-full bg-success/15 animate-pulse-ring"
             aria-hidden="true"
-          >
-            {incomingCall.callerName.charAt(0).toUpperCase()}
-          </div>
-        )}
+          />
+          {/* Inner ripple (staggered) */}
+          <div
+            className="absolute -inset-3 rounded-full bg-success/20 animate-pulse-ring"
+            style={{ animationDelay: '0.75s' }}
+            aria-hidden="true"
+          />
+          {/* Gradient border ring */}
+          <div
+            className="absolute -inset-1 rounded-full bg-gradient-to-b from-success/40 to-success/20"
+            aria-hidden="true"
+          />
+          {incomingCall.callerPhotoURL ? (
+            <img
+              src={incomingCall.callerPhotoURL}
+              alt={incomingCall.callerName}
+              className="relative min-w-[120px] min-h-[120px] w-[120px] h-[120px] rounded-full object-cover"
+            />
+          ) : (
+            <div
+              className="relative min-w-[120px] min-h-[120px] w-[120px] h-[120px] rounded-full bg-primary flex items-center justify-center text-primary-content text-[length:var(--text-display)]"
+              aria-hidden="true"
+            >
+              {incomingCall.callerName.charAt(0).toUpperCase()}
+            </div>
+          )}
+        </div>
+
+        <div className="text-center">
+          <p className="text-[length:var(--text-heading)] font-bold">{incomingCall.callerName}</p>
+          <p className="text-[length:var(--text-body)] opacity-70 animate-pulse">
+            {t('incomingCall.calling')}
+          </p>
+          <p className="text-[length:var(--text-small)] opacity-50 mt-1">
+            {restrictedNetworkMode
+              ? t('settings.connectionModeRelay')
+              : t('settings.connectionModeP2P')}
+          </p>
+        </div>
       </div>
 
-      <div className="text-center">
-        <p className="text-[length:var(--text-heading)] font-bold">{incomingCall.callerName}</p>
-        <p className="text-[length:var(--text-body)] text-[color:var(--color-text-secondary)] animate-pulse">
-          {t('incomingCall.calling')}
-        </p>
-        <p className="text-[length:var(--text-small)] text-[color:var(--color-text-secondary)] mt-1">
-          {restrictedNetworkMode
-            ? t('settings.connectionModeRelay')
-            : t('settings.connectionModeP2P')}
-        </p>
-      </div>
-
+      {/* Action buttons — pinned to bottom */}
       <div className="flex flex-col items-center gap-[var(--space-md)] w-full max-w-xs">
         <button
           type="button"
