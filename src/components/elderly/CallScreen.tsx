@@ -44,6 +44,7 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
   const beforeUnloadRef = useRef<((e: BeforeUnloadEvent) => void) | null>(null);
   const contactNameRef = useRef<string>('');
   const contactIdRef = useRef<string>('');
+  const contactUserIdRef = useRef<string>('');
   const restrictedNetworkRef = useRef(restrictedNetworkMode);
   useEffect(() => {
     restrictedNetworkRef.current = restrictedNetworkMode;
@@ -162,6 +163,7 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
         callStartTimeRef.current = Date.now();
         contactNameRef.current = contactName;
         contactIdRef.current = contactDocId;
+        contactUserIdRef.current = contactUserId;
         setInCall?.(true);
 
         if (user.uid) {
@@ -298,7 +300,7 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
     const uid = auth.currentUser?.uid;
     if (uid) void clearActiveCall(uid);
     // Clean up incoming call signaling for the contact (outgoing calls only)
-    if (contactId && contact?.contactUserId) void clearIncomingCallDoc(contact.contactUserId);
+    if (contactId && contactUserIdRef.current) void clearIncomingCallDoc(contactUserIdRef.current);
     apiRef.current?.executeCommand('hangup');
     void navigate('/elderly');
   };
