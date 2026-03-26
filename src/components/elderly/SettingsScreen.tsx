@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { doc, updateDoc } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
-import { auth, db } from '@/services/firebase';
+import { auth, db, getFirebaseMessaging } from '@/services/firebase';
 import { EasyCallText } from '@/components/shared/EasyCallText';
 import { EasyCallButton } from '@/components/shared/EasyCallButton';
 import { Icon } from '@/components/shared/Icon';
@@ -32,6 +32,11 @@ export function SettingsScreen({ settings, userId, displayName }: SettingsScreen
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(displayName);
   const [savingName, setSavingName] = useState(false);
+  const [messagingSupported, setMessagingSupported] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    void getFirebaseMessaging().then((m) => setMessagingSupported(m !== null));
+  }, []);
 
   const handleSaveName = async () => {
     const trimmed = nameInput.trim();
@@ -219,6 +224,35 @@ export function SettingsScreen({ settings, userId, displayName }: SettingsScreen
             {settings.restrictedNetworkMode
               ? t('settings.connectionModeRelay')
               : t('settings.connectionModeP2P')}
+          </EasyCallText>
+        </div>
+      </section>
+
+      <section data-testid="notification-status-section">
+        <EasyCallText as="h2" variant="button" className="font-bold mb-2">
+          {t('settings.notifications')}
+        </EasyCallText>
+        <div className="flex items-center gap-2 px-4 py-3 bg-base-200 rounded-xl min-h-14">
+          <span
+            className={`inline-block w-3 h-3 rounded-full ${
+              messagingSupported === false || typeof Notification === 'undefined'
+                ? 'bg-warning'
+                : Notification.permission === 'granted'
+                  ? 'bg-success'
+                  : Notification.permission === 'denied'
+                    ? 'bg-error'
+                    : 'bg-warning'
+            }`}
+            aria-hidden="true"
+          />
+          <EasyCallText as="span" variant="body">
+            {messagingSupported === false || typeof Notification === 'undefined'
+              ? t('settings.notificationsUnsupported')
+              : Notification.permission === 'granted'
+                ? t('settings.notificationsEnabled')
+                : Notification.permission === 'denied'
+                  ? t('settings.notificationsBlocked')
+                  : t('settings.notificationsDefault')}
           </EasyCallText>
         </div>
       </section>

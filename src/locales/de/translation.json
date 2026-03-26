@@ -51,7 +51,12 @@
     "noName": "Nicht festgelegt",
     "connectionMode": "Verbindungsmodus",
     "connectionModeP2P": "Direkt (P2P)",
-    "connectionModeRelay": "Relay"
+    "connectionModeRelay": "Relay",
+    "notifications": "Benachrichtigungen",
+    "notificationsEnabled": "Aktiviert",
+    "notificationsBlocked": "Blockiert",
+    "notificationsDefault": "Nicht festgelegt",
+    "notificationsUnsupported": "Nicht unterstützt"
   },
   "permissions": {
     "checking": "Kamera- und Mikrofonberechtigungen werden überprüft",

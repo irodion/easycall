@@ -51,7 +51,12 @@
     "noName": "לא הוגדר",
     "connectionMode": "מצב חיבור",
     "connectionModeP2P": "ישיר (P2P)",
-    "connectionModeRelay": "ממסר"
+    "connectionModeRelay": "ממסר",
+    "notifications": "התראות",
+    "notificationsEnabled": "מופעלות",
+    "notificationsBlocked": "חסומות",
+    "notificationsDefault": "לא הוגדר",
+    "notificationsUnsupported": "לא נתמך"
   },
   "permissions": {
     "checking": "בודק הרשאות מצלמה ומיקרופון",

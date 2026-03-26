@@ -6,6 +6,7 @@ import { SettingsScreen } from './SettingsScreen';
 import type { UserSettings } from '@/types/user';
 
 const mockResetAppData = vi.fn().mockResolvedValue(undefined);
+const mockGetFirebaseMessaging = vi.fn().mockResolvedValue({});
 
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn().mockReturnValue('doc-ref'),
@@ -21,6 +22,7 @@ vi.mock('@/services/firebase', () => ({
   db: {},
   app: {},
   auth: { currentUser: { uid: 'user-1' } },
+  getFirebaseMessaging: () => mockGetFirebaseMessaging(),
 }));
 
 vi.mock('@/hooks/usePairingCode', () => ({
@@ -212,6 +214,84 @@ describe('SettingsScreen', () => {
       />,
     );
     expect(screen.getByText('Relay')).toBeInTheDocument();
+  });
+
+  describe('notification status', () => {
+    it('shows "Enabled" when permission granted and messaging supported', async () => {
+      Object.defineProperty(globalThis, 'Notification', {
+        value: { permission: 'granted' },
+        writable: true,
+        configurable: true,
+      });
+      mockGetFirebaseMessaging.mockResolvedValue({});
+      renderWithProviders(
+        <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+      );
+      expect(screen.getByTestId('notification-status-section')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Enabled')).toBeInTheDocument();
+      });
+    });
+
+    it('shows "Not supported" when permission granted but messaging unsupported', async () => {
+      Object.defineProperty(globalThis, 'Notification', {
+        value: { permission: 'granted' },
+        writable: true,
+        configurable: true,
+      });
+      mockGetFirebaseMessaging.mockResolvedValue(null);
+      renderWithProviders(
+        <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+      );
+      await waitFor(() => {
+        expect(screen.getByText('Not supported')).toBeInTheDocument();
+      });
+    });
+
+    it('shows "Blocked" when Notification.permission is denied', async () => {
+      Object.defineProperty(globalThis, 'Notification', {
+        value: { permission: 'denied' },
+        writable: true,
+        configurable: true,
+      });
+      mockGetFirebaseMessaging.mockResolvedValue({});
+      renderWithProviders(
+        <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+      );
+      await waitFor(() => {
+        expect(screen.getByText('Blocked')).toBeInTheDocument();
+      });
+    });
+
+    it('shows "Not set" when Notification.permission is default', async () => {
+      Object.defineProperty(globalThis, 'Notification', {
+        value: { permission: 'default' },
+        writable: true,
+        configurable: true,
+      });
+      mockGetFirebaseMessaging.mockResolvedValue({});
+      renderWithProviders(
+        <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+      );
+      await waitFor(() => {
+        expect(screen.getByText('Not set')).toBeInTheDocument();
+      });
+    });
+
+    it('shows "Not supported" when Notification API is unavailable', async () => {
+      Object.defineProperty(globalThis, 'Notification', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+      mockGetFirebaseMessaging.mockResolvedValue(null);
+      renderWithProviders(
+        <SettingsScreen settings={defaultSettings} userId="user-1" displayName="Test User" />,
+      );
+      await waitFor(() => {
+        expect(screen.getByText('Not supported')).toBeInTheDocument();
+      });
+    });
   });
 
   it('passes vitest-axe accessibility check', async () => {
