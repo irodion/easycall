@@ -524,7 +524,6 @@ describe('CallScreen', () => {
     }, 10000);
   });
 
-
   describe('error handling', () => {
     it('shows error message when loadJitsiApi rejects', async () => {
       mockLoadJitsiApi.mockRejectedValueOnce(new Error('timed out'));
