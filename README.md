@@ -58,8 +58,12 @@ EasyCall works on any modern phone or tablet browser:
 
 ## Getting Help
 
-If something isn't working, the caregiver can check the member's settings from their own dashboard. For technical issues, see the [development guide](DEVELOPMENT.md) or open an issue on GitHub.
+If something isn't working, the caregiver can check the member's settings from their own dashboard. For technical issues, see the [development guide](DEVELOPMENT.md).
+
+## Disclaimer
+
+This is a personal project built for a specific use case. No active development or support is planned. Use at your own risk — no warranties or guarantees of any kind are provided.
 
 ---
 
-For developers and contributors, see [DEVELOPMENT.md](DEVELOPMENT.md).
+For developers, see [DEVELOPMENT.md](DEVELOPMENT.md).
