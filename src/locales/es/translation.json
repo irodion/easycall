@@ -33,7 +33,8 @@
     "endCall": "Finalizar llamada",
     "cameraOn": "Encender cámara",
     "cameraOff": "Apagar cámara",
-    "videoCallArea": "Área de videollamada"
+    "videoCallArea": "Área de videollamada",
+    "connectionFailed": "No se pudo conectar a la llamada. Por favor, inténtalo de nuevo."
   },
   "settings": {
     "title": "Ajustes",

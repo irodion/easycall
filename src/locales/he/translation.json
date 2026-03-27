@@ -33,7 +33,8 @@
     "endCall": "סיים שיחה",
     "cameraOn": "הפעל מצלמה",
     "cameraOff": "כבה מצלמה",
-    "videoCallArea": "אזור שיחת וידאו"
+    "videoCallArea": "אזור שיחת וידאו",
+    "connectionFailed": "לא ניתן להתחבר לשיחה. אנא נסה שוב."
   },
   "settings": {
     "title": "הגדרות",
