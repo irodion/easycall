@@ -26,19 +26,26 @@ pnpm preview    # Preview production build
 
 ## Scripts
 
-| Command              | Description                    |
-| -------------------- | ------------------------------ |
-| `pnpm dev`           | Start development server       |
-| `pnpm build`         | Type check + production build  |
-| `pnpm preview`       | Preview production build       |
-| `pnpm test`          | Run tests once                 |
-| `pnpm test:watch`    | Run tests in watch mode        |
-| `pnpm lint`          | Run ESLint                     |
-| `pnpm lint:fix`      | Run ESLint with auto-fix       |
-| `pnpm format`        | Format code with Prettier      |
-| `pnpm test:coverage` | Run tests with coverage report |
-| `pnpm test:e2e`      | Run Playwright E2E tests       |
-| `pnpm format:check`  | Check formatting               |
+| Command                   | Description                                  |
+| ------------------------- | -------------------------------------------- |
+| `pnpm dev`                | Start development server                     |
+| `pnpm build`              | Type check + production build                |
+| `pnpm preview`            | Preview production build                     |
+| `pnpm test`               | Run tests once                               |
+| `pnpm test:watch`         | Run tests in watch mode                      |
+| `pnpm lint`               | Run ESLint                                   |
+| `pnpm lint:fix`           | Run ESLint with auto-fix                     |
+| `pnpm format`             | Format code with Prettier                    |
+| `pnpm test:coverage`      | Run tests with coverage report               |
+| `pnpm test:e2e`           | Run Playwright E2E tests                     |
+| `pnpm test:e2e:emulators` | E2E tests with Firebase Emulators (Chromium) |
+| `pnpm format:check`       | Check formatting                             |
+| `pnpm security`           | Run Semgrep security scan                    |
+| `pnpm security:deps`      | Scan dependencies for vulnerabilities        |
+| `pnpm deploy:all`         | Full deployment (validate + Firebase)        |
+| `pnpm deploy:dry-run`     | Dry-run deployment                           |
+| `pnpm deploy:firebase`    | Deploy all Firebase services                 |
+| `pnpm deploy:health`      | Run post-deploy health check                 |
 
 ## Project Structure
 

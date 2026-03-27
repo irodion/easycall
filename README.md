@@ -43,7 +43,7 @@ All management happens remotely — you don't need to be in the same room.
 - Large, high-contrast interface optimized for readability
 - Video calls powered by Jitsi (free, no account needed)
 - Push notifications for incoming calls
-- Works offline (opens from home screen even without internet)
+- Opens from home screen even without internet (calls require a connection)
 - Supports English, Spanish, Hebrew, Russian, and German
 - Right-to-left language support
 - PIN lock for device security
