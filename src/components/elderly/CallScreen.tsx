@@ -299,6 +299,14 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
 
         conferenceJoinTimer = setTimeout(() => {
           if (mounted) {
+            // Tear down the Jitsi instance — the conference never connected
+            if (apiRef.current) {
+              apiRef.current.dispose();
+              apiRef.current = null;
+            }
+            const uid = auth.currentUser?.uid;
+            if (uid) void clearActiveCall(uid);
+            setInCall?.(false);
             setLoading(false);
             setError(t('call.connectionFailed'));
           }

@@ -609,7 +609,7 @@ describe('CallScreen', () => {
       installNoAutoEmitMock();
       vi.useFakeTimers();
       try {
-        const { CallScreen } = await import('./CallScreen');
+        const { CallScreen, CONFERENCE_JOIN_TIMEOUT_MS } = await import('./CallScreen');
         await act(async () => {
           render(
             <I18nextProvider i18n={i18n}>
@@ -622,12 +622,44 @@ describe('CallScreen', () => {
           );
           await vi.advanceTimersByTimeAsync(50);
         });
-        // Conference join timeout (30s)
         await act(async () => {
-          await vi.advanceTimersByTimeAsync(30_000);
+          await vi.advanceTimersByTimeAsync(CONFERENCE_JOIN_TIMEOUT_MS);
         });
         expect(screen.getByText(/could not connect/i)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('clears error overlay when conference joins after timeout', async () => {
+      installNoAutoEmitMock();
+      vi.useFakeTimers();
+      try {
+        const { CallScreen, CONFERENCE_JOIN_TIMEOUT_MS } = await import('./CallScreen');
+        await act(async () => {
+          render(
+            <I18nextProvider i18n={i18n}>
+              <MemoryRouter initialEntries={['/call/contact-1']}>
+                <Routes>
+                  <Route path="/call/:contactId" element={<CallScreen />} />
+                </Routes>
+              </MemoryRouter>
+            </I18nextProvider>,
+          );
+          await vi.advanceTimersByTimeAsync(50);
+        });
+        // Trigger timeout
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(CONFERENCE_JOIN_TIMEOUT_MS);
+        });
+        expect(screen.getByText(/could not connect/i)).toBeInTheDocument();
+
+        // Late join clears the error
+        await act(async () => {
+          lastApiInstance?._emit('videoConferenceJoined', {});
+        });
+        expect(screen.queryByText(/could not connect/i)).not.toBeInTheDocument();
       } finally {
         vi.useRealTimers();
       }
