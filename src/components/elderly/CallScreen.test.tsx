@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, fireEvent, act, render } from '@testing-library/react';
 import { axe } from 'vitest-axe';
 import { MemoryRouter, Routes, Route } from 'react-router';
@@ -84,23 +84,37 @@ vi.mock('@/stores/contactStore', () => ({
 
 describe('CallScreen', () => {
   let lastApiInstance: MockJitsiMeetExternalAPI | null = null;
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     lastApiInstance = null;
 
+    // Mock fetch for the network pre-check (all tests need this)
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response());
+
     // Capture the MockJitsiMeetExternalAPI instance when CallScreen creates it.
     // Override dispose() to preserve commands so tests can inspect them after hangup/unmount.
+    // Auto-emit videoConferenceJoined after 10ms so loading completes — mocked async ops
+    // (ensureAuthenticated, loadJitsiApi, generateJwt) resolve as microtasks, so listeners
+    // are registered before the 10ms timer fires.
     const OriginalMock = MockJitsiMeetExternalAPI;
     window.JitsiMeetExternalAPI = class extends OriginalMock {
       constructor(domain: string, options: never) {
         super(domain, options);
         lastApiInstance = this as unknown as MockJitsiMeetExternalAPI;
+        setTimeout(() => {
+          (this as unknown as MockJitsiMeetExternalAPI)._emit('videoConferenceJoined', {});
+        }, 10);
       }
       dispose(): void {
         // Don't clear — keep listeners/commands so tests can inspect post-dispose
       }
     } as unknown as typeof window.JitsiMeetExternalAPI;
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
   });
 
   const mockSetInCall = vi.fn();
@@ -134,8 +148,12 @@ describe('CallScreen', () => {
           </MemoryRouter>
         </I18nextProvider>,
       );
-      // Wait for async operations to settle
+      // Wait for async operations (auth, fetch, JWT, API creation) to settle
       await new Promise((r) => setTimeout(r, 50));
+    });
+    // Flush any pending state updates from the auto-emitted videoConferenceJoined event
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 20));
     });
     return result!;
   }
@@ -506,6 +524,7 @@ describe('CallScreen', () => {
     }, 10000);
   });
 
+
   describe('error handling', () => {
     it('shows error message when loadJitsiApi rejects', async () => {
       mockLoadJitsiApi.mockRejectedValueOnce(new Error('timed out'));
@@ -555,5 +574,115 @@ describe('CallScreen', () => {
       const { container } = await renderLoaded();
       expect(await axe(container)).toHaveNoViolations();
     }, 10000);
+  });
+
+  describe('conference join lifecycle', () => {
+    /** Install a mock that does NOT auto-emit videoConferenceJoined */
+    function installNoAutoEmitMock() {
+      const OriginalMock = MockJitsiMeetExternalAPI;
+      window.JitsiMeetExternalAPI = class extends OriginalMock {
+        constructor(domain: string, options: never) {
+          super(domain, options);
+          lastApiInstance = this as unknown as MockJitsiMeetExternalAPI;
+        }
+        dispose(): void {}
+      } as unknown as typeof window.JitsiMeetExternalAPI;
+    }
+
+    it('shows loading until videoConferenceJoined fires', async () => {
+      installNoAutoEmitMock();
+      await renderLoaded();
+      expect(screen.getByRole('status')).toBeInTheDocument();
+      expect(screen.getByText(/connecting/i)).toBeInTheDocument();
+    });
+
+    it('hides loading when videoConferenceJoined fires', async () => {
+      installNoAutoEmitMock();
+      await renderLoaded();
+      expect(screen.getByRole('status')).toBeInTheDocument();
+      await act(async () => {
+        lastApiInstance?._emit('videoConferenceJoined', {});
+      });
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    });
+
+    it('shows error after conference join timeout', async () => {
+      installNoAutoEmitMock();
+      vi.useFakeTimers();
+      try {
+        const { CallScreen } = await import('./CallScreen');
+        await act(async () => {
+          render(
+            <I18nextProvider i18n={i18n}>
+              <MemoryRouter initialEntries={['/call/contact-1']}>
+                <Routes>
+                  <Route path="/call/:contactId" element={<CallScreen />} />
+                </Routes>
+              </MemoryRouter>
+            </I18nextProvider>,
+          );
+          await vi.advanceTimersByTimeAsync(50);
+        });
+        // Conference join timeout (30s)
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(30_000);
+        });
+        expect(screen.getByText(/could not connect/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  describe('auto-disable video on poor connection', () => {
+    it('auto-mutes video when quality is poor and video is on', async () => {
+      await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 15 });
+        await new Promise((r) => setTimeout(r, 10));
+      });
+      const cmds = lastApiInstance?.getExecutedCommands() ?? [];
+      expect(cmds.some((c) => c.command === 'toggleVideo')).toBe(true);
+    });
+
+    it('does not auto-mute if video already muted', async () => {
+      await renderLoaded();
+      lastApiInstance!.isVideoMuted = () => Promise.resolve(true);
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 15 });
+        await new Promise((r) => setTimeout(r, 10));
+      });
+      const cmds = lastApiInstance?.getExecutedCommands() ?? [];
+      expect(cmds.some((c) => c.command === 'toggleVideo')).toBe(false);
+    });
+
+    it('does not auto-mute on fair quality', async () => {
+      await renderLoaded();
+      await act(async () => {
+        lastApiInstance?._emit('connectionQuality', { local: true, quality: 50 });
+        await new Promise((r) => setTimeout(r, 10));
+      });
+      const cmds = lastApiInstance?.getExecutedCommands() ?? [];
+      expect(cmds.some((c) => c.command === 'toggleVideo')).toBe(false);
+    });
+  });
+
+  describe('network pre-check', () => {
+    it('proceeds when 8x8.vc is reachable', async () => {
+      await renderLoaded();
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://8x8.vc/favicon.ico',
+        expect.objectContaining({ mode: 'no-cors' }),
+      );
+      expect(lastApiInstance).not.toBeNull();
+    });
+
+    it('shows error when 8x8.vc is unreachable', async () => {
+      fetchSpy.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+      await renderLoaded();
+      expect(screen.getByText(/could not connect/i)).toBeInTheDocument();
+      expect(lastApiInstance).toBeNull();
+    });
   });
 });

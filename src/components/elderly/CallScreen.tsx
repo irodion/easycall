@@ -17,6 +17,8 @@ import type { ConnectionQuality } from '@/components/shared/connectionQualitySty
 import type { JitsiMeetExternalAPI } from '@/types/jitsi';
 
 const WEAK_SIGNAL_BANNER_DURATION_MS = 5000;
+export const CONFERENCE_JOIN_TIMEOUT_MS = 30_000;
+export const REACHABILITY_TIMEOUT_MS = 5_000;
 const CONTROLS_SAFE_AREA_STYLE = { paddingBottom: 'max(1.5rem, var(--safe-bottom, 0px))' };
 
 interface CallScreenProps {
@@ -121,10 +123,27 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
     const jitsiRoomId = jitsiRoomIdStable;
 
     let mounted = true;
+    let conferenceJoinTimer: ReturnType<typeof setTimeout> | undefined;
 
     async function startCall() {
       try {
         const user = await ensureAuthenticated();
+
+        // Quick reachability check — fails fast if 8x8.vc is blocked
+        const reachController = new AbortController();
+        const reachTimer = setTimeout(() => reachController.abort(), REACHABILITY_TIMEOUT_MS);
+        try {
+          await fetch('https://8x8.vc/favicon.ico', {
+            mode: 'no-cors',
+            signal: reachController.signal,
+          });
+        } catch {
+          clearTimeout(reachTimer);
+          throw new Error('8x8.vc is not reachable');
+        } finally {
+          clearTimeout(reachTimer);
+        }
+
         await loadJitsiApi();
 
         const functions = getFunctions(app);
@@ -249,6 +268,10 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
             setConnectionQuality(quality);
             if (quality === 'poor') {
               setShowWeakSignalBanner(true);
+              // Auto-mute video to preserve audio bandwidth
+              void api.isVideoMuted().then((muted) => {
+                if (!muted) api.executeCommand('toggleVideo');
+              });
               if (!weakSignalTimerRef.current) {
                 weakSignalTimerRef.current = setTimeout(() => {
                   setShowWeakSignalBanner(false);
@@ -265,7 +288,21 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
           }
         });
 
-        if (mounted) setLoading(false);
+        // Wait for the conference to actually join before hiding the spinner
+        api.addListener('videoConferenceJoined', () => {
+          clearTimeout(conferenceJoinTimer);
+          if (mounted) {
+            setLoading(false);
+            setError(null);
+          }
+        });
+
+        conferenceJoinTimer = setTimeout(() => {
+          if (mounted) {
+            setLoading(false);
+            setError(t('call.connectionFailed'));
+          }
+        }, CONFERENCE_JOIN_TIMEOUT_MS);
       } catch {
         if (mounted) {
           setLoading(false);
@@ -278,6 +315,7 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
 
     return () => {
       mounted = false;
+      clearTimeout(conferenceJoinTimer);
       setInCall?.(false);
       if (beforeUnloadRef.current) {
         window.removeEventListener('beforeunload', beforeUnloadRef.current);
