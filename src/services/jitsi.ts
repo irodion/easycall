@@ -18,6 +18,9 @@ export function getJaasAppId(): string {
   return appId;
 }
 
+/** Timeout for loading the Jitsi external API script (ms). */
+export const LOAD_TIMEOUT_MS = 15_000;
+
 export function loadJitsiApi(): Promise<void> {
   // Already loaded
   if (window.JitsiMeetExternalAPI) {
@@ -36,8 +39,19 @@ export function loadJitsiApi(): Promise<void> {
     const script = document.createElement('script');
     script.src = src;
     script.async = true;
-    script.onload = () => resolve();
+
+    const timer = setTimeout(() => {
+      script.remove();
+      loadPromise = null;
+      reject(new Error('Jitsi external API load timed out'));
+    }, LOAD_TIMEOUT_MS);
+
+    script.onload = () => {
+      clearTimeout(timer);
+      resolve();
+    };
     script.onerror = () => {
+      clearTimeout(timer);
       script.remove();
       loadPromise = null;
       reject(new Error('Failed to load Jitsi external API'));

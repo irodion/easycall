@@ -33,7 +33,8 @@
     "endCall": "Anruf beenden",
     "cameraOn": "Kamera einschalten",
     "cameraOff": "Kamera ausschalten",
-    "videoCallArea": "Videoanruf-Bereich"
+    "videoCallArea": "Videoanruf-Bereich",
+    "connectionFailed": "Verbindung zum Anruf fehlgeschlagen. Bitte versuchen Sie es erneut."
   },
   "settings": {
     "title": "Einstellungen",

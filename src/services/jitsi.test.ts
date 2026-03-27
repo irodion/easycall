@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { loadJitsiApi, _resetLoadPromise, getJaasAppId } from './jitsi';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { loadJitsiApi, _resetLoadPromise, getJaasAppId, LOAD_TIMEOUT_MS } from './jitsi';
 import { MockJitsiMeetExternalAPI } from '@/test/mocks/jitsi';
 
 describe('loadJitsiApi', () => {
@@ -79,5 +79,63 @@ describe('loadJitsiApi', () => {
     expect(script2).not.toBeNull();
     script2?.dispatchEvent(new Event('load'));
     await expect(loadPromise2).resolves.toBeUndefined();
+  });
+
+  describe('timeout', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('rejects when script neither loads nor errors within timeout', async () => {
+      const loadPromise = loadJitsiApi();
+      const script = document.head.querySelector('script[src*="8x8.vc"]');
+      expect(script).not.toBeNull();
+
+      vi.advanceTimersByTime(LOAD_TIMEOUT_MS);
+
+      await expect(loadPromise).rejects.toThrow('timed out');
+      // Script should be removed from DOM
+      expect(document.head.querySelector('script[src*="8x8.vc"]')).toBeNull();
+    });
+
+    it('clears timeout on successful load', async () => {
+      const loadPromise = loadJitsiApi();
+      const script = document.head.querySelector('script[src*="8x8.vc"]');
+
+      script?.dispatchEvent(new Event('load'));
+      await loadPromise;
+
+      // Advancing past timeout should NOT cause a rejection
+      vi.advanceTimersByTime(LOAD_TIMEOUT_MS);
+      await expect(loadPromise).resolves.toBeUndefined();
+    });
+
+    it('clears timeout on script error', async () => {
+      const loadPromise = loadJitsiApi();
+      const script = document.head.querySelector('script[src*="8x8.vc"]');
+
+      script?.dispatchEvent(new Event('error'));
+      await expect(loadPromise).rejects.toThrow('Failed to load');
+
+      // Advancing past timeout should not cause additional issues
+      vi.advanceTimersByTime(LOAD_TIMEOUT_MS);
+    });
+
+    it('allows retry after timeout', async () => {
+      const loadPromise = loadJitsiApi();
+      vi.advanceTimersByTime(LOAD_TIMEOUT_MS);
+      await expect(loadPromise).rejects.toThrow('timed out');
+
+      // Should be able to retry — new script appended
+      const loadPromise2 = loadJitsiApi();
+      const script2 = document.head.querySelector('script[src*="8x8.vc"]');
+      expect(script2).not.toBeNull();
+      script2?.dispatchEvent(new Event('load'));
+      await expect(loadPromise2).resolves.toBeUndefined();
+    });
   });
 });

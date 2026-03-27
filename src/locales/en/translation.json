@@ -33,7 +33,8 @@
     "endCall": "End call",
     "cameraOn": "Turn on camera",
     "cameraOff": "Turn off camera",
-    "videoCallArea": "Video call area"
+    "videoCallArea": "Video call area",
+    "connectionFailed": "Could not connect to call. Please try again."
   },
   "settings": {
     "title": "Settings",

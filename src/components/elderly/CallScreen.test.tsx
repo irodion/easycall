@@ -25,8 +25,10 @@ vi.mock('@/services/callSignaling', () => ({
   clearIncomingCallDoc: (...args: unknown[]) => mockClearIncomingCallDoc(...args),
 }));
 
+const mockLoadJitsiApi = vi.fn().mockResolvedValue(undefined);
+
 vi.mock('@/services/jitsi', () => ({
-  loadJitsiApi: vi.fn().mockResolvedValue(undefined),
+  loadJitsiApi: (...args: unknown[]) => mockLoadJitsiApi(...args),
   getJaasAppId: vi.fn().mockReturnValue('vpaas-magic-cookie-test123'),
 }));
 
@@ -500,6 +502,57 @@ describe('CallScreen', () => {
       await act(async () => {
         lastApiInstance?._emit('connectionQuality', { local: true, quality: 50 });
       });
+      expect(await axe(container)).toHaveNoViolations();
+    }, 10000);
+  });
+
+  describe('error handling', () => {
+    it('shows error message when loadJitsiApi rejects', async () => {
+      mockLoadJitsiApi.mockRejectedValueOnce(new Error('timed out'));
+      await renderLoaded();
+      expect(screen.getByText(/could not connect/i)).toBeInTheDocument();
+      expect(screen.queryByText(/connecting to call/i)).not.toBeInTheDocument();
+    });
+
+    it('shows retry button on failure', async () => {
+      mockLoadJitsiApi.mockRejectedValueOnce(new Error('timed out'));
+      await renderLoaded();
+      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+    });
+
+    it('retry clears error and re-triggers call', async () => {
+      mockLoadJitsiApi.mockRejectedValueOnce(new Error('timed out'));
+      await renderLoaded();
+      expect(screen.getByText(/could not connect/i)).toBeInTheDocument();
+
+      // Second call will succeed (default mock resolves)
+      mockLoadJitsiApi.mockResolvedValueOnce(undefined);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: /retry/i }));
+        await new Promise((r) => setTimeout(r, 50));
+      });
+      expect(screen.queryByText(/could not connect/i)).not.toBeInTheDocument();
+      expect(lastApiInstance).not.toBeNull();
+    });
+
+    it('shows error when JWT generation fails', async () => {
+      const { httpsCallable } = await import('firebase/functions');
+      vi.mocked(httpsCallable).mockReturnValueOnce(
+        vi.fn().mockRejectedValue(new Error('JWT error')) as never,
+      );
+      await renderLoaded();
+      expect(screen.getByText(/could not connect/i)).toBeInTheDocument();
+    });
+
+    it('does not show call controls when error is displayed', async () => {
+      mockLoadJitsiApi.mockRejectedValueOnce(new Error('timed out'));
+      await renderLoaded();
+      expect(screen.queryByRole('button', { name: /end call/i })).not.toBeInTheDocument();
+    });
+
+    it('error overlay passes axe check', async () => {
+      mockLoadJitsiApi.mockRejectedValueOnce(new Error('timed out'));
+      const { container } = await renderLoaded();
       expect(await axe(container)).toHaveNoViolations();
     }, 10000);
   });

@@ -37,6 +37,8 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
   const [callEnded, setCallEnded] = useState(false);
   const [connectionQuality, setConnectionQuality] = useState<ConnectionQuality | null>(null);
   const [showWeakSignalBanner, setShowWeakSignalBanner] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const weakSignalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const callStartTimeRef = useRef<number | null>(null);
@@ -265,7 +267,10 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
 
         if (mounted) setLoading(false);
       } catch {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          setError(t('call.connectionFailed'));
+        }
       }
     }
 
@@ -293,7 +298,15 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
     // restrictedNetworkMode is read via ref — changing it mid-call must not remount the conference
     // contact fields (name, contactUserId) are read via contactRef — snapshot updates must not
     // destroy the active Jitsi conference
-  }, [contactIdStable, jitsiRoomIdStable, contactId, navigate, setInCall, writeHistory]);
+  }, [
+    contactIdStable,
+    jitsiRoomIdStable,
+    contactId,
+    navigate,
+    setInCall,
+    writeHistory,
+    retryCount,
+  ]);
 
   const handleHangup = () => {
     void writeHistory();
@@ -312,6 +325,12 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
   const handleToggleVideo = () => {
     apiRef.current?.executeCommand('toggleVideo');
   };
+
+  const handleRetry = useCallback(() => {
+    setError(null);
+    setLoading(true);
+    setRetryCount((c) => c + 1);
+  }, []);
 
   if (!contact) {
     return (
@@ -342,14 +361,28 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
         </div>
       )}
 
-      {!loading && !callEnded && (
+      {error && !loading && (
+        <div className="absolute inset-0 bg-base-100 flex items-center justify-center z-10">
+          <div className="flex flex-col items-center gap-6 p-8 text-center">
+            <Icon name="phone-end" size={48} className="text-error" aria-hidden />
+            <EasyCallText as="p" variant="body" className="text-base-content">
+              {error}
+            </EasyCallText>
+            <EasyCallButton variant="primary" size="large" onClick={handleRetry}>
+              {t('common.retry')}
+            </EasyCallButton>
+          </div>
+        </div>
+      )}
+
+      {!loading && !callEnded && !error && (
         <ConnectionQualityIndicator
           quality={connectionQuality}
           className="absolute top-4 start-4 z-10"
         />
       )}
 
-      {showWeakSignalBanner && !callEnded && !loading && (
+      {showWeakSignalBanner && !callEnded && !loading && !error && (
         <div
           role="alert"
           className="absolute top-4 start-14 end-4 z-10 bg-error/90 text-error-content rounded-lg px-4 py-2 text-center"
@@ -367,37 +400,39 @@ export function CallScreen({ setInCall, restrictedNetworkMode }: CallScreenProps
       />
 
       {/* Overlay call controls */}
-      <div
-        className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center gap-6"
-        style={CONTROLS_SAFE_AREA_STYLE}
-      >
-        <EasyCallButton
-          variant="secondary"
-          size="large"
-          onClick={handleToggleAudio}
-          aria-label={audioMuted ? t('call.unmuteMic') : t('call.muteMic')}
+      {!error && (
+        <div
+          className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center gap-6"
+          style={CONTROLS_SAFE_AREA_STYLE}
         >
-          <Icon name={audioMuted ? 'mic-off' : 'mic'} size={28} />
-        </EasyCallButton>
+          <EasyCallButton
+            variant="secondary"
+            size="large"
+            onClick={handleToggleAudio}
+            aria-label={audioMuted ? t('call.unmuteMic') : t('call.muteMic')}
+          >
+            <Icon name={audioMuted ? 'mic-off' : 'mic'} size={28} />
+          </EasyCallButton>
 
-        <EasyCallButton
-          variant="danger"
-          size="call"
-          onClick={handleHangup}
-          aria-label={t('call.endCall')}
-        >
-          <Icon name="phone-end" size={32} />
-        </EasyCallButton>
+          <EasyCallButton
+            variant="danger"
+            size="call"
+            onClick={handleHangup}
+            aria-label={t('call.endCall')}
+          >
+            <Icon name="phone-end" size={32} />
+          </EasyCallButton>
 
-        <EasyCallButton
-          variant="secondary"
-          size="large"
-          onClick={handleToggleVideo}
-          aria-label={videoMuted ? t('call.cameraOn') : t('call.cameraOff')}
-        >
-          <Icon name={videoMuted ? 'camera-off' : 'camera'} size={28} />
-        </EasyCallButton>
-      </div>
+          <EasyCallButton
+            variant="secondary"
+            size="large"
+            onClick={handleToggleVideo}
+            aria-label={videoMuted ? t('call.cameraOn') : t('call.cameraOff')}
+          >
+            <Icon name={videoMuted ? 'camera-off' : 'camera'} size={28} />
+          </EasyCallButton>
+        </div>
+      )}
     </div>
   );
 }
