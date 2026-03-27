@@ -34,7 +34,7 @@
     "cameraOn": "Encender cámara",
     "cameraOff": "Apagar cámara",
     "videoCallArea": "Área de videollamada",
-    "connectionFailed": "No se pudo conectar a la llamada. Por favor, inténtalo de nuevo."
+    "connectionFailed": "No se pudo conectar a la llamada. Por favor inténtelo de nuevo."
   },
   "settings": {
     "title": "Ajustes",
