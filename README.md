@@ -1,58 +1,65 @@
 # EasyCall
 
-Elderly-friendly video calling PWA built with Jitsi.
+Video calling made simple for everyone.
 
-## Tech Stack
+EasyCall is a web app that makes video calling as easy as tapping a photo. It's designed for people who find apps like Zoom or FaceTime confusing — whether that's an elderly parent, a grandparent, or anyone who just wants a simpler way to stay in touch.
 
-- **Framework:** React 19 + TypeScript (strict mode)
-- **Build:** Vite 7
-- **Styling:** Tailwind CSS v4 + DaisyUI v5 (custom "elderly" high-contrast theme)
-- **State:** Zustand v5
-- **Routing:** React Router v7
-- **PWA:** vite-plugin-pwa + Workbox
-- **Testing:** Vitest + Testing Library + vitest-axe + MSW v2
-- **E2E:** Playwright (Chromium + WebKit)
-- **Linting:** ESLint (flat config) + Prettier
+## Why EasyCall?
 
-## Getting Started
+Regular video calling apps require navigating menus, sharing links, managing settings, and dealing with confusing screens full of buttons. EasyCall removes all of that:
 
-```bash
-pnpm install
-pnpm dev        # Start dev server at localhost:5173
-pnpm test       # Run tests
-pnpm build      # Production build
-pnpm preview    # Preview production build
-```
+- **One tap to call** — tap a contact's photo and the call starts immediately
+- **Simple call screen** — only three buttons: mute, camera, and hang up
+- **Incoming calls just work** — the phone rings with a big "Answer" button, no links or codes needed
+- **No app store required** — installs directly from the browser to the home screen
+- **Remote setup** — a family member or caregiver can set everything up from their own device using a pairing code
 
-## Scripts
+## How It Works
 
-| Command              | Description                    |
-| -------------------- | ------------------------------ |
-| `pnpm dev`           | Start development server       |
-| `pnpm build`         | Type check + production build  |
-| `pnpm preview`       | Preview production build       |
-| `pnpm test`          | Run tests once                 |
-| `pnpm test:watch`    | Run tests in watch mode        |
-| `pnpm lint`          | Run ESLint                     |
-| `pnpm lint:fix`      | Run ESLint with auto-fix       |
-| `pnpm format`        | Format code with Prettier      |
-| `pnpm test:coverage` | Run tests with coverage report |
-| `pnpm test:e2e`      | Run Playwright E2E tests       |
-| `pnpm format:check`  | Check formatting               |
+EasyCall has two roles:
 
-## Project Structure
+### For the member (the person making calls)
 
-```
-src/
-  components/
-    elderly/      # Elderly-facing UI components
-    caregiver/    # Caregiver dashboard UI
-    shared/       # Shared components (buttons, modals)
-  hooks/          # Custom React hooks
-  stores/         # Zustand state stores
-  services/       # Firebase, Jitsi, FCM service layers
-  utils/          # Pure utility functions
-  test/           # Test setup and fixtures
-  types/          # TypeScript type definitions
-  styles/         # Design tokens and CSS
-```
+1. Open EasyCall on your phone's browser
+2. Add it to your home screen — on Android tap "Install" when prompted; on iPhone use the Share button and choose "Add to Home Screen"
+3. A caregiver pairs with your device using a simple 6-digit code
+4. Your contacts appear as large photo buttons — tap one to call
+
+That's it. No accounts to create, no passwords to remember.
+
+### For the caregiver (family member or helper)
+
+1. Create an account on EasyCall from your own device
+2. Pair with the member's device using the 6-digit code shown on their screen
+3. From your dashboard you can:
+   - Add, edit, or remove the member's contacts
+   - Adjust settings like volume, display name, or language
+   - See call history and online status
+
+All management happens remotely — you don't need to be in the same room.
+
+## Features
+
+- Large, high-contrast interface optimized for readability
+- Video calls powered by Jitsi (free, no account needed)
+- Push notifications for incoming calls
+- Works offline (opens from home screen even without internet)
+- Supports English, Spanish, Hebrew, Russian, and German
+- Right-to-left language support
+- PIN lock for device security
+- Free for families (up to 25 users at zero cost)
+
+## Supported Devices
+
+EasyCall works on any modern phone or tablet browser:
+
+- **Android** (Chrome) — full support including push notifications
+- **iOS** (Safari) — supported with some notification limitations due to iOS restrictions
+
+## Getting Help
+
+If something isn't working, the caregiver can check the member's settings from their own dashboard. For technical issues, see the [development guide](DEVELOPMENT.md) or open an issue on GitHub.
+
+---
+
+For developers and contributors, see [DEVELOPMENT.md](DEVELOPMENT.md).
