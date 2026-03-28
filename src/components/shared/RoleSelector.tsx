@@ -29,8 +29,9 @@ function getErrorMessage(err: unknown, t: TFunction): string {
 
   if (combined.includes('permission-denied')) {
     // assignCaregiverRole throws permission-denied for both closed registration
-    // and incorrect PIN — distinguish by checking the server's error message.
-    if (combined.includes('pin')) {
+    // and incorrect PIN — match the exact phrase from the Cloud Function to
+    // avoid false positives (e.g. "pinpoint" in unrelated messages).
+    if (combined.includes('incorrect pin')) {
       return t('roleSelector.incorrectPin');
     }
     return t('registrationLock.closed');
