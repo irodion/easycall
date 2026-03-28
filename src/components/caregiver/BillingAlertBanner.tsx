@@ -4,7 +4,6 @@ import { useBillingAlert, type BillingSeverity } from '@/hooks/useBillingAlert';
 
 const alertClasses: Record<BillingSeverity, string> = {
   warning: 'alert alert-warning',
-  error: 'alert alert-error',
   critical: 'alert alert-error',
 };
 

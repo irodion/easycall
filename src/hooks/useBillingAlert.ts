@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { doc, onSnapshot, type Timestamp } from 'firebase/firestore';
 import { db } from '@/services/firebase';
 
-export type BillingSeverity = 'warning' | 'error' | 'critical';
+export type BillingSeverity = 'warning' | 'critical';
 
 export interface BillingAlert {
   costAmount: number;
@@ -16,8 +16,7 @@ export interface BillingAlert {
 const DISMISS_KEY_PREFIX = 'easycall_billing_alert_dismissed_';
 
 function getSeverity(threshold: number): BillingSeverity {
-  if (threshold >= 1.0) return 'critical';
-  if (threshold >= 0.9) return 'error';
+  if (threshold >= 0.9) return 'critical'; // billing auto-disabled at 90%
   return 'warning';
 }
 

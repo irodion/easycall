@@ -80,7 +80,7 @@ describe('useBillingAlert', () => {
       ),
     );
 
-    expect(result.current.alert!.severity).toBe('error');
+    expect(result.current.alert!.severity).toBe('critical');
   });
 
   it('returns critical severity for threshold 1.0', async () => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { auth, db, getFirebaseMessaging } from '@/services/firebase';
 import { EasyCallText } from '@/components/shared/EasyCallText';
@@ -44,7 +44,10 @@ export function SettingsScreen({ settings, userId, displayName }: SettingsScreen
     setSaveError(null);
     setSavingName(true);
     try {
-      await updateDoc(doc(db, 'users', userId), { displayName: trimmed });
+      await updateDoc(doc(db, 'users', userId), {
+        displayName: trimmed,
+        lastDisplayNameChange: serverTimestamp(),
+      });
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, { displayName: trimmed });
       }
