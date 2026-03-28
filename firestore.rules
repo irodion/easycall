@@ -23,6 +23,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Billing alert status: readable by anyone (shown on caregiver dashboard).
+    // Only contains spend amounts and threshold — no sensitive data.
+    // Written by Cloud Functions only.
+    match /config/billingAlert {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // PIN hash and legacy PIN doc: NO client access at all.
     // Server-only via admin SDK.
     match /config/caregiverPin {

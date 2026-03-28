@@ -13,6 +13,7 @@ import { useContactsPresence } from '@/hooks/useContactsPresence';
 import { chunkArray } from '@/utils/chunkArray';
 import { unlinkElderlyUser } from '@/services/callSignaling';
 import { AccountBanner } from './AccountBanner';
+import { BillingAlertBanner } from './BillingAlertBanner';
 import type { EasyCallUser } from '@/types/user';
 
 interface DashboardProps {
@@ -114,6 +115,7 @@ export function Dashboard({ userId }: DashboardProps) {
       </EasyCallText>
 
       <AccountBanner />
+      <BillingAlertBanner />
 
       <Link
         to="/caregiver/pair"

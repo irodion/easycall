@@ -11,6 +11,10 @@ vi.mock('@/hooks/useContactsPresence', () => ({
   useContactsPresence: () => mockPresenceMap,
 }));
 
+vi.mock('@/hooks/useBillingAlert', () => ({
+  useBillingAlert: () => ({ alert: null, dismissed: false, dismiss: vi.fn() }),
+}));
+
 const mockUnlinkElderlyUser = vi.fn();
 
 describe('Dashboard', () => {

@@ -48,7 +48,7 @@ The hook (`scripts/hooks/pre-commit`) blocks direct commits to `main`, runs semg
 
 - **Zustand stores** (`src/stores/`): `contactStore` (contacts CRUD + Firestore sync), `callStore` (incoming call state)
 - **Firebase services** (`src/services/`): `firebase.ts` (SDK init), `callSignaling.ts` (call initiation/decline via Firestore), `caregiverAuth.ts` (email/password linking), `callHistory.ts`, `jitsi.ts` (API loader)
-- **Custom hooks** (`src/hooks/`): media permissions, push notifications, pairing codes, presence, focus traps, app lock
+- **Custom hooks** (`src/hooks/`): media permissions, push notifications, pairing codes, presence, focus traps, app lock, billing alerts
 
 ### i18n
 

@@ -342,5 +342,10 @@
     "addFailed": "Error al agregar contacto: {{error}}",
     "memberFallback": "Miembro",
     "needsName": "Necesita establecer su nombre primero"
+  },
+  "billingAlert": {
+    "warning": "Alerta de presupuesto: {{cost}} {{currency}} de {{budget}} {{currency}} gastados (60% alcanzado).",
+    "error": "Advertencia de presupuesto: {{cost}} {{currency}} de {{budget}} {{currency}} gastados (90% alcanzado). Considere revisar el uso.",
+    "critical": "Presupuesto excedido: {{cost}} {{currency}} de {{budget}} {{currency}}. La facturación se ha desactivado para evitar cargos."
   }
 }

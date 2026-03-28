@@ -345,5 +345,10 @@
     "addFailed": "Failed to add contact: {{error}}",
     "memberFallback": "Member",
     "needsName": "Needs to set their name first"
+  },
+  "billingAlert": {
+    "warning": "Budget alert: {{cost}} {{currency}} of {{budget}} {{currency}} spent (60% reached).",
+    "error": "Budget warning: {{cost}} {{currency}} of {{budget}} {{currency}} spent (90% reached). Consider reviewing usage.",
+    "critical": "Budget exceeded: {{cost}} {{currency}} of {{budget}} {{currency}}. Billing has been disabled to prevent charges."
   }
 }
