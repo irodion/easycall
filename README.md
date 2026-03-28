@@ -35,6 +35,7 @@ That's it. No accounts to create, no passwords to remember.
    - Add, edit, or remove the member's contacts
    - Adjust settings like volume, display name, or language
    - See call history and online status
+   - Monitor billing usage with automatic alerts at 60%, 90%, and 100% of the budget
 
 All management happens remotely — you don't need to be in the same room.
 
@@ -47,7 +48,7 @@ All management happens remotely — you don't need to be in the same room.
 - Supports English, Spanish, Hebrew, Russian, and German
 - Right-to-left language support
 - PIN lock for device security
-- Free for families (up to 25 users at zero cost)
+- Free for families (up to 25 users at zero cost) with automatic budget protection
 
 ## Supported Devices
 

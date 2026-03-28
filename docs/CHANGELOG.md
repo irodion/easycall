@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Billing Alert System**
+  - Budget monitoring with automated billing cutoff via Cloud Function (`onBillingAlert`)
+  - Google Cloud budget (20 ILS/month) with Pub/Sub alerts at 60%, 90%, 100% thresholds
+  - Cloud Function writes billing alert state to `config/billingAlert` Firestore document at all thresholds
+  - Race guard: only overwrites if new threshold >= current (prevents out-of-order Pub/Sub downgrades)
+  - Automatic billing disable at 100% threshold via Cloud Billing API
+  - `useBillingAlert` hook with real-time `onSnapshot` listener and per-threshold localStorage dismiss
+  - `BillingAlertBanner` component on caregiver dashboard with severity-based styling (warning/error/critical)
+  - Firestore security rule for `config/billingAlert` (public read, Cloud Functions write only)
+  - Localized in all 5 locales (en, es, he, ru, de)
 - **Phase 2: Notifications, Incoming Calls & Pairing**
   - FCM push notifications with custom service worker (injectManifest strategy)
   - Incoming call detection via Firestore `onSnapshot` with 60s stale-call filtering

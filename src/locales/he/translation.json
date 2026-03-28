@@ -342,5 +342,10 @@
     "addFailed": "שגיאה בהוספת איש קשר: {{error}}",
     "memberFallback": "חבר",
     "needsName": "צריך להגדיר את שמו קודם"
+  },
+  "billingAlert": {
+    "warning": "התראת תקציב: {{cost}} {{currency}} מתוך {{budget}} {{currency}} נוצלו (הגעת ל-60%).",
+    "error": "אזהרת תקציב: {{cost}} {{currency}} מתוך {{budget}} {{currency}} נוצלו (הגעת ל-90%). מומלץ לבדוק את השימוש.",
+    "critical": "חריגה מהתקציב: {{cost}} {{currency}} מתוך {{budget}} {{currency}}. החיוב הושבת למניעת חיובים נוספים."
   }
 }

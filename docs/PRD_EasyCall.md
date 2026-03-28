@@ -255,13 +255,13 @@ npx prettier
 
 ### Backend (Firebase)
 
-| Service               | Usage                                                                     | Free Tier Limit                     |
-| --------------------- | ------------------------------------------------------------------------- | ----------------------------------- |
-| Firestore             | User profiles, contacts, call signaling, pairing codes, call history      | 50K reads/day, 20K writes/day, 1 GB |
-| Authentication        | Anonymous auth (default), email link (optional recovery)                  | Unlimited                           |
-| Cloud Messaging (FCM) | Push notifications for incoming calls                                     | Unlimited messages                  |
-| Cloud Functions (v2)  | JWT generation for JaaS, call signaling triggers, pairing code validation | 2M invocations/month                |
-| Hosting               | _Not used — using Cloudflare Pages instead_                               | —                                   |
+| Service               | Usage                                                                                     | Free Tier Limit                     |
+| --------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------- |
+| Firestore             | User profiles, contacts, call signaling, pairing codes, call history                      | 50K reads/day, 20K writes/day, 1 GB |
+| Authentication        | Anonymous auth (default), email link (optional recovery)                                  | Unlimited                           |
+| Cloud Messaging (FCM) | Push notifications for incoming calls                                                     | Unlimited messages                  |
+| Cloud Functions (v2)  | JWT generation for JaaS, call signaling triggers, pairing code validation, billing alerts | 2M invocations/month                |
+| Hosting               | _Not used — using Cloudflare Pages instead_                                               | —                                   |
 
 ### Video Calling
 
@@ -533,6 +533,28 @@ interfaceConfigOverwrite: {
 - AC-10.3: If the user does not rejoin within 30 seconds, the call is marked as ended.
 - AC-10.4: The `beforeunload` event fires a warning during active calls.
 
+### F11: Billing Alerts & Budget Cutoff
+
+**Description:** Automated budget monitoring that alerts caregivers when Firebase spending approaches the limit and automatically disables billing to prevent overspend. The system uses Google Cloud Budget alerts with Pub/Sub notifications, a Cloud Function that writes billing state to Firestore, and a real-time banner on the caregiver dashboard.
+
+**Architecture:**
+
+1. Google Cloud Budget (20 ILS/month) sends Pub/Sub messages at 60%, 90%, and 100% thresholds.
+2. `onBillingAlert` Cloud Function receives the message, writes to `config/billingAlert` in Firestore.
+3. At 100%, the function also disables billing via Cloud Billing API.
+4. Caregiver dashboard shows a `BillingAlertBanner` that listens to `config/billingAlert` via `onSnapshot`.
+5. Dismiss is per-threshold (dismissing 60% alert doesn't suppress the 90% alert).
+
+**Acceptance criteria:**
+
+- AC-11.1: Cloud Function writes billing alert state to Firestore at any threshold (60%, 90%, 100%).
+- AC-11.2: Cloud Function only overwrites if new threshold >= current (race guard for out-of-order Pub/Sub).
+- AC-11.3: Billing is automatically disabled when threshold reaches 100%.
+- AC-11.4: Caregiver dashboard shows warning banner (yellow) at 60%, error banner (red) at 90%, critical banner (red) at 100%.
+- AC-11.5: Each threshold level can be dismissed independently via localStorage.
+- AC-11.6: Banner has `role="alert"` and meets 56px touch target requirements.
+- AC-11.7: All banner text is localized in 5 locales (en, es, he, ru, de).
+
 ---
 
 ## 8. Data Model
@@ -585,6 +607,14 @@ Root
 │       ├── jitsiRoomId: string
 │       ├── status: "ringing" | "answered" | "missed" | "declined" | "ended"
 │       └── timestamp: timestamp
+│
+├── config/billingAlert                    // Written by onBillingAlert Cloud Function
+│   ├── costAmount: number                 // Current spend in billing period
+│   ├── budgetAmount: number               // Budget cap
+│   ├── currencyCode: string               // e.g. "ILS"
+│   ├── costIntervalStart: string          // Billing period start (e.g. "2026-03-01T07:00:00Z")
+│   ├── thresholdExceeded: number          // 0.6, 0.9, or 1.0
+│   └── updatedAt: timestamp
 │
 └── pairingCodes/{code}                   // 6-digit numeric string
     ├── elderlyUserId: string
@@ -1523,16 +1553,16 @@ For each task in the backlog:
 
 ## 16. Risk Register
 
-| ID  | Risk                                          | Probability | Impact | Mitigation                                                                                                                      |
-| --- | --------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| R1  | JaaS free tier discontinued or limits reduced | Low         | High   | Architecture supports migration to self-hosted Jitsi (4–8 hrs effort). IFrame API code identical — only domain changes.         |
-| R2  | iOS PWA push notifications unreliable         | Medium      | Medium | Primary target is Android. iOS documented as second-class. Admin can call the member's phone number as fallback.                |
-| R3  | Member unable to complete onboarding alone    | High        | Medium | Onboarding designed to support admin assistance. Remote pairing flow + phone call guidance.                                     |
-| R4  | Jitsi IFrame API breaking changes             | Low         | High   | Pin Jitsi external API script version. Test against JaaS staging environment before updates.                                    |
-| R5  | Firebase free tier exceeded                   | Very Low    | Low    | Family-sized usage is <1% of free tier limits. Monitoring alerts at 50% usage.                                                  |
-| R6  | WebRTC quality on poor mobile networks        | Medium      | High   | Default 360p resolution, auto-degrade to 180p/audio-only. Connection quality indicator. Plain-language error messages.          |
-| R7  | Developer burnout (solo side project)         | Medium      | High   | MVP scoped to 4–6 weeks. Phases are independently valuable. Claude Code handles boilerplate. Tasks sized for 1–4 hour sessions. |
-| R8  | Camera permissions permanently denied         | Medium      | Medium | Pre-call check with step-by-step recovery guide. Admin can assist remotely via phone call.                                      |
+| ID  | Risk                                          | Probability | Impact | Mitigation                                                                                                                                                                                 |
+| --- | --------------------------------------------- | ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R1  | JaaS free tier discontinued or limits reduced | Low         | High   | Architecture supports migration to self-hosted Jitsi (4–8 hrs effort). IFrame API code identical — only domain changes.                                                                    |
+| R2  | iOS PWA push notifications unreliable         | Medium      | Medium | Primary target is Android. iOS documented as second-class. Admin can call the member's phone number as fallback.                                                                           |
+| R3  | Member unable to complete onboarding alone    | High        | Medium | Onboarding designed to support admin assistance. Remote pairing flow + phone call guidance.                                                                                                |
+| R4  | Jitsi IFrame API breaking changes             | Low         | High   | Pin Jitsi external API script version. Test against JaaS staging environment before updates.                                                                                               |
+| R5  | Firebase free tier exceeded                   | Very Low    | Low    | Blaze plan with 20 ILS/month budget. Automated alerts at 60/90/100% via `onBillingAlert` Cloud Function. Auto-disable billing at 100%. Caregiver dashboard shows real-time billing banner. |
+| R6  | WebRTC quality on poor mobile networks        | Medium      | High   | Default 360p resolution, auto-degrade to 180p/audio-only. Connection quality indicator. Plain-language error messages.                                                                     |
+| R7  | Developer burnout (solo side project)         | Medium      | High   | MVP scoped to 4–6 weeks. Phases are independently valuable. Claude Code handles boilerplate. Tasks sized for 1–4 hour sessions.                                                            |
+| R8  | Camera permissions permanently denied         | Medium      | Medium | Pre-call check with step-by-step recovery guide. Admin can assist remotely via phone call.                                                                                                 |
 
 ---
 

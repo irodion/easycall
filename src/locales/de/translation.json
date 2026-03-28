@@ -342,5 +342,10 @@
     "addFailed": "Kontakt konnte nicht hinzugefügt werden: {{error}}",
     "memberFallback": "Mitglied",
     "needsName": "Muss zuerst einen Namen festlegen"
+  },
+  "billingAlert": {
+    "warning": "Budgetwarnung: {{cost}} {{currency}} von {{budget}} {{currency}} verbraucht (60% erreicht).",
+    "error": "Budgetalarm: {{cost}} {{currency}} von {{budget}} {{currency}} verbraucht (90% erreicht). Bitte Nutzung überprüfen.",
+    "critical": "Budget überschritten: {{cost}} {{currency}} von {{budget}} {{currency}}. Die Abrechnung wurde deaktiviert, um Kosten zu vermeiden."
   }
 }

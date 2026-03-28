@@ -1,6 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onValueWritten } from 'firebase-functions/v2/database';
+import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { getFirestore, FieldValue, Timestamp, type Firestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { initializeApp } from 'firebase-admin/app';
@@ -957,3 +958,103 @@ export const onUserStatusChanged = onValueWritten('/status/{uid}', async (event)
 
   await handleStatusChange(getFirestore(), uid, beforeState, afterState, after.lastChanged ?? null);
 });
+
+// ---------------------------------------------------------------------------
+// onBillingAlert
+//
+// Listens to the billing-alerts Pub/Sub topic. Writes the current spend to
+// config/billingAlert so caregivers see it in real-time. When the budget
+// threshold reaches 100%, also disables billing to prevent overspend.
+// Re-enable billing manually in the Cloud Console when ready.
+// ---------------------------------------------------------------------------
+const BILLING_ACCOUNT = 'billingAccounts/01E5DE-2C7B58-EEC12F';
+const PROJECT_ID = 'easycall-dev';
+
+export interface BudgetNotification {
+  costAmount: number;
+  budgetAmount: number;
+  budgetAmountType: string;
+  alertThresholdExceeded?: number;
+  costIntervalStart: string;
+  currencyCode: string;
+}
+
+export const onBillingAlert: ReturnType<typeof onMessagePublished> = onMessagePublished(
+  'billing-alerts',
+  async (event) => {
+    const data: BudgetNotification = event.data.message.json as BudgetNotification;
+
+    if (data.alertThresholdExceeded == null) {
+      // nosemgrep: no-console-log-sensitive — logs cost amount and currency, not secrets
+      console.log(
+        `Budget notification: ${data.costAmount} ${data.currencyCode} spent (no threshold exceeded). Skipping.`,
+      );
+      return;
+    }
+
+    const db = getFirestore();
+    const alertRef = db.doc('config/billingAlert');
+
+    // Only skip if the new threshold is lower than the current one AND
+    // we're in the same billing period. A new costIntervalStart means a
+    // new monthly cycle, so the document must be overwritten even if the
+    // threshold is lower (e.g. 0.6 in March after 1.0 in February).
+    const current = await alertRef.get();
+    if (current.exists) {
+      const currentData = current.data()!;
+      const currentThreshold = currentData['thresholdExceeded'] as number | undefined;
+      const currentInterval = currentData['costIntervalStart'] as string | undefined;
+      const samePeriod = currentInterval === data.costIntervalStart;
+
+      if (
+        samePeriod &&
+        currentThreshold != null &&
+        currentThreshold > data.alertThresholdExceeded
+      ) {
+        // nosemgrep: no-console-log-sensitive — logs threshold percentages and period, not secrets
+        console.log(
+          `Skipping threshold ${data.alertThresholdExceeded}: current alert is already at ${currentThreshold} for period ${data.costIntervalStart}.`,
+        );
+        return;
+      }
+    }
+
+    await alertRef.set({
+      costAmount: data.costAmount,
+      budgetAmount: data.budgetAmount,
+      currencyCode: data.currencyCode,
+      costIntervalStart: data.costIntervalStart,
+      thresholdExceeded: data.alertThresholdExceeded,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    // nosemgrep: no-console-log-sensitive — logs cost amounts and threshold, not secrets
+    console.log(
+      `Budget alert: ${data.costAmount} ${data.currencyCode} of ${data.budgetAmount} ${data.currencyCode} (threshold: ${data.alertThresholdExceeded}). Written to Firestore.`,
+    );
+
+    // Disable billing only when the budget is fully exceeded.
+    if (data.alertThresholdExceeded >= 1.0) {
+      // nosemgrep: no-console-log-sensitive — logs project ID, not secrets
+      console.warn(`Budget EXCEEDED. Disabling billing for project ${PROJECT_ID}.`);
+
+      const { GoogleAuth } = await import('google-auth-library');
+      const auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-billing'] });
+      const client = await auth.getClient();
+
+      const res = await client.request({
+        url: `https://cloudbilling.googleapis.com/v1/projects/${PROJECT_ID}/billingInfo`,
+        method: 'PUT',
+        data: { billingAccountName: '' },
+      });
+
+      if (res.status === 200) {
+        // nosemgrep: no-console-log-sensitive — logs project ID and billing account, not secrets
+        console.warn(`Billing disabled for project ${PROJECT_ID} via ${BILLING_ACCOUNT}.`);
+      } else {
+        // nosemgrep: no-console-log-sensitive — logs HTTP status and response body for debugging
+        console.error(`Failed to disable billing: ${res.status} ${JSON.stringify(res.data)}`);
+      }
+    }
+  },
+);
