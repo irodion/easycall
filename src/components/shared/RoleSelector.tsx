@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { doc, setDoc } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app, db, ensureAuthenticated } from '@/services/firebase';
@@ -9,6 +10,55 @@ import { useCaregiverPin } from '@/hooks/useCaregiverPin';
 import { CaregiverPinPrompt } from './CaregiverPinPrompt';
 import { EasyCallButton } from './EasyCallButton';
 import { EasyCallText } from './EasyCallText';
+
+const NETWORK_ERROR_PATTERNS = [
+  'auth/network-request-failed',
+  'network-request-failed',
+  'failed to fetch',
+  'networkerror',
+  'err_network',
+  'err_internet_disconnected',
+];
+
+const APP_CHECK_ERROR_PATTERNS = ['appcheck/', 'app-check', 'recaptcha', 'missing-app-check-token'];
+
+function getErrorMessage(err: unknown, t: TFunction): string {
+  const code = (err as { code?: string }).code ?? '';
+  const message = (err as { message?: string }).message ?? '';
+  const combined = `${code} ${message}`.toLowerCase();
+
+  if (combined.includes('permission-denied')) {
+    // assignCaregiverRole throws permission-denied for both closed registration
+    // and incorrect PIN — match the exact phrase from the Cloud Function to
+    // avoid false positives (e.g. "pinpoint" in unrelated messages).
+    if (combined.includes('incorrect pin')) {
+      return t('roleSelector.incorrectPin');
+    }
+    return t('registrationLock.closed');
+  }
+
+  if (combined.includes('too-many-requests') || combined.includes('resource-exhausted')) {
+    return t('roleSelector.firestoreUnavailable');
+  }
+
+  if (APP_CHECK_ERROR_PATTERNS.some((p) => combined.includes(p))) {
+    return t('roleSelector.appCheckError');
+  }
+
+  if (NETWORK_ERROR_PATTERNS.some((p) => combined.includes(p))) {
+    return t('roleSelector.networkError');
+  }
+
+  if (combined.includes('unavailable') || combined.includes('deadline-exceeded')) {
+    return t('roleSelector.firestoreUnavailable');
+  }
+
+  // Fallback with error code hint for remote debugging
+  if (code) {
+    return `${t('common.somethingWentWrong')} ${t('roleSelector.errorCode', { code })}`;
+  }
+  return t('common.somethingWentWrong');
+}
 
 export function RoleSelector() {
   const { t } = useTranslation();
@@ -51,12 +101,7 @@ export function RoleSelector() {
     } catch (err) {
       // nosemgrep: no-console-log-sensitive — logs error object, not credentials
       console.error('Role selection failed:', err);
-      const code = (err as { code?: string }).code ?? '';
-      if (code.includes('permission-denied')) {
-        setError(t('registrationLock.closed'));
-      } else {
-        setError(t('common.somethingWentWrong'));
-      }
+      setError(getErrorMessage(err, t));
     } finally {
       setIsSaving(false);
     }

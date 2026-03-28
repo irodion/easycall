@@ -105,10 +105,16 @@ describe('RoleSelector', () => {
     });
   });
 
-  it('shows friendly error when ensureAuthenticated fails and does not write to Firestore', async () => {
+  it('shows network error when ensureAuthenticated fails with network error', async () => {
     const { ensureAuthenticated } = await import('@/services/firebase');
     const { setDoc } = await import('firebase/firestore');
-    vi.mocked(ensureAuthenticated).mockRejectedValueOnce(new Error('auth/network-error'));
+    const networkError = Object.assign(
+      new Error('Firebase: Error (auth/network-request-failed).'),
+      {
+        code: 'auth/network-request-failed',
+      },
+    );
+    vi.mocked(ensureAuthenticated).mockRejectedValueOnce(networkError);
 
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
@@ -117,23 +123,83 @@ describe('RoleSelector', () => {
     await vi.waitFor(() => {
       const alert = screen.getByRole('alert');
       expect(alert).toBeInTheDocument();
-      // Should NOT expose raw Firebase error message
-      expect(alert.textContent).not.toContain('auth/network-error');
+      expect(alert.textContent).toContain('Check your internet connection');
     });
-    // Auth failure should short-circuit before any database write
     expect(setDoc).not.toHaveBeenCalled();
   });
 
-  it('shows error when setDoc rejects', async () => {
-    const { setDoc } = await import('firebase/firestore');
-    vi.mocked(setDoc).mockRejectedValueOnce(new Error('Firestore write failed'));
+  it('shows app check error when reCAPTCHA verification fails', async () => {
+    const { ensureAuthenticated } = await import('@/services/firebase');
+    const appCheckError = Object.assign(new Error('missing-app-check-token'), {
+      code: 'appCheck/fetch-status-error',
+    });
+    vi.mocked(ensureAuthenticated).mockRejectedValueOnce(appCheckError);
 
     const { RoleSelector } = await import('./RoleSelector');
     renderWithProviders(<RoleSelector />);
     fireEvent.click(screen.getByRole('button', { name: /I want to make calls/i }));
 
     await vi.waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
+      const alert = screen.getByRole('alert');
+      expect(alert).toBeInTheDocument();
+      expect(alert.textContent).toContain('Security verification failed');
+    });
+  });
+
+  it('shows incorrect PIN error instead of registration closed for PIN failures', async () => {
+    const { ensureAuthenticated } = await import('@/services/firebase');
+    // assignCaregiverRole throws permission-denied with "Incorrect PIN." message
+    const pinError = Object.assign(new Error('Incorrect PIN.'), {
+      code: 'functions/permission-denied',
+    });
+    vi.mocked(ensureAuthenticated).mockResolvedValueOnce({ uid: 'user-1' } as never);
+    mockCallable.mockRejectedValueOnce(pinError);
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /I want to manage calls/i }));
+
+    await vi.waitFor(() => {
+      const alert = screen.getByRole('alert');
+      expect(alert).toBeInTheDocument();
+      expect(alert.textContent).toContain('Incorrect PIN');
+      expect(alert.textContent).not.toContain('closed');
+    });
+  });
+
+  it('shows error code in fallback error message', async () => {
+    const { ensureAuthenticated } = await import('@/services/firebase');
+    const unknownError = Object.assign(new Error('Something unusual'), {
+      code: 'auth/some-unknown-code',
+    });
+    vi.mocked(ensureAuthenticated).mockRejectedValueOnce(unknownError);
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /I want to make calls/i }));
+
+    await vi.waitFor(() => {
+      const alert = screen.getByRole('alert');
+      expect(alert).toBeInTheDocument();
+      expect(alert.textContent).toContain('auth/some-unknown-code');
+    });
+  });
+
+  it('shows error when setDoc rejects with unavailable', async () => {
+    const { setDoc } = await import('firebase/firestore');
+    const unavailableError = Object.assign(new Error('Service unavailable'), {
+      code: 'unavailable',
+    });
+    vi.mocked(setDoc).mockRejectedValueOnce(unavailableError);
+
+    const { RoleSelector } = await import('./RoleSelector');
+    renderWithProviders(<RoleSelector />);
+    fireEvent.click(screen.getByRole('button', { name: /I want to make calls/i }));
+
+    await vi.waitFor(() => {
+      const alert = screen.getByRole('alert');
+      expect(alert).toBeInTheDocument();
+      expect(alert.textContent).toContain('temporarily unavailable');
     });
   });
 

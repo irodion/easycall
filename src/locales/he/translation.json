@@ -171,7 +171,12 @@
     "whoAreYou": "מי אתה?",
     "elderlyUser": "אני רוצה לבצע שיחות",
     "caregiver": "אני רוצה לנהל שיחות",
-    "alreadyHaveAccount": "כבר יש לך חשבון? התחבר"
+    "alreadyHaveAccount": "כבר יש לך חשבון? התחבר",
+    "incorrectPin": "קוד PIN שגוי. אנא נסה שוב.",
+    "networkError": "לא ניתן להתחבר לשרת. בדוק את חיבור האינטרנט או נסה רשת אחרת.",
+    "appCheckError": "אימות האבטחה נכשל. הדפדפן או הרשת שלך עשויים לחסום שירותים נדרשים. נסה דפדפן או רשת אחרים.",
+    "firestoreUnavailable": "השרת אינו זמין זמנית. אנא נסה שוב בעוד רגע.",
+    "errorCode": "(שגיאה: {{code}})"
   },
   "onboarding": {
     "welcome": "ברוכים הבאים ל-EasyCall",

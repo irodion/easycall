@@ -35,10 +35,20 @@ export function initAppCheck(): AppCheck | null {
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_APP_CHECK_DEBUG_TOKEN || true;
   }
 
-  appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(siteKey),
-    isTokenAutoRefreshEnabled: true,
-  });
+  try {
+    appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(siteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (err) {
+    // App Check init can fail if reCAPTCHA scripts are blocked (e.g. restricted
+    // networks, privacy-focused browsers). Log but don't crash — Firebase calls
+    // will still fail with app-check errors, which RoleSelector surfaces as a
+    // user-friendly message.
+    // nosemgrep: no-console-log-sensitive — logs error object, not credentials
+    console.warn('App Check initialization failed:', err);
+    return null;
+  }
 
   return appCheck;
 }
