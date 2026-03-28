@@ -87,6 +87,15 @@ export async function checkPinVerifyRateLimit(db: Firestore, callerIp: string): 
   });
 }
 
+export function checkJwtRateLimit(db: Firestore, uid: string): Promise<void> {
+  return checkRateLimit(db, uid, {
+    docKeyPrefix: 'jitsiJwt',
+    maxAttempts: 5,
+    windowMs: 60 * 1000,
+    errorMessage: 'Too many call attempts. Please wait a minute before trying again.',
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Server-side PIN hashing (mirrors src/utils/pinHash.ts)
 // ---------------------------------------------------------------------------
@@ -540,7 +549,19 @@ export const generateJitsiJwt = onCall({ enforceAppCheck: true }, async (request
     throw new HttpsError('unauthenticated', 'Authentication required.');
   }
 
-  const requestData = typeof request.data === 'object' && request.data !== null ? request.data : {};
+  const uid = request.auth.uid;
+  const db = getFirestore();
+
+  // Reject users who haven't completed role selection — they have no contacts
+  // and no legitimate reason to request a JWT. Reduces attack surface.
+  const userDoc = await db.doc(`users/${uid}`).get();
+  if (!userDoc.exists || !userDoc.data()?.['role']) {
+    throw new HttpsError('permission-denied', 'Account setup incomplete.');
+  }
+
+  await checkJwtRateLimit(db, uid);
+
+  const requestData = extractData(request);
   const { roomName, displayName } = requestData as {
     roomName?: unknown;
     displayName?: unknown;
@@ -553,45 +574,56 @@ export const generateJitsiJwt = onCall({ enforceAppCheck: true }, async (request
     throw new HttpsError('invalid-argument', 'displayName is required.');
   }
 
-  const uid = request.auth.uid;
-  const db = getFirestore();
+  // Look up room ownership from the roomOwners index (O(1) single doc read).
+  // Falls back to collectionGroup scan for pre-existing contacts that haven't
+  // been backfilled yet. The fallback also lazily populates the index.
+  let participants: Participant[];
 
-  // Find the contact record that owns this room ID (across all users).
-  // No limit() — we require exactly one match. Multiple matches would mean
-  // a room ID collision, which must not silently authorize via the wrong record.
-  const contactsSnap = await db
-    .collectionGroup('contacts')
-    .where('jitsiRoomId', '==', roomName)
-    .get();
+  const roomDoc = await db.collection('roomOwners').doc(roomName).get();
+  if (roomDoc.exists) {
+    participants = (roomDoc.data()!['participants'] ?? []) as Participant[];
+  } else {
+    // Fallback: collectionGroup scan for rooms created before onContactWritten
+    const contactsSnap = await db
+      .collectionGroup('contacts')
+      .where('jitsiRoomId', '==', roomName)
+      .get();
 
-  if (contactsSnap.empty) {
-    throw new HttpsError('not-found', 'Room not found.');
+    if (contactsSnap.empty) {
+      throw new HttpsError('not-found', 'Room not found.');
+    }
+
+    // Build participants from contact docs and lazily populate roomOwners
+    participants = [];
+    for (const contactDoc of contactsSnap.docs) {
+      const ownerUserId = contactDoc.ref.parent.parent!.id;
+      const contactUserId = (contactDoc.data()['contactUserId'] as string) ?? null;
+      participants.push({ userId: ownerUserId, role: 'owner' });
+      if (contactUserId) {
+        participants.push({ userId: contactUserId, role: 'contact' });
+      }
+    }
+    // Lazily backfill the index so future calls use the fast path
+    await db
+      .collection('roomOwners')
+      .doc(roomName)
+      .set(
+        {
+          participants: FieldValue.arrayUnion(...participants),
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
   }
 
-  // Multiple contacts can share a room ID (linked contacts: Alice→Bob and
-  // Bob→Alice use the same deterministic room). Check if the caller is
-  // authorized for ANY of the matching contact docs.
+  // Check if the caller is a direct participant or a linked caregiver.
   let authorized = false;
-  for (const contactDoc of contactsSnap.docs) {
-    const contactData = contactDoc.data();
-    // Path: users/{elderlyUserId}/contacts/{contactId}
-    const elderlyUserId = contactDoc.ref.parent.parent!.id;
-
-    if (uid === elderlyUserId) {
+  for (const p of participants) {
+    if (p.userId === uid) {
       authorized = true;
       break;
     }
-    if (contactData['contactUserId'] != null && uid === contactData['contactUserId']) {
-      authorized = true;
-      break;
-    }
-
-    const caregiverDoc = await db
-      .collection('users')
-      .doc(elderlyUserId)
-      .collection('caregivers')
-      .doc(uid)
-      .get();
+    const caregiverDoc = await db.doc(`users/${p.userId}/caregivers/${uid}`).get();
     if (caregiverDoc.exists) {
       authorized = true;
       break;
@@ -931,12 +963,25 @@ export const onUserProfileChanged = onDocumentWritten('users/{uid}', async (even
 
   const db = getFirestore();
   const uid = event.params['uid'];
+
+  // Defense-in-depth: skip sync if this displayName was changed less than 30s
+  // ago (primary throttle is in Firestore rules). Prevents cascade if rules
+  // are bypassed (e.g., via admin SDK or a bug).
+  const rateLimitRef = db.collection('rateLimits').doc(`displayNameSync:${uid}`);
+  const rateLimitSnap = await rateLimitRef.get();
+  const lastSync = rateLimitSnap.data()?.['lastSync'] as Timestamp | undefined;
+  if (lastSync && Date.now() - lastSync.toMillis() < 30_000) {
+    return;
+  }
+
   const count = await syncDisplayNameToContacts(db, uid, beforeName, afterName);
 
   if (count > 0) {
     // nosemgrep: no-console-log-sensitive — logs count, not name value
     console.log(`Updated ${count} contact(s) with new displayName for user ${uid}`);
   }
+
+  await rateLimitRef.set({ lastSync: FieldValue.serverTimestamp() });
 });
 
 // ---------------------------------------------------------------------------
@@ -958,6 +1003,107 @@ export const onUserStatusChanged = onValueWritten('/status/{uid}', async (event)
 
   await handleStatusChange(getFirestore(), uid, beforeState, afterState, after.lastChanged ?? null);
 });
+
+// ---------------------------------------------------------------------------
+// Room ownership index helpers
+//
+// Maintains roomOwners/{jitsiRoomId} documents so generateJitsiJwt can
+// verify room access with a single doc read instead of a collectionGroup scan.
+// ---------------------------------------------------------------------------
+interface Participant {
+  userId: string;
+  role: string;
+}
+
+function buildParticipants(ownerUserId: string, contactUserId: string | null): Participant[] {
+  const list: Participant[] = [{ userId: ownerUserId, role: 'owner' }];
+  if (contactUserId) list.push({ userId: contactUserId, role: 'contact' });
+  return list;
+}
+
+async function addToRoomOwners(
+  db: Firestore,
+  roomId: string,
+  ownerUserId: string,
+  contactUserId: string | null,
+): Promise<void> {
+  const ref = db.collection('roomOwners').doc(roomId);
+  await ref.set(
+    {
+      participants: FieldValue.arrayUnion(...buildParticipants(ownerUserId, contactUserId)),
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
+
+async function removeFromRoomOwners(
+  db: Firestore,
+  roomId: string,
+  ownerUserId: string,
+  contactUserId: string | null,
+): Promise<void> {
+  const ref = db.collection('roomOwners').doc(roomId);
+  try {
+    await ref.update({
+      participants: FieldValue.arrayRemove(...buildParticipants(ownerUserId, contactUserId)),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  } catch (err) {
+    // Document may not exist (already cleaned up or data inconsistency).
+    // Swallow NOT_FOUND to prevent infinite Cloud Function retries.
+    if (err instanceof Error && err.message.includes('NOT_FOUND')) return;
+    throw err;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// onContactWritten
+//
+// Maintains the roomOwners index when contacts are created, updated, or deleted.
+// ---------------------------------------------------------------------------
+export const onContactWritten = onDocumentWritten(
+  'users/{userId}/contacts/{contactId}',
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    const userId = event.params['userId'];
+    const db = getFirestore();
+
+    const beforeRoomId = before?.['jitsiRoomId'] as string | undefined;
+    const afterRoomId = after?.['jitsiRoomId'] as string | undefined;
+    const beforeContactUserId = (before?.['contactUserId'] as string) ?? null;
+    const afterContactUserId = (after?.['contactUserId'] as string) ?? null;
+
+    // Deletion
+    if (!after && beforeRoomId) {
+      await removeFromRoomOwners(db, beforeRoomId, userId, beforeContactUserId);
+      return;
+    }
+
+    // Creation
+    if (!before && afterRoomId) {
+      await addToRoomOwners(db, afterRoomId, userId, afterContactUserId);
+      return;
+    }
+
+    // Update — room ID or contactUserId changed
+    if (before && after) {
+      const roomChanged = beforeRoomId !== afterRoomId;
+      const contactChanged = beforeContactUserId !== afterContactUserId;
+      if (!roomChanged && !contactChanged) return;
+
+      const ops: Promise<void>[] = [];
+      if (beforeRoomId) {
+        ops.push(removeFromRoomOwners(db, beforeRoomId, userId, beforeContactUserId));
+      }
+      if (afterRoomId) {
+        ops.push(addToRoomOwners(db, afterRoomId, userId, afterContactUserId));
+      }
+      await Promise.all(ops);
+    }
+  },
+);
 
 // ---------------------------------------------------------------------------
 // onBillingAlert
@@ -1033,10 +1179,13 @@ export const onBillingAlert: ReturnType<typeof onMessagePublished> = onMessagePu
       `Budget alert: ${data.costAmount} ${data.currencyCode} of ${data.budgetAmount} ${data.currencyCode} (threshold: ${threshold}). Written to Firestore.`,
     );
 
-    // Disable billing only when the budget is fully exceeded.
-    if (threshold >= 1.0) {
+    // Disable billing at 90% to account for the delay between actual spend
+    // and budget alert delivery (can be 5-30 minutes).
+    if (threshold >= 0.9) {
       // nosemgrep: no-console-log-sensitive — logs project ID, not secrets
-      console.warn(`Budget EXCEEDED. Disabling billing for project ${PROJECT_ID}.`);
+      console.warn(
+        `Budget threshold ${threshold} reached. Disabling billing for project ${PROJECT_ID}.`,
+      );
 
       try {
         const { GoogleAuth } = await import('google-auth-library');

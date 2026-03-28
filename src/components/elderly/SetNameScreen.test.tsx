@@ -5,10 +5,13 @@ import { renderWithProviders } from '@/test/helpers';
 
 const mockUpdateDoc = vi.fn().mockResolvedValue(undefined);
 
+const MOCK_SERVER_TS = { _type: 'serverTimestamp' };
+
 vi.mock('firebase/firestore', () => ({
   getFirestore: vi.fn(),
   doc: vi.fn(() => 'doc-ref'),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
+  serverTimestamp: () => MOCK_SERVER_TS,
 }));
 
 const mockUpdateProfile = vi.fn().mockResolvedValue(undefined);
@@ -71,7 +74,10 @@ describe('SetNameScreen', () => {
       fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     });
 
-    expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', { displayName: 'Grandma Rose' });
+    expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', {
+      displayName: 'Grandma Rose',
+      lastDisplayNameChange: MOCK_SERVER_TS,
+    });
     expect(mockUpdateProfile).toHaveBeenCalledWith(
       { uid: 'user-1' },
       { displayName: 'Grandma Rose' },
@@ -88,7 +94,10 @@ describe('SetNameScreen', () => {
       fireEvent.click(screen.getByRole('button', { name: /continue/i }));
     });
 
-    expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', { displayName: 'Grandma Rose' });
+    expect(mockUpdateDoc).toHaveBeenCalledWith('doc-ref', {
+      displayName: 'Grandma Rose',
+      lastDisplayNameChange: MOCK_SERVER_TS,
+    });
     expect(mockUpdateProfile).toHaveBeenCalledWith(
       { uid: 'user-1' },
       { displayName: 'Grandma Rose' },

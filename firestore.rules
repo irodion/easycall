@@ -40,6 +40,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Room ownership index: maintained by onContactWritten Cloud Function.
+    // Read and written exclusively via admin SDK — no client access.
+    match /roomOwners/{roomId} {
+      allow read, write: if false;
+    }
+
     // Rate limit counters: written exclusively by Cloud Functions (admin SDK).
     match /rateLimits/{docId} {
       allow read, write: if false;
@@ -61,7 +67,15 @@ service cloud.firestore {
       // Users can update their own profile but cannot change their role once set.
       // Linked caregivers can also update settings (e.g. font size, restricted network mode).
       allow update: if (request.auth.uid == userId || isCaregiverOf(userId, request.auth.uid))
-        && (!('role' in resource.data) || request.resource.data.role == resource.data.role);
+        && (!('role' in resource.data) || request.resource.data.role == resource.data.role)
+        // Throttle displayName changes: require 30s gap between updates.
+        // Prevents triggering expensive collectionGroup sync in onUserProfileChanged.
+        && (
+          !('displayName' in request.resource.data)
+          || request.resource.data.displayName == resource.data.displayName
+          || !('lastDisplayNameChange' in resource.data)
+          || request.time > resource.data.lastDisplayNameChange + duration.value(30, 's')
+        );
       allow delete: if request.auth.uid == userId;
       // New user creation: role must be 'elderly' (caregiver goes through Cloud Function).
       allow create: if request.auth.uid == userId

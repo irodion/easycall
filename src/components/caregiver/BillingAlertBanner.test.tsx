@@ -59,8 +59,8 @@ describe('BillingAlertBanner', () => {
     expect(alert.className).toContain('alert-warning');
   });
 
-  it('renders error-styled alert at 90%', async () => {
-    mockHook.alert = makeAlert('error', 0.9);
+  it('renders critical-styled alert at 90%', async () => {
+    mockHook.alert = makeAlert('critical', 0.9);
 
     const { BillingAlertBanner } = await import('./BillingAlertBanner');
     renderWithProviders(<BillingAlertBanner />);
