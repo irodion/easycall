@@ -1,7 +1,7 @@
 # PRD: EasyCall — Simple Personal Call Network PWA
 
 **Version:** 1.0  
-**Last Updated:** 2026-02-21  
+**Last Updated:** 2026-03-28  
 **Author:** Solo Developer  
 **Status:** Draft  
 **Target Platform:** Android (primary), iOS (secondary/future)

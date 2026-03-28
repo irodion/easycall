@@ -52,7 +52,9 @@ export function useBillingAlert(): {
         const key = `${DISMISS_KEY_PREFIX}${thresholdExceeded}`;
         setDismissed(localStorage.getItem(key) === 'true');
       },
-      () => {
+      (err) => {
+        // nosemgrep: no-console-log-sensitive — logs Firestore listener error, not user data
+        console.error('Billing alert listener error:', err);
         setAlert(null);
       },
     );
