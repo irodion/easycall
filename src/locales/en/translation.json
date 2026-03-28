@@ -299,7 +299,12 @@
     "whoAreYou": "Who are you?",
     "elderlyUser": "I want to make calls",
     "caregiver": "I want to manage calls",
-    "alreadyHaveAccount": "Already have an account? Sign in"
+    "alreadyHaveAccount": "Already have an account? Sign in",
+    "incorrectPin": "Incorrect PIN. Please try again.",
+    "networkError": "Cannot connect to the server. Check your internet connection or try a different network.",
+    "appCheckError": "Security verification failed. Your browser or network may be blocking required services. Try a different browser or network.",
+    "firestoreUnavailable": "Server is temporarily unavailable. Please try again in a moment.",
+    "errorCode": "(Error: {{code}})"
   },
   "resetApp": {
     "resetButton": "Reset App",

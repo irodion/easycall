@@ -171,7 +171,12 @@
     "whoAreYou": "Wer sind Sie?",
     "elderlyUser": "Ich möchte Anrufe tätigen",
     "caregiver": "Ich möchte Anrufe verwalten",
-    "alreadyHaveAccount": "Bereits ein Konto? Anmelden"
+    "alreadyHaveAccount": "Bereits ein Konto? Anmelden",
+    "incorrectPin": "Falscher PIN. Bitte versuchen Sie es erneut.",
+    "networkError": "Verbindung zum Server nicht möglich. Überprüfen Sie Ihre Internetverbindung oder versuchen Sie ein anderes Netzwerk.",
+    "appCheckError": "Sicherheitsüberprüfung fehlgeschlagen. Ihr Browser oder Netzwerk blockiert möglicherweise erforderliche Dienste. Versuchen Sie einen anderen Browser oder ein anderes Netzwerk.",
+    "firestoreUnavailable": "Server ist vorübergehend nicht verfügbar. Bitte versuchen Sie es in einem Moment erneut.",
+    "errorCode": "(Fehler: {{code}})"
   },
   "onboarding": {
     "welcome": "Willkommen bei EasyCall",
