@@ -1,4 +1,4 @@
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onValueWritten } from 'firebase-functions/v2/database';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
@@ -1217,3 +1217,299 @@ export const onBillingAlert: ReturnType<typeof onMessagePublished> = onMessagePu
     }
   },
 );
+
+// ---------------------------------------------------------------------------
+// generateDirectLink
+//
+// Creates a direct call link for restricted network users. The link embeds
+// a long-lived JWT so the restricted user's browser never contacts Firebase.
+// ---------------------------------------------------------------------------
+export const generateDirectLink = onCall({ enforceAppCheck: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required.');
+  }
+
+  const db = getFirestore();
+  const uid = request.auth.uid;
+  await requireCaregiver(db, uid);
+
+  const data = extractData(request);
+  const { elderlyUserId, contactId, callerDisplayName } = data as {
+    elderlyUserId?: unknown;
+    contactId?: unknown;
+    callerDisplayName?: unknown;
+  };
+
+  if (typeof elderlyUserId !== 'string' || !elderlyUserId) {
+    throw new HttpsError('invalid-argument', 'elderlyUserId is required.');
+  }
+  if (typeof contactId !== 'string' || !contactId) {
+    throw new HttpsError('invalid-argument', 'contactId is required.');
+  }
+  if (typeof callerDisplayName !== 'string' || !callerDisplayName.trim()) {
+    throw new HttpsError('invalid-argument', 'callerDisplayName is required.');
+  }
+
+  // Verify caregiver is linked to this elderly user
+  const linkDoc = await db
+    .collection('users')
+    .doc(elderlyUserId)
+    .collection('caregivers')
+    .doc(uid)
+    .get();
+  if (!linkDoc.exists) {
+    throw new HttpsError('permission-denied', 'Not linked to this member.');
+  }
+
+  // Verify contact exists under the elderly user
+  const contactDoc = await db
+    .collection('users')
+    .doc(elderlyUserId)
+    .collection('contacts')
+    .doc(contactId)
+    .get();
+  if (!contactDoc.exists) {
+    throw new HttpsError('not-found', 'Contact not found.');
+  }
+
+  const contactData = contactDoc.data()!;
+  const contactName = (contactData['name'] as string) ?? 'Contact';
+  const contactUserId = (contactData['contactUserId'] as string) ?? '';
+
+  // Generate unique link ID and room ID
+  const linkId = crypto.randomBytes(9).toString('base64url');
+  const roomId = `easycall-direct-${linkId}`;
+
+  // Sign a 30-day JWT
+  const appId = process.env['JAAS_APP_ID'];
+  const keyId = process.env['JAAS_KEY_ID'];
+  const privateKey = process.env['JAAS_PRIVATE_KEY']?.replace(/\\n/g, '\n');
+
+  if (!privateKey || !appId || !keyId) {
+    throw new HttpsError('internal', 'JaaS configuration is missing.');
+  }
+
+  const token = jwt.sign(
+    {
+      aud: 'jitsi',
+      iss: 'chat',
+      sub: appId,
+      room: roomId,
+      context: {
+        user: {
+          id: `direct-${linkId}`,
+          name: callerDisplayName.trim(),
+          moderator: false,
+        },
+      },
+    },
+    privateKey,
+    {
+      algorithm: 'RS256',
+      header: { kid: keyId, typ: 'JWT', alg: 'RS256' },
+      expiresIn: '30d',
+    },
+  );
+
+  const now = Timestamp.now();
+  const expiresAt = Timestamp.fromMillis(now.toMillis() + 30 * 24 * 60 * 60 * 1000);
+
+  // Write link metadata and room index atomically
+  const batch = db.batch();
+  batch.set(db.doc(`directLinks/${linkId}`), {
+    linkId,
+    roomId,
+    elderlyUserId,
+    contactUserId,
+    contactName,
+    callerDisplayName: callerDisplayName.trim(),
+    createdBy: uid,
+    createdAt: now,
+    expiresAt,
+    revoked: false,
+    revokedAt: null,
+  });
+  batch.set(db.doc(`directLinksByRoom/${roomId}`), {
+    linkId,
+    contactUserId,
+    elderlyUserId,
+    callerDisplayName: callerDisplayName.trim(),
+    revoked: false,
+  });
+  await batch.commit();
+
+  // Build the URL — the fragment is never sent to the server
+  const origin = process.env['APP_ORIGIN'] ?? 'https://easycall.web.app';
+  const url = `${origin}/join#token=${token}&room=${encodeURIComponent(roomId)}&name=${encodeURIComponent(contactName)}`;
+
+  return { linkId, url };
+});
+
+// ---------------------------------------------------------------------------
+// revokeDirectLink
+//
+// Marks a direct link as revoked. The JWT remains technically valid, but the
+// webhook handler will not send notifications for revoked links.
+// ---------------------------------------------------------------------------
+export const revokeDirectLink = onCall({ enforceAppCheck: true }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Authentication required.');
+  }
+
+  const db = getFirestore();
+  const uid = request.auth.uid;
+
+  const data = extractData(request);
+  const { linkId } = data as { linkId?: unknown };
+
+  if (typeof linkId !== 'string' || !linkId) {
+    throw new HttpsError('invalid-argument', 'linkId is required.');
+  }
+
+  const linkDoc = await db.doc(`directLinks/${linkId}`).get();
+  if (!linkDoc.exists) {
+    throw new HttpsError('not-found', 'Link not found.');
+  }
+
+  if (linkDoc.data()!['createdBy'] !== uid) {
+    throw new HttpsError('permission-denied', 'Only the link creator can revoke it.');
+  }
+
+  const roomId = linkDoc.data()!['roomId'] as string;
+  const now = FieldValue.serverTimestamp();
+
+  const batch = db.batch();
+  batch.update(db.doc(`directLinks/${linkId}`), { revoked: true, revokedAt: now });
+  batch.update(db.doc(`directLinksByRoom/${roomId}`), { revoked: true });
+  await batch.commit();
+
+  return { success: true };
+});
+
+// ---------------------------------------------------------------------------
+// onJaasWebhook
+//
+// HTTP endpoint that receives JaaS webhook events. When a participant joins
+// a direct-link room, notifies the designated contact via the existing
+// incoming call signaling mechanism (Firestore doc + FCM push).
+// ---------------------------------------------------------------------------
+export function verifyJaasWebhookSignature(
+  rawBody: string,
+  signature: string | undefined,
+  secret: string,
+): boolean {
+  if (!signature) return false;
+  const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  const sigBuf = Buffer.from(signature);
+  const expBuf = Buffer.from(expected);
+  if (sigBuf.length !== expBuf.length) return false;
+  return crypto.timingSafeEqual(sigBuf, expBuf);
+}
+
+export async function handleJaasParticipantJoined(
+  db: Firestore,
+  roomId: string,
+  participantName: string,
+): Promise<boolean> {
+  // Only process direct-link rooms
+  if (!roomId.startsWith('easycall-direct-')) return false;
+
+  const roomDoc = await db.doc(`directLinksByRoom/${roomId}`).get();
+  if (!roomDoc.exists) return false;
+
+  const roomData = roomDoc.data()!;
+  if (roomData['revoked'] === true) return false;
+
+  const contactUserId = roomData['contactUserId'] as string;
+  const callerDisplayName = (roomData['callerDisplayName'] as string) || participantName;
+
+  // Write incoming call signaling doc (same mechanism as initiateCall)
+  await db.doc(`users/${contactUserId}/incomingCall/current`).set({
+    callerId: `direct-link`,
+    callerName: callerDisplayName,
+    callerPhotoURL: '',
+    jitsiRoomId: roomId,
+    status: 'ringing',
+    timestamp: FieldValue.serverTimestamp(),
+  });
+
+  // Send FCM push notification
+  const userDoc = await db.doc(`users/${contactUserId}`).get();
+  const rawTokens: unknown = userDoc.data()?.['pushTokens'] ?? [];
+  if (!Array.isArray(rawTokens) || rawTokens.length === 0) return true;
+
+  const pushTokens = rawTokens.filter((t): t is string => typeof t === 'string');
+  if (pushTokens.length === 0) return true;
+
+  await getMessaging().sendEachForMulticast({
+    tokens: pushTokens,
+    data: {
+      type: 'incoming_call',
+      callerName: callerDisplayName,
+      callerPhoto: '',
+      roomId,
+      elderlyUserId: roomData['elderlyUserId'] as string,
+    },
+    android: { priority: 'high' as const, ttl: 60_000 },
+    webpush: {
+      headers: { Urgency: 'high' },
+      fcmOptions: { link: `/call-room/${roomId}` },
+    },
+  });
+
+  return true;
+}
+
+export const onJaasWebhook = onRequest(async (req, res) => {
+  if (req.method !== 'POST') {
+    res.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  const secret = process.env['JAAS_WEBHOOK_SECRET'];
+  if (!secret) {
+    // Fail closed in production — never accept unsigned webhooks
+    if (process.env['FUNCTIONS_EMULATOR'] !== 'true') {
+      res.status(500).send('Webhook secret not configured');
+      return;
+    }
+  } else {
+    const rawBody = req.rawBody?.toString('utf-8') ?? '';
+    const signature = req.headers['x-webhook-signature'] as string | undefined;
+    if (!verifyJaasWebhookSignature(rawBody, signature, secret)) {
+      res.status(401).send('Invalid signature');
+      return;
+    }
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  } catch {
+    res.status(400).send('Invalid JSON');
+    return;
+  }
+  const eventType = body?.['eventType'] as string | undefined;
+
+  if (eventType !== 'PARTICIPANT_JOINED') {
+    res.status(200).send('OK');
+    return;
+  }
+
+  const data = (body?.['data'] ?? {}) as Record<string, unknown>;
+  const conference = (data['conference'] as string) ?? '';
+  // Format: roomname@conference.appId.8x8.vc — extract roomname
+  const roomId = conference.split('@')[0] ?? '';
+  const participantName = (data['name'] as string) ?? 'Someone';
+
+  try {
+    const db = getFirestore();
+    await handleJaasParticipantJoined(db, roomId, participantName);
+  } catch (err) {
+    // nosemgrep: no-console-log-sensitive, unsafe-formatstring — logs room ID and error, not user data
+    console.error(`Error handling JaaS webhook for room ${roomId}:`, err); // nosemgrep: unsafe-formatstring
+  }
+
+  // Always return 200 to prevent JaaS retries
+  res.status(200).send('OK');
+});

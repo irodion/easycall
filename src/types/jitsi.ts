@@ -23,7 +23,8 @@ export type JitsiEvent =
   | 'videoMuteStatusChanged'
   | 'incomingMessage'
   | 'readyToClose'
-  | 'connectionQuality';
+  | 'connectionQuality'
+  | 'endpointTextMessageReceived';
 
 export type JitsiCommand =
   | 'toggleAudio'
@@ -32,7 +33,8 @@ export type JitsiCommand =
   | 'toggleChat'
   | 'toggleTileView'
   | 'setLargeVideoParticipant'
-  | 'setVideoQuality';
+  | 'setVideoQuality'
+  | 'sendEndpointTextMessage';
 
 export interface JitsiMeetExternalAPI {
   addListener(event: JitsiEvent, listener: (data: unknown) => void): void;

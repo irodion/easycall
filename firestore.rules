@@ -147,6 +147,19 @@ service cloud.firestore {
       }
     }
 
+    // Direct links: created by Cloud Functions (admin SDK).
+    // Caregivers can read links they created.
+    match /directLinks/{linkId} {
+      allow read: if request.auth != null
+        && resource.data.createdBy == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Direct link room index: server-only (webhook handler reads via admin SDK).
+    match /directLinksByRoom/{roomId} {
+      allow read, write: if false;
+    }
+
     // Pairing codes: owner can read own codes, owner can create
     match /pairingCodes/{code} {
       allow read: if request.auth != null

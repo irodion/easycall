@@ -29,6 +29,7 @@ vi.mock('firebase-functions/v2/https', () => ({
     // Handle both onCall(handler) and onCall(options, handler)
     return args.length === 2 ? args[1] : args[0];
   }),
+  onRequest: vi.fn((...args: unknown[]) => (args.length === 2 ? args[1] : args[0])),
   HttpsError: class HttpsError extends Error {
     constructor(
       public code: string,
