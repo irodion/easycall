@@ -5,6 +5,7 @@ vi.mock('firebase-admin/app', () => ({ initializeApp: vi.fn() }));
 vi.mock('firebase-admin/messaging', () => ({ getMessaging: vi.fn() }));
 vi.mock('firebase-functions/v2/https', () => ({
   onCall: vi.fn((...args: unknown[]) => (args.length === 2 ? args[1] : args[0])),
+  onRequest: vi.fn((fn: unknown) => fn),
   HttpsError: class HttpsError extends Error {
     constructor(
       public code: string,
