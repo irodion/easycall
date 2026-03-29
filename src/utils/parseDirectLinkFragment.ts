@@ -20,5 +20,7 @@ export function parseDirectLinkFragment(hash: string): DirectLinkParams | null {
 
   if (!token || !room) return null;
 
-  return { token, room, name: decodeURIComponent(name) };
+  // URLSearchParams.get() already decodes percent-encoded values — do not
+  // call decodeURIComponent again or names containing literal '%' will throw.
+  return { token, room, name };
 }

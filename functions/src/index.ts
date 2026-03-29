@@ -1468,7 +1468,9 @@ export const onJaasWebhook = onRequest(async (req, res) => {
 
   const secret = process.env['JAAS_WEBHOOK_SECRET'];
   if (secret) {
-    const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    // Use rawBody (the exact bytes from the HTTP request) for HMAC verification.
+    // JSON.stringify(req.body) can produce different formatting than what JaaS signed.
+    const rawBody = req.rawBody?.toString('utf-8') ?? '';
     const signature = req.headers['x-webhook-signature'] as string | undefined;
     if (!verifyJaasWebhookSignature(rawBody, signature, secret)) {
       res.status(401).send('Invalid signature');

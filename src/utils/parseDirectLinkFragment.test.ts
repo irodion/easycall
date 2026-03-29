@@ -37,6 +37,13 @@ describe('parseDirectLinkFragment', () => {
     expect(result).toEqual({ token: 'abc123', room: 'easycall-direct-xyz', name: 'Grand Mother' });
   });
 
+  it('handles names with literal percent signs without throwing', () => {
+    const result = parseDirectLinkFragment(
+      '#token=abc123&room=easycall-direct-xyz&name=Alice%20100%25',
+    );
+    expect(result).toEqual({ token: 'abc123', room: 'easycall-direct-xyz', name: 'Alice 100%' });
+  });
+
   it('handles long JWT tokens', () => {
     const longToken = 'eyJ' + 'a'.repeat(800);
     const result = parseDirectLinkFragment(`#token=${longToken}&room=easycall-direct-xyz`);

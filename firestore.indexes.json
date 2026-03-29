@@ -7,6 +7,15 @@
         { "fieldPath": "outcome", "order": "ASCENDING" },
         { "fieldPath": "startedAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "directLinks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "elderlyUserId", "order": "ASCENDING" },
+        { "fieldPath": "createdBy", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
