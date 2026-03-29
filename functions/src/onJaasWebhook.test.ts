@@ -33,7 +33,7 @@ vi.mock('jsonwebtoken', () => ({
 }));
 
 describe('handleJaasParticipantJoined', () => {
-  let handleJaasParticipantJoined: typeof import('./index').handleJaasParticipantJoined;
+  let handleJaasParticipantJoined: typeof import('./index.js').handleJaasParticipantJoined;
   let mockDb: {
     doc: ReturnType<typeof vi.fn>;
   };
@@ -58,7 +58,7 @@ describe('handleJaasParticipantJoined', () => {
       })),
     };
 
-    const mod = await import('./index');
+    const mod = await import('./index.js');
     handleJaasParticipantJoined = mod.handleJaasParticipantJoined;
   });
 
@@ -130,7 +130,7 @@ describe('handleJaasParticipantJoined', () => {
 });
 
 describe('verifyJaasWebhookSignature', () => {
-  let verifyJaasWebhookSignature: typeof import('./index').verifyJaasWebhookSignature;
+  let verifyJaasWebhookSignature: typeof import('./index.js').verifyJaasWebhookSignature;
 
   beforeEach(async () => {
     vi.doMock('firebase-admin/firestore', () => ({
@@ -138,7 +138,7 @@ describe('verifyJaasWebhookSignature', () => {
       FieldValue: { serverTimestamp: vi.fn() },
       Timestamp: { now: vi.fn(), fromMillis: vi.fn() },
     }));
-    const mod = await import('./index');
+    const mod = await import('./index.js');
     verifyJaasWebhookSignature = mod.verifyJaasWebhookSignature;
   });
 

@@ -1496,10 +1496,11 @@ export const onJaasWebhook = onRequest(async (req, res) => {
     return;
   }
 
-  const conference = (body?.['data']?.['conference'] as string) ?? '';
+  const data = (body?.['data'] ?? {}) as Record<string, unknown>;
+  const conference = (data['conference'] as string) ?? '';
   // Format: roomname@conference.appId.8x8.vc — extract roomname
   const roomId = conference.split('@')[0] ?? '';
-  const participantName = (body?.['data']?.['name'] as string) ?? 'Someone';
+  const participantName = (data['name'] as string) ?? 'Someone';
 
   try {
     const db = getFirestore();
