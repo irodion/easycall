@@ -27,6 +27,7 @@ import { ForgotPasswordForm } from '@/components/shared/ForgotPasswordForm';
 import { DEFAULT_USER_SETTINGS } from '@/types/user';
 import type { UserSettings } from '@/types/user';
 import { SkipToContent } from '@/components/shared/SkipToContent';
+import { DirectCallScreen } from '@/components/direct/DirectCallScreen';
 import { loadLanguage, RTL_LANGUAGES } from '@/i18n';
 
 function ManageContactsPage({ userId }: { userId: string }) {
@@ -123,6 +124,7 @@ function AuthenticatedApp() {
             <Route path="/" element={<RoleSelector />} />
             <Route path="/login" element={<LoginForm />} />
             <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+            <Route path="/join" element={<DirectCallScreen />} />
             <Route element={<AuthGuard requiredRole="elderly" />}>
               <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
               <Route
