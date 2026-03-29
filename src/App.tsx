@@ -28,6 +28,7 @@ import { DEFAULT_USER_SETTINGS } from '@/types/user';
 import type { UserSettings } from '@/types/user';
 import { SkipToContent } from '@/components/shared/SkipToContent';
 import { DirectCallScreen } from '@/components/direct/DirectCallScreen';
+import { DirectLinkManager } from '@/components/caregiver/DirectLinkManager';
 import { loadLanguage, RTL_LANGUAGES } from '@/i18n';
 
 function ManageContactsPage({ userId }: { userId: string }) {
@@ -40,6 +41,12 @@ function CaregiverSettingsPage() {
   const { elderlyUserId } = useParams<{ elderlyUserId: string }>();
   if (!elderlyUserId) return null;
   return <ElderlyUserSettings elderlyUserId={elderlyUserId} />;
+}
+
+function DirectLinkManagerPage() {
+  const { elderlyUserId } = useParams<{ elderlyUserId: string }>();
+  if (!elderlyUserId) return null;
+  return <DirectLinkManager elderlyUserId={elderlyUserId} />;
 }
 
 function PairElderlyUserPage() {
@@ -170,6 +177,10 @@ function AuthenticatedApp() {
                 element={<CaregiverSettingsPage />}
               />
               <Route path="/caregiver/account" element={<CaregiverAccount />} />
+              <Route
+                path="/caregiver/direct-links/:elderlyUserId"
+                element={<DirectLinkManagerPage />}
+              />
             </Route>
           </Routes>
         </main>

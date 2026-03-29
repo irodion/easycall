@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import { db } from '@/services/firebase';
@@ -345,6 +346,16 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
         onChange={(language) => void updateSettings({ language })}
         name="elderly-language"
       />
+
+      {/* Direct Call Links section */}
+      <section className="mt-6">
+        <Link
+          to={`/caregiver/direct-links/${elderlyUserId}`}
+          className="btn btn-outline btn-primary w-full min-h-14"
+        >
+          {t('directLinks.title')}
+        </Link>
+      </section>
     </div>
   );
 }
