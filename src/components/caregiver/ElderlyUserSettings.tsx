@@ -351,7 +351,7 @@ export function ElderlyUserSettings({ elderlyUserId }: ElderlyUserSettingsProps)
       <section className="mt-6">
         <Link
           to={`/caregiver/direct-links/${elderlyUserId}`}
-          className="btn btn-outline btn-primary w-full min-h-14"
+          className="btn btn-outline btn-primary w-full min-h-14 min-w-14"
         >
           {t('directLinks.title')}
         </Link>

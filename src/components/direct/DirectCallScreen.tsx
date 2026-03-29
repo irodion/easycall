@@ -345,7 +345,7 @@ export function DirectCallScreen() {
       />
 
       {/* Overlay call controls */}
-      {!error && !callEnded && (
+      {!error && !callEnded && !loading && (
         <div
           className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center gap-6"
           style={CONTROLS_SAFE_AREA_STYLE}

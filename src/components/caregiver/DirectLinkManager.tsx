@@ -42,7 +42,6 @@ export function DirectLinkManager({ elderlyUserId }: DirectLinkManagerProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
-  const [revoking, setRevoking] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   const contacts = useContactStore((s) => s.contacts);
@@ -54,11 +53,12 @@ export function DirectLinkManager({ elderlyUserId }: DirectLinkManagerProps) {
   }, [elderlyUserId, subscribeToContacts]);
 
   // Subscribe to direct links
+  const uid = auth.currentUser?.uid;
+
   useEffect(() => {
-    const uid = auth.currentUser?.uid;
     if (!uid) return;
     return subscribeToDirectLinks(elderlyUserId, uid, setLinks);
-  }, [elderlyUserId]);
+  }, [elderlyUserId, uid]);
 
   const handleCreate = useCallback(async () => {
     if (!selectedContactId || !callerName.trim()) return;
@@ -77,21 +77,23 @@ export function DirectLinkManager({ elderlyUserId }: DirectLinkManagerProps) {
 
   const handleCopy = useCallback(async () => {
     if (!generatedUrl) return;
-    await navigator.clipboard.writeText(generatedUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(generatedUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError('Failed to copy link');
+    }
   }, [generatedUrl]);
 
   const handleRevoke = useCallback(
     async (linkId: string) => {
-      setRevoking(true);
       try {
         await revokeDirectLink(linkId);
       } catch (err) {
         const msg = (err as { message?: string }).message ?? '';
         setError(t('directLinks.revokeFailed', { error: msg }));
       } finally {
-        setRevoking(false);
         setRevokeTarget(null);
       }
     },
@@ -142,7 +144,7 @@ export function DirectLinkManager({ elderlyUserId }: DirectLinkManagerProps) {
             {t('directLinks.selectContact')}
           </EasyCallText>
           <select
-            className="select select-bordered w-full"
+            className="select select-bordered w-full min-h-14"
             value={selectedContactId ?? ''}
             onChange={(e) => setSelectedContactId(e.target.value || null)}
           >
@@ -160,7 +162,7 @@ export function DirectLinkManager({ elderlyUserId }: DirectLinkManagerProps) {
             </EasyCallText>
             <input
               type="text"
-              className="input input-bordered w-full"
+              className="input input-bordered w-full min-h-14"
               placeholder={t('directLinks.callerNamePlaceholder')}
               value={callerName}
               onChange={(e) => setCallerName(e.target.value)}
@@ -260,8 +262,9 @@ export function DirectLinkManager({ elderlyUserId }: DirectLinkManagerProps) {
       <ConfirmDialog
         open={revokeTarget !== null}
         message={t('directLinks.revokeConfirm')}
-        confirmLabel={revoking ? t('directLinks.revoking') : t('directLinks.revoke')}
-        onConfirm={() => revokeTarget && void handleRevoke(revokeTarget)}
+        onConfirm={() => {
+          if (revokeTarget) void handleRevoke(revokeTarget);
+        }}
         onCancel={() => setRevokeTarget(null)}
       />
     </div>

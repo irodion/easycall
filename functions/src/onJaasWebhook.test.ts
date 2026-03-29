@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('firebase-admin/app', () => ({ initializeApp: vi.fn() }));
+const mockSendEachForMulticast = vi.fn().mockResolvedValue({ responses: [] });
 vi.mock('firebase-admin/messaging', () => ({
   getMessaging: vi.fn(() => ({
-    sendEachForMulticast: vi.fn().mockResolvedValue({ responses: [] }),
+    sendEachForMulticast: mockSendEachForMulticast,
   })),
 }));
 vi.mock('firebase-functions/v2/https', () => ({
   onCall: vi.fn((...args: unknown[]) => (args.length === 2 ? args[1] : args[0])),
-  onRequest: vi.fn((fn: unknown) => fn),
+  onRequest: vi.fn((...args: unknown[]) => (args.length === 2 ? args[1] : args[0])),
   HttpsError: class HttpsError extends Error {
     constructor(
       public code: string,
@@ -105,7 +106,7 @@ describe('handleJaasParticipantJoined', () => {
       // Second call: user doc for push tokens
       .mockResolvedValueOnce({
         exists: true,
-        data: () => ({ pushTokens: [] }),
+        data: () => ({ pushTokens: ['token-1'] }),
       });
 
     const result = await handleJaasParticipantJoined(
@@ -114,6 +115,7 @@ describe('handleJaasParticipantJoined', () => {
       'Alice',
     );
     expect(result).toBe(true);
+    expect(mockDb.doc).toHaveBeenCalledWith('users/contact-1/incomingCall/current');
     expect(mockDocSet).toHaveBeenCalledWith(
       expect.objectContaining({
         callerId: 'direct-link',
@@ -122,6 +124,8 @@ describe('handleJaasParticipantJoined', () => {
         status: 'ringing',
       }),
     );
+
+    expect(mockSendEachForMulticast).toHaveBeenCalled();
   });
 });
 

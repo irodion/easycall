@@ -1467,9 +1467,13 @@ export const onJaasWebhook = onRequest(async (req, res) => {
   }
 
   const secret = process.env['JAAS_WEBHOOK_SECRET'];
-  if (secret) {
-    // Use rawBody (the exact bytes from the HTTP request) for HMAC verification.
-    // JSON.stringify(req.body) can produce different formatting than what JaaS signed.
+  if (!secret) {
+    // Fail closed in production — never accept unsigned webhooks
+    if (process.env['FUNCTIONS_EMULATOR'] !== 'true') {
+      res.status(500).send('Webhook secret not configured');
+      return;
+    }
+  } else {
     const rawBody = req.rawBody?.toString('utf-8') ?? '';
     const signature = req.headers['x-webhook-signature'] as string | undefined;
     if (!verifyJaasWebhookSignature(rawBody, signature, secret)) {
@@ -1478,7 +1482,13 @@ export const onJaasWebhook = onRequest(async (req, res) => {
     }
   }
 
-  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  let body: Record<string, unknown>;
+  try {
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  } catch {
+    res.status(400).send('Invalid JSON');
+    return;
+  }
   const eventType = body?.['eventType'] as string | undefined;
 
   if (eventType !== 'PARTICIPANT_JOINED') {

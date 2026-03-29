@@ -131,7 +131,6 @@ function AuthenticatedApp() {
             <Route path="/" element={<RoleSelector />} />
             <Route path="/login" element={<LoginForm />} />
             <Route path="/forgot-password" element={<ForgotPasswordForm />} />
-            <Route path="/join" element={<DirectCallScreen />} />
             <Route element={<AuthGuard requiredRole="elderly" />}>
               <Route path="/elderly" element={userId ? <HomeScreen userId={userId} /> : null} />
               <Route
@@ -197,7 +196,10 @@ function AuthenticatedApp() {
 function App() {
   return (
     <BrowserRouter>
-      <AuthenticatedApp />
+      <Routes>
+        <Route path="/join" element={<DirectCallScreen />} />
+        <Route path="*" element={<AuthenticatedApp />} />
+      </Routes>
     </BrowserRouter>
   );
 }

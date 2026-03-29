@@ -52,7 +52,7 @@ export function subscribeToDirectLinks(
   );
 
   return onSnapshot(q, (snap) => {
-    const links = snap.docs.map((doc) => doc.data() as DirectLink);
+    const links = snap.docs.map((doc) => ({ ...doc.data(), linkId: doc.id }) as DirectLink);
     callback(links);
   });
 }
